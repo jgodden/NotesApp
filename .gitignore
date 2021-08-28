@@ -1,2 +1,2 @@
-# ignore all logs
+# ignore all node_modules which can be retrieved from nodejs repository
 /NotesApp/node_modules
