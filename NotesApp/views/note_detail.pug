@@ -1,0 +1,34 @@
+extends layout
+
+block content
+  <div class='topic'>
+    table(style='width:100%')
+      tr
+        td Subject: #{note.subject.title}
+        td(style="text-align:right") Date: #{note.date_formatted}
+      tr 
+        td
+          h6 #{note.topic}
+  </div>
+  <div class='keywords'>
+    h5 keywords
+    each keyword in note.keywords
+      p #{keyword}
+  </div>
+  <div class='questions'>
+    h5 questions
+    each question in note.questions
+      p #{question}
+  </div>
+  <div class='comments'>
+    h5 comments
+    each comment in note.comments
+      p #{comment}
+  </div>
+  div.notes #{note.lectureNote}
+  div.summary #{note.summary}
+  div.keys
+    p
+      a(href=note.url+'/delete') Delete note
+    p
+      a(href=note.url+'/update') Update note

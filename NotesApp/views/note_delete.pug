@@ -1,0 +1,13 @@
+extends layout
+
+block content
+  div.topic
+    h6 #{title}: #{note.topic} (Subject: #{note.subject.title}, Last Updated: #{note.date_formatted})
+
+    p Do you really want to delete this Note?
+
+    form(method='POST' action='')
+      div.form-group
+        input#noteid.form-control(type='hidden',name='noteid', required='true', value=note._id )
+
+      button.btn.btn-primary(type='submit') Delete

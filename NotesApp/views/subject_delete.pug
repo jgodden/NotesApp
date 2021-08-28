@@ -1,0 +1,28 @@
+extends layout
+
+block content
+  div.topic
+    h6 #{title}: #{subject.title}
+
+    if subject_notes.length
+
+      p #[strong Delete the following notes before attempting to delete this subject.]
+
+      div(style='margin-left:20px;margin-top:20px')
+
+        h4 Notes
+
+        dl
+        each note in subject_notes
+          dt
+            a(href=note.url) #{note.topic}
+          dd #{note.summary}
+
+    else
+      p Do you really want to delete this Subject?
+
+      form(method='POST' action='')
+        div.form-group
+          input#subjectid.form-control(type='hidden',name='subjectid', required='true', value=subject._id )
+
+        button.btn.btn-primary(type='submit') Delete

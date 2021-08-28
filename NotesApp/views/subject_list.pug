@@ -1,0 +1,11 @@
+extends layout
+
+block content
+  div.topic
+    table
+      each subject in subject_list
+        tr
+          td
+            a(href=subject.url) #{subject.title}
+      else
+        li There are no subjects.

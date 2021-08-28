@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  div.topic
+    table
+      - note_list.sort(function(a, b) {let textA = a.topic.toUpperCase(); let textB = b.topic.toUpperCase(); return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;});
+      each note in note_list
+        tr
+          td
+            a(href=note.url) #{note.topic}
+          td #{note.subject.title}
+          td #{note.date_formatted}
+
+      else
+        li There are no notes.
