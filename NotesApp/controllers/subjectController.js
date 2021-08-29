@@ -11,7 +11,7 @@ exports.subject_list = function(req, res, next) {
       .exec(function (err, list_subjects) {
         if (err) { return next(err); }
         //Successful, so render
-        res.render('subject_list', { title: 'Subject List', subject_list: list_subjects });
+        res.render('subjects', { title: 'Subject List', subjects: list_subjects });
       });
   
   };

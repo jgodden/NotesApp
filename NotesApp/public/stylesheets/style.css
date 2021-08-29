@@ -41,17 +41,24 @@ ul {
 
 p {
   font-size: 16px;
+  padding: 0px;
+  text-indent: 30px;
+  display: block;
+  margin-top: 0em;
+  margin-bottom: 0em;
+  margin-left: 0;
+  margin-right: 0;
 }
 .nav { grid-area: nav; }
-.topic { grid-area: topbar; }
-.keywords { grid-area: leftareatop; }
-.questions { grid-area: leftareamid; }
-.comments { grid-area: leftareabottom; }
-.notes {
+.topbar { grid-area: topbar; }
+.lefttoparea { grid-area: lefttoparea; }
+.leftmidarea { grid-area: leftmidarea; }
+.leftbottomarea { grid-area: leftbottomarea; }
+.rightarea {
   grid-area: rightarea;
   white-space: pre-wrap;
 }
-.summary {
+.bottombar {
   grid-area: bottombar;
   white-space: pre-wrap;
 }
@@ -61,9 +68,9 @@ p {
   display: grid;
   grid-template-areas:
     'nav topbar topbar topbar'
-    'nav leftareatop rightarea rightarea'
-    'nav leftareamid rightarea rightarea'
-    'nav leftareabottom rightarea rightarea'
+    'nav lefttoparea rightarea rightarea'
+    'nav leftmidarea rightarea rightarea'
+    'nav leftbottomarea rightarea rightarea'
     'nav bottombar bottombar bottombar'
     'nav keys keys keys';
   grid-template-columns: 100px 1fr 1fr 1fr;
@@ -81,4 +88,23 @@ p {
   text-align: left;
   margin: 1px 1px;
   padding: 5px 5px;
+}
+
+.topbar .topbar {
+  grid-template-columns: 1fr 1fr;
+}
+.d{
+  grid-column: col 1 / span 1;
+  grid-row: row 1;
+  display: grid;
+  grid-gap: 10px;
+  grid-template-columns: 1fr 1fr;
+}
+.e {
+  grid-column: 1;
+  grid-row: 1;
+}
+.f {
+  grid-column: 2;
+  grid-row: 1;
 }

@@ -7,11 +7,11 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var repoRouter = require('./routes/repo');  //Import routes for "repo" area of site
-var compression = require('compression');
+//var compression = require('compression');
 var helmet = require('helmet');
 var app = express();
 
-app.use(compression()); //Compress all routes
+//app.use(compression()); //Compress all routes
 //Set up mongoose connection
 var mongoose = require('mongoose');
 var dev_db_url = 'mongodb+srv://Admin:M4rmoset52@cluster0.j8m3g.mongodb.net/NotesApp?retryWrites=true'

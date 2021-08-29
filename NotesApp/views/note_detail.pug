@@ -1,34 +1,35 @@
 extends layout
 
 block content
-  <div class='topic'>
-    table(style='width:100%')
-      tr
-        td Subject: #{note.subject.title}
-        td(style="text-align:right") Date: #{note.date_formatted}
-      tr 
-        td
-          h6 #{note.topic}
+  <div class='topbar'>
+    <div class='topbar d'>
+      <div class='topbar e'>Subject: </div>
+      <div class='topbar f'> Date: #{note.date_formatted}</div>
+    </div>
+    p #{note.topic}
   </div>
-  <div class='keywords'>
+  <div class='lefttoparea'>
     h5 keywords
     each keyword in note.keywords
       p #{keyword}
   </div>
-  <div class='questions'>
+  <div class='leftmidarea'>
     h5 questions
     each question in note.questions
       p #{question}
   </div>
-  <div class='comments'>
+  <div class='leftbottomarea'>
     h5 comments
     each comment in note.comments
       p #{comment}
   </div>
-  div.notes #{note.lectureNote}
-  div.summary #{note.summary}
+  div.rightarea #{note.lectureNote}
+  div.bottombar #{note.summary}
   div.keys
-    p
-      a(href=note.url+'/delete') Delete note
-    p
-      a(href=note.url+'/update') Update note
+    table
+      tr
+        td
+          a(class="btn btn-success btn-sm" href=note.url+"/update" role="button") Edit
+        td
+          a(class="btn btn-danger btn-sm" href=note.url+"/delete" role="button") Delete
+

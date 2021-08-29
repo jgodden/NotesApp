@@ -13,23 +13,30 @@ exports.index = function(req, res, next) {
         subject_count: function(callback) {
             Subject.countDocuments({}, callback);
         },
+        subject_list: function(callback) {
+            Subject.find(callback);
+        },
     }, function(err, results) {
-        res.render('index', { title: 'NoteApp Home', error: err, data: results });
+        res.render('index', { title: 'NoteApp Home', error: err, data: results, subject_list: results.subject_list });
     });
 };
 
 // Display list of all Notes.
 exports.note_list = function(req, res, next) {
-
-    Note.find({}, 'topic subject date')
-      .populate('subject')
-      .exec(function (err, list_notes) {
+    async.parallel({
+        note_list: function (callback) {
+            Note.find({}, 'topic')
+        .exec(callback);
+        },
+        subject_list: function (callback) {
+            Subject.find({}, 'title')
+        .exec(callback);
+        },
+    }, function(err, results) {
         if (err) { return next(err); }
-        //Successful, so render
-        res.render('note_list', { topic: 'Note List', note_list: list_notes });
-      });
-  
-  };
+        res.render('note_list', { title: 'Note List', note_list: results.note_list, subject_list: results.subject_list });
+    });
+};
 
 // Display detail page for a specific Note.
 exports.note_detail = function(req, res, next) {
