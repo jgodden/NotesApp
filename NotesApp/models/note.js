@@ -16,7 +16,7 @@ var NoteSchema = new Schema({
 NoteSchema
 .virtual('url')
 .get(function () {
-  return '/repo/note/' + this._id;
+  return '/repo/6128b8a7fcd1382b28f4ecba/note/' + this._id;
 });
 
 NoteSchema

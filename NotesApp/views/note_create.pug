@@ -17,21 +17,15 @@ block content
   </div>
   <div class='lefttoparea'>
     h5 keywords
-    each keyword in note.keywords
-      input#topic.form-control(type='text', placeholder='Keyword' name='keyword' required='false' class="form-control form-control-sm" value=(undefined===note ? '' : keyword) )
-    <button type="button" class="btn btn-success btn-sm">Add</button>
+    input#topic.form-control(type='text', placeholder='Keyword' name='keyword' required='false' class="form-control form-control-sm" value=(undefined===note ? '' : keyword) )
   </div>
   <div class='leftmidarea'>
     h5 questions
-    each question in note.questions
-      input#topic.form-control(type='text', placeholder='Question' name='question' required='false' class="form-control form-control-sm" value=(undefined===note ? '' : question) )
-    <button type="button" class="btn btn-success btn-sm">Add</button>
+    input#topic.form-control(type='text', placeholder='Question' name='question' required='false' class="form-control form-control-sm" value=(undefined===note ? '' : question) )
   </div>
   <div class='leftbottomarea'>
     h5 comments
-    each comment in note.comments
-      input#topic.form-control(type='text', placeholder='Comment' name='comment' required='false' class="form-control form-control-sm" value=(undefined===note ? '' : comment) )
-    <button type="button" class="btn btn-success btn-sm">Add</button>
+    input#topic.form-control(type='text', placeholder='Comment' name='comment' required='false' class="form-control form-control-sm" value=(undefined===note ? '' : comment) )
   </div>
   div.rightarea
     div.form-group

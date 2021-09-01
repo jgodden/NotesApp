@@ -15,29 +15,24 @@ html(lang='en')
             div.form-group
               <div class="form-row">
                 <div class="col">
-                  label(for='subject' class="col-sm-2 col-form-label") Subject:
-                </div>
-                <div class="col">
-                  select#subject.form-control(type='select', placeholder='Select subject' name='subject' required='true', class="form-control form-control-sm")
+                  select#subject.form-control(type='select', placeholder='Select subject' name='subject' required='true', class="form-control form-control-sm" onchange="ChangeSubject(this);")
                     - subject_list.sort(function(a, b) {let textA = a.title.toUpperCase(); let textB = b.title.toUpperCase(); return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;});
                     for subject in subject_list
-                      if note
-                        option(value=subject._id selected=(subject._id.toString()===note.subject._id.toString() ? 'selected' : false) ) #{subject.title}
+                      if subject_id
+                        option(value=subject._id selected=(subject._id.toString()===subject_id.toString() ? 'selected' : false) ) #{subject.title}
                       else
                         option(value=subject._id) #{subject.title}
+                  script.
+                    function ChangeSubject(select) {
+                      var subject_id = select.options[select.selectedIndex].value;
+                      var subject = select.options[select.selectedIndex].text;
+                      window.location.href = '/repo/' + subject_id + '/notes';
+                    }
                 </div>
           li
-            a(href='/repo') Home
-          li
-            a(href='/repo/notes') Notes
-          li
-            a(href='/repo/subjects') Subjects
+            a(href='/repo/' + subject_id + '/notes') Notes
           li
             hr
           li
-            a(href='/repo/note/create') Add Note
-          li
-            a(href='/repo/subject/create') Add Subject
-
+            a(href='/repo/' + subject_id + '/note/create') Add Note
       block content
-    p A-level Note App © #{new Date().getFullYear()} Sam Godden

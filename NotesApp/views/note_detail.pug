@@ -3,10 +3,9 @@ extends layout
 block content
   <div class='topbar'>
     <div class='topbar d'>
-      <div class='topbar e'>Subject: </div>
-      <div class='topbar f'> Date: #{note.date_formatted}</div>
+      <div class='topbar f'>Date: #{note.date_formatted}</div>
     </div>
-    p #{note.topic}
+    | #{note.topic}
   </div>
   <div class='lefttoparea'>
     h5 keywords
@@ -25,11 +24,13 @@ block content
   </div>
   div.rightarea #{note.lectureNote}
   div.bottombar #{note.summary}
-  div.keys
-    table
-      tr
-        td
+  .keys
+    div.topbar
+      <div class='topbar d'>
+        <div class='topbar e'>
           a(class="btn btn-success btn-sm" href=note.url+"/update" role="button") Edit
-        td
+        </div>
+        <div class='topbar f'>
           a(class="btn btn-danger btn-sm" href=note.url+"/delete" role="button") Delete
+        </div>
 

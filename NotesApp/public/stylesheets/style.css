@@ -1,14 +1,5 @@
 
-table {
-  height: 100%;
-  width: 100%;
-  border: 1px;
-  text-align: left;
-  margin: 0em;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 1.0em;
-  border-collapse: collapse;
-}
+
 
 th {
   font-size: 1.0em;
@@ -73,7 +64,7 @@ p {
     'nav leftbottomarea rightarea rightarea'
     'nav bottombar bottombar bottombar'
     'nav keys keys keys';
-  grid-template-columns: 100px 1fr 1fr 1fr;
+  grid-template-columns: 125px 1fr 1fr 1fr;
   grid-gap: 0px;
   background-color: rgba(122, 173, 221, 0.8);
   padding: 0px;
@@ -95,16 +86,19 @@ p {
 }
 .d{
   grid-column: col 1 / span 1;
-  grid-row: row 1;
+  grid-row: 1;
   display: grid;
-  grid-gap: 10px;
+  grid-gap: 1px;
   grid-template-columns: 1fr 1fr;
+
 }
 .e {
   grid-column: 1;
   grid-row: 1;
+  text-align: left;
 }
 .f {
   grid-column: 2;
   grid-row: 1;
+  text-align: right;
 }
