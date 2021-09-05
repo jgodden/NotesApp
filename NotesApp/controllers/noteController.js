@@ -1,121 +1,54 @@
 const { body,validationResult } = require('express-validator');
 var Note = require('../models/note');
-var Subject = require('../models/subject');
-var debug = require('debug')('note');
 
 var async = require('async');
 
 exports.index = function(req, res, next) {
-    async.parallel({
-        subject_list: function(callback) {
-            Subject.find({}, callback);
-        },
-    }, function(err, results) {
-        console.log('in index: ' + req.params.subject);
-        res.render('index', { data: results });
-    });
+    res.render('index', {});
 };
 
 // Display list of all Notes.
 exports.note_list = function(req, res, next) {
-    var subject_id = req.params.subject;
+    var subject = req.params.subject;
     async.parallel({
         note_count: function(callback) {
-            Note.countDocuments({subject:subject_id})
+            Note.countDocuments({subject:subject})
             .exec(callback);
         },
         note_list: function (callback) {
-          Note.find({subject:subject_id}, 'topic date', callback);
+          Note.find({subject:subject}, 'topic creationDate updateDate subject', callback);
         },
-        subject: function (callback) {
-            Subject.find({_id:subject_id}, callback);
-        },
-        subject_list: function (callback) {
-          Subject.find({}, callback);
-        },
-    }, function(err, results) {
+      }, function(err, results) {
         if (err) { return next(err); }
-        console.log('note_count: ' + results.note_count);
-        console.log('subject_id: ' + subject_id);
-        console.log('subject: ' + results.subject[0].title);
         res.render('note_list', {
             title: 'List',
             note_count: results.note_count,
             note_list: results.note_list,
-            subject_list: results.subject_list,
-            subject_id: subject_id,
-            subject: results.subject[0].title
-        } );
-    });
-};
-
-// Display detail page for a specific Note.
-exports.note_detail = function(req, res, next) {
-    var subject_id = req.params.subject;
-    async.parallel({
-        note: function(callback) {
-            Note.findById(req.params.note)
-              .exec(callback);
-        },
-        note_count: function(callback) {
-            Note.countDocuments({subject:subject_id})
-            .exec(callback);
-        },
-        note_list: function (callback) {
-          Note.find({subject:subject_id}, 'topic date', callback);
-        },
-        subject: function (callback) {
-            Subject.find({_id:subject_id}, callback);
-        },
-        subject_list: function (callback) {
-          Subject.find({}, callback);
-        },
-    }, function(err, results) {
-        if (err) { return next(err); }
-        if (results.note==null) { // No results.
-            var err = new Error('Note not found');
-            err.status = 404;
-            return next(err);
-        }
-        // Successful, so render.
-        res.render('note_detail', {
-            title: 'Detail',
-            note: results.note,
-            note_count: results.note_count,
-            note_list: results.note_list,
-            subject_list: results.subject_list,
-            subject_id: subject_id,
-            subject: results.subject[0].title
+            subject: subject,
+            subject_list: subject_list
         } );
     });
 };
 
 // Display Note create form on GET.
 exports.note_create_get = function(req, res, next) {
-    var subject_id = req.params.subject;
+    var subject = req.params.subject;
     async.parallel({
         note_count: function(callback) {
-            Note.countDocuments({subject:subject_id})
+            Note.countDocuments({subject:subject})
             .exec(callback);
         },
         note_list: function (callback) {
-          Note.find({subject:subject_id}, 'topic date', callback);
-        },
-        subject: function (callback) {
-            Subject.find({_id:subject_id}, callback);
-        },
-        subject_list: function (callback) {
-          Subject.find({}, callback);
+          Note.find({subject:subject}, 'topic date', callback);
         },
     }, function(err, results) {
         if (err) { return next(err); }
-        res.render('note_create', {
+        
+        res.render('note_form', {
             title: 'Create',
             note_count: results.note_count,
             note_list: results.note_list,
-            subject_list: results.subject_list,
-            subject_id: subject_id,
-            subject: results.subject[0].title
+            subject: subject
         });
     });
 };
@@ -133,24 +66,26 @@ exports.note_create_post = [
         // Extract the validation errors from a request.
         const errors = validationResult(req);
 
+        var date = Date.now();
         // Create a Note object with escaped and trimmed data.
-        var note = new Note(
-          { topic: req.body.topic,
-            subject: req.body.subject,
+        var note = new Note({
+            topic: req.body.topic,
             lectureNote: req.body.lectureNote,
+            creationDate: date,
+            updateDate: date,
+            keywords: req.body.keywords,
+            questions: req.body.questions,
+            comments: req.body.comments,
             summary: req.body.summary,
-           });
+            subject: req.body.subject,
+            image: req.body.image
+        });
+
         if (!errors.isEmpty()) {
             // There are errors. Render form again with sanitized values/error messages.
-
-            // Get all subjects for form.
-            async.parallel({
-                subject_list: function(callback) {
-                    Subject.find(callback);
-                },
-            }, function(err, results) {
-                if (err) { return next(err); }
-                res.render('note_create', { data: results });
+            res.render('note_form', {
+                title: 'Create',
+                subject: subject
             });
             return;
         }
@@ -167,23 +102,17 @@ exports.note_create_post = [
 
 // Display Note delete form on GET.
 exports.note_delete_get = function(req, res, next) {
-    var subject_id = req.params.subject;
+    var subject = req.params.subject;
     async.parallel({
         note: function(callback) {
             Note.findById(req.params.note).exec(callback);
         },
         note_count: function(callback) {
-            Note.countDocuments({subject:subject_id})
+            Note.countDocuments({subject:subject})
             .exec(callback);
         },
         note_list: function (callback) {
-          Note.find({subject:subject_id}, 'topic date', callback);
-        },
-        subject: function (callback) {
-            Subject.find({_id:subject_id}, callback);
-        },
-        subject_list: function (callback) {
-          Subject.find({}, callback);
+          Note.find({subject:subject}, 'topic date', callback);
         },
     }, function(err, results) {
         if (err) { return next(err); }
@@ -192,12 +121,11 @@ exports.note_delete_get = function(req, res, next) {
         }
         // Successful, so render.
        res.render('note_delete', {
-           title: 'Delete', note: results.note,
+           title: 'Delete',
+           note: results.note,
            note_count: results.note_count,
            note_list: results.note_list,
-           subject_list: results.subject_list,
-           subject_id: subject_id,
-           subject: results.subject[0].title
+           subject: subject
         });
     });
 };
@@ -206,7 +134,7 @@ exports.note_delete_get = function(req, res, next) {
 exports.note_delete_post = function(req, res, next) {
     async.parallel({
         note: function(callback) {
-            Note.findById(req.body.note).populate('subject').exec(callback);
+            Note.findById(req.body.note).exec(callback);
         },
     }, function(err, results) {
         if (err) { return next(err); }
@@ -215,31 +143,25 @@ exports.note_delete_post = function(req, res, next) {
         Note.findByIdAndRemove(req.body.noteid, function deleteNote(err) {
             if (err) { return next(err); }
             // Success - got to notes list.
-            res.redirect('/repo/:subject/notes');
+            res.redirect('/repo/' + req.body.subject + '/notes');
         });
     });
 };
 
 // Display Note update form on GET.
 exports.note_update_get = function(req, res, next) {
-    var subject_id = req.params.subject;
+    var subject = req.params.subject;
     // Get note and subjects for form.
     async.parallel({
         note: function(callback) {
-            Note.findById(req.params.note).populate('subject').exec(callback);
+            Note.findById(req.params.note).exec(callback);
         },
         note_count: function(callback) {
-            Note.countDocuments({subject:subject_id})
+            Note.countDocuments({subject:subject})
             .exec(callback);
         },
         note_list: function (callback) {
-          Note.find({subject:subject_id}, 'topic date', callback);
-        },
-        subject: function (callback) {
-            Subject.find({_id:subject_id}, callback);
-        },
-        subject_list: function (callback) {
-          Subject.find({}, callback);
+          Note.find({subject:subject}, 'topic date image', callback);
         },
     }, function(err, results) {
         if (err) { return next(err); }
@@ -250,12 +172,11 @@ exports.note_update_get = function(req, res, next) {
         }
         // Success.
         res.render('note_form', {
-            title: 'Delete', note: results.note,
+            title: 'Update',
+            note: results.note,
             note_count: results.note_count,
             note_list: results.note_list,
-            subject_list: results.subject_list,
-            subject_id: subject_id,
-            subject: results.subject[0].title
+            subject: subject
         });
     });
 };
@@ -264,45 +185,41 @@ exports.note_update_get = function(req, res, next) {
 exports.note_update_post = [
     // Validate and santitize fields.
     body('topic', 'Topic must not be empty.').trim().isLength({ min: 1 }).escape(),
-    body('subject', 'Subject must not be empty.').trim().isLength({ min: 1 }).escape(),
-    body('date', 'Date must not be empty.').trim().isLength({ min: 1 }).escape(),
     body('lectureNote', 'Lecture Note must not be empty.').trim().isLength({ min: 1 }).escape(),
     body('summary', 'Summary must not be empty.').trim().isLength({ min: 1 }).escape(),
 
     // Process request after validation and sanitization.
     (req, res, next) => {
+        console.log('update validation');
         // Extract the validation errors from a request.
         const errors = validationResult(req);
         // Create a Note object with escaped/trimmed data and old id.
-        var note = new Note(
-            { topic: req.body.topic,
-            date: req.body.date,
-            subject: req.body.subject,
+        var date = Date.now();
+        var note = new Note({
+            topic: req.body.topic,
             lectureNote: req.body.lectureNote,
+            creationDate: req.body.date,
+            updateDate: date,
+            keywords: req.body.keywords,
+            questions: req.body.questions,
+            comments: req.body.comments,
             summary: req.body.summary,
+            subject: req.body.subject,
+            image: req.body.image,
             _id:req.params.note // This is required, or a new ID will be assigned!
             });
 
         if (!errors.isEmpty()) {
             // There are errors. Render form again with sanitized values/error messages.
-
-            // Get all subjects for form
-            async.parallel({
-                aubjects: function(callback) {
-                    Subject.find(callback);
-                },
-            }, function(err, results) {
-                if (err) { return next(err); }
-                res.render('note_form', { data: results });
-            });
+            res.render('note_form', { data: results });
             return;
         }
         else {
             // Data from form is valid. Update the record.
             Note.findByIdAndUpdate(req.params.note, note, {}, function (err,thenote) {
                 if (err) { return next(err); }
-                    // Successful - redirect to note detail page.
-                    res.redirect(thenote.url);
+                    // Successful - redirect to note list page.
+                    res.redirect('/repo/' + thenote.subject + '/notes');
                 });
         }
     }

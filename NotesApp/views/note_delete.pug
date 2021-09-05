@@ -1,13 +1,25 @@
 extends layout
 
 block content
-  div.topbar
-    h6 #{title}: #{note.topic} Last Updated: #{note.date_formatted}
+  div(class="row")
+    div(class="col-sm-2")
+      p Topic:
+    div(class="col-sm-6")
+      p
+        strong #{note.topic}
+  div(class="row mb-3")
+    div(class="col-sm-2")
+      p Creation date:
+    div(class="col-sm-6")
+      p
+        strong #{note.date_formatted}
+  div(class="row mb-3")
+    div(class="col-sm-12")
+      p Are you sure you want to delete this Note?
 
-    p Do you really want to delete this Note?
+  form(method='POST' action='')
+    div.form-group
+      input#noteid.form-control(type='hidden',name='noteid', required='true', value=note._id )
+      input#subjectid.form-control(type='hidden',name='subject', required='true', value=note.subject )
 
-    form(method='POST' action='')
-      div.form-group
-        input#noteid.form-control(type='hidden',name='noteid', required='true', value=note._id )
-
-      button.btn.btn-primary(type='submit') Delete
+    button.btn.btn-danger.btn-sm(type='submit') Delete

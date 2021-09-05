@@ -3,8 +3,8 @@ var router = express.Router();
 
 // Require controller modules.
 var note_controller = require('../controllers/noteController');
-var subject_controller = require('../controllers/subjectController');
 
+//var run = require('../public/javascripts/script');
 /// NOTE ROUTES ///
 
 // GET repo home page.
@@ -23,13 +23,10 @@ router.get('/:subject/note/:note/delete', note_controller.note_delete_get);
 router.post('/:subject/note/:note/delete', note_controller.note_delete_post);
 
 // GET request to update Note.
-router.get('/:subject/note/:note/update', note_controller.note_update_get);
+router.get('/:subject/note/:note', note_controller.note_update_get);
 
 // POST request to update Note.
-router.post('/:subject/note/:note/update', note_controller.note_update_post);
-
-// GET request for one Note.
-router.get('/:subject/note/:note', note_controller.note_detail);
+router.post('/:subject/note/:note', note_controller.note_update_post);
 
 // GET request for list of all Note items.
 router.get('/:subject/notes', note_controller.note_list);

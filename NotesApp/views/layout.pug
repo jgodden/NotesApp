@@ -3,36 +3,53 @@ html(lang='en')
   head
     meta(charset='utf-8')
     meta(name='viewport', content='width=device-width, initial-scale=1')
-    link(rel="stylesheet", href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css", integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z", crossorigin="anonymous")
+    link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous")
     script(src="https://code.jquery.com/jquery-3.5.1.slim.min.js", integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj", crossorigin="anonymous")
     script(src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js", integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV", crossorigin="anonymous")
+    script(src='/javascripts/script.js')
     link(rel='stylesheet', href='/stylesheets/style.css')
+
   body
-    div(class='grid-container')
-      div(class="nav")
-        ul(style='list-style-type:none')
-          li
-            div.form-group
-              <div class="form-row">
-                <div class="col">
-                  select#subject.form-control(type='select', placeholder='Select subject' name='subject' required='true', class="form-control form-control-sm" onchange="ChangeSubject(this);")
-                    - subject_list.sort(function(a, b) {let textA = a.title.toUpperCase(); let textB = b.title.toUpperCase(); return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;});
-                    for subject in subject_list
-                      if subject_id
-                        option(value=subject._id selected=(subject._id.toString()===subject_id.toString() ? 'selected' : false) ) #{subject.title}
-                      else
-                        option(value=subject._id) #{subject.title}
-                  script.
-                    function ChangeSubject(select) {
-                      var subject_id = select.options[select.selectedIndex].value;
-                      var subject = select.options[select.selectedIndex].text;
-                      window.location.href = '/repo/' + subject_id + '/notes';
-                    }
-                </div>
-          li
-            a(href='/repo/' + subject_id + '/notes') Notes
-          li
-            hr
-          li
-            a(href='/repo/' + subject_id + '/note/create') Add Note
-      block content
+    div(class='container-fluid px-2')
+      div(class="row mt-3")
+        div(class="col-sm-2")
+          form(class="form-inline my-2 my-lg-0")
+            select#subject.form-control(type='select', placeholder='Select subject' name='subject' required='true', class="form-control form-control-sm" onchange="ChangeSubject(this);")
+              each subject_item in subject_list
+                option(value=subject_item selected=(subject===subject_item ? 'selected' : false) ) #{subject_item}
+            script.
+              function ChangeSubject(select) {
+                var subject = select.options[select.selectedIndex].text;
+                window.location.href = '/repo/' + subject + '/notes';
+              }
+          div(class="row mt-3")
+            div(class="col-sm-6")
+              a(class='btn btn-success btn-sm' href='/repo/' + subject + '/notes' role='button') List
+            div(class="col-sm-6")
+              a(class='btn btn-primary btn-sm' href='/repo/' + subject + '/note/create' role='button')  New
+          div(class="row")
+            div(class="col-sm-12")
+              nav(class="navbar navbar-expand-lg navbar-light bg-light")
+                ul(class="navbar-nav mr-auto")
+                  li(class="nav-item dropdown")
+                    a(class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false") Links
+                    div(class="dropdown-menu" aria-labelledby="navbarDropdown")
+                      p #{subject}
+                      if subject === 'Biology'
+                        a(href='https://www.aqa.org.uk/subjects/science/as-and-a-level/biology-7401-7402/changes-for-2021' target='_blank' role='button') A-level Specification
+                      if subject === 'Chemistry'
+                        a(href='https://www.aqa.org.uk/subjects/science/as-and-a-level/chemistry-7404-7405/changes-for-2021' target='_blank' role='button') A-level Specification
+                      if subject === 'Geography'
+                        a(href='https://www.aqa.org.uk/subjects/geography/as-and-a-level/geography-7037/specification-at-a-glance' target='_blank' role='button') A-level Specification
+                      if subject === 'Biology'
+                        a(href='https://guildfordcounty.s3.amazonaws.com/uploads/document/Biology-Handbook.pdf?t=1630671756?ts=1630671756' target='_blank' role='button') Handbook
+                      if subject === 'Chemistry'
+                        a(href='https://guildfordcounty.s3.amazonaws.com/uploads/document/Chemistry-handbook.pdf?t=1630671756?ts=1630671756' target='_blank' role='button') Handbook
+                      if subject === 'Geography'
+                        a(href='https://guildfordcounty.s3.amazonaws.com/uploads/document/A-Level-Handbook-Geography-2021.pdf?t=1630671756?ts=1630671756' target='_blank' role='button') Handbook
+
+                      div(class="dropdown-divider")
+                      a(href='https://www.guildfordcounty.co.uk/603/welcome-to-the-sixth-form' target='_blank' role='button') GCS Sixth Form
+        div(class="col-sm-7" id='form-div')
+          block content
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>

@@ -1,46 +1,61 @@
 extends layout
 
 block content
-  <div class='topbar'>
-    form(method='POST' action='')
-      div.form-group
-        <div class="form-row">
-          <div class="col">
-            label(for='date' class="col-sm-2 col-form-label") Date:
-          </div>
-          <div class="col">
-            input#date.form-control(type='date', placeholder='Date' name='date' required='true' class="form-control form-control-sm" value=(undefined===note ? '' : note.date_yyyy_mm_dd) )
-          </div>
-        </div>
-      div.form-group
-        input#topic.form-control(type='text', placeholder='Topic' name='topic' required='true' class="form-control form-control-sm" value=(undefined===note ? '' : note.topic) )
-  </div>
-  <div class='lefttoparea'>
-    h5 keywords
-    each keyword in note.keywords
-      input#topic.form-control(type='text', placeholder='Keyword' name='keyword' required='false' class="form-control form-control-sm" value=(undefined===note ? '' : keyword) )
-    <button type="button" class="btn btn-success btn-sm">Add</button>
-  </div>
-  <div class='leftmidarea'>
-    h5 questions
-    each question in note.questions
-      input#topic.form-control(type='text', placeholder='Question' name='question' required='false' class="form-control form-control-sm" value=(undefined===note ? '' : question) )
-    <button type="button" class="btn btn-success btn-sm">Add</button>
-  </div>
-  <div class='leftbottomarea'>
-    h5 comments
-    each comment in note.comments
-      input#topic.form-control(type='text', placeholder='Comment' name='comment' required='false' class="form-control form-control-sm" value=(undefined===note ? '' : comment) )
-    <button type="button" class="btn btn-success btn-sm">Add</button>
-  </div>
-  div.rightarea
+  form(method='POST' action='')
+    if note
+      div(class="row gx-0")
+        div(class="col-6")
+          p Creation date:  #{note.creationDate_formatted}
+        div(class="col-6 text-end")
+          p Last updated: #{note.updateDate_formatted}
     div.form-group
-      textarea#lectureNote.form-control(type='textarea', placeholder='Lecture Notes' name='lectureNote' required='true' rows='20' class="form-control form-control-sm") #{undefined===note ? '' : note.lectureNote}
-  div.bottombar
-    div.form-group
-      textarea#summary.form-control(type='textarea', placeholder='Summary' name='summary' required='true' class="form-control form-control-sm") #{undefined===note ? '' : note.summary}
-  .keys
-    button.btn.btn-primary(type='submit') Save
+      input#subjectid.form-control(type='hidden', name='subject', required='true', value=subject)
+      input#image.form-control(type='hidden', name='image', required='false', value=(undefined===note ? '' : note.image))
+    div(class="border-bottom border-secondary")
+      div(class="row gx-0")
+        div(class="col-12")
+          input#topic.form-control(type='text', placeholder='Topic' name='topic' required='true' class="form-control form-control-sm" value=(undefined===note ? '' : note.topic) )
+    div(class="row gx-0")
+      div(class="col-4 align-self-center")
+        div(class="border-end border-secondary")
+          div(class="row")
+            div(class="col-12")
+              textarea#keywords.form-control(type='textarea', placeholder='Keywords' name='keywords' required='false' rows='7' class="form-control form-control-sm") #{undefined===note ? '' : note.keywords}
+          div(class="row")
+            div(class="col-12")
+              textarea#questions.form-control(type='textarea', placeholder='Questions' name='questions' required='false' rows='7' class="form-control form-control-sm") #{undefined===note ? '' : note.questions}
+          div(class="row")
+            div(class="col-12")
+              textarea#comments.form-control(type='textarea', placeholder='Comments' name='comments' required='false' rows='7' class="form-control form-control-sm") #{undefined===note ? '' : note.comments}
+      div(class="col-8")
+        textarea#lectureNote.form-control(type='textarea', placeholder='Lecture Notes' name='lectureNote' required='true' rows='22' class="form-control form-control-sm") #{undefined===note ? '' : note.lectureNote}
+    div(class="border-top border-secondary")
+      div(class="row gx-0")
+        div(class="col-12")
+          textarea#summary.form-control(type='textarea', placeholder='Summary' name='summary' required='true' rows='4' class="form-control form-control-sm") #{undefined===note ? '' : note.summary}
+    div(class="row gx-0" id='canvas-div')
+      canvas(id='canvas')
+    div(class="row gx-0")
+      div(class="col-1")
+        img(src="/images/blue_button.jpg" alt="Blue" width="16" height="16" id='blue_button')
+      div(class="col-1")
+        img(src="/images/red_button.jpg" alt="Red" width="16" height="16" id='red_button')
+      div(class="col-1")
+        img(src="/images/green_button.jpg" alt="Green" width="16" height="16" id='green_button')
+      div(class="col-1")
+        img(src="/images/black_button.jpg" alt="Black" width="16" height="16" id='black_button')
+      div(class="col-1")
+        img(src="/images/erase_button.jpg" alt="Erase" width="16" height="16" id='erase_button')
+      div(class="col-1")
+        div(class="row gx-0")
+          img(src="/images/space.jpg" alt="Space" width="16" height="5" id='space')
+          img(src="/images/thin_width_button.jpg" alt="Thin" width="16" height="1" id='thin_width_button')
+          img(src="/images/space.jpg" alt="Space" width="16" height="5" id='space')
+          img(src="/images/mid_width_button.jpg" alt="Mid" width="16" height="3" id='mid_width_button')
+          img(src="/images/space.jpg" alt="Space" width="16" height="5" id='space')
+          img(src="/images/thick_width_button.jpg" alt="Thick" width="16" height="5" id='thick_width_button')
+    .keys
+      button.btn.btn-primary.btn-sm(type='submit' id='save_button') Save
 
   if errors
     ul

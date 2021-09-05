@@ -1,6 +1,3 @@
-
-
-
 th {
   font-size: 1.0em;
   padding:0;
@@ -11,16 +8,8 @@ td {
 }
 
 body {
-  background: rgb(198, 221, 146);
+  background: white;
   color: black;
-}
-
-textarea {
-	width: 95%;
-  height: 95%;
-  background: rgb(198, 221, 146);
-  color: black;
-  border: 1px solid black;
 }
 
 ul {
@@ -30,75 +19,13 @@ ul {
   text-align: left;
 }
 
-p {
-  font-size: 16px;
+p, a {
+  font-size: 14px;
   padding: 0px;
-  text-indent: 30px;
+  text-indent: 2px;
   display: block;
-  margin-top: 0em;
-  margin-bottom: 0em;
+  margin-top: 0;
+  margin-bottom: 0;
   margin-left: 0;
   margin-right: 0;
-}
-.nav { grid-area: nav; }
-.topbar { grid-area: topbar; }
-.lefttoparea { grid-area: lefttoparea; }
-.leftmidarea { grid-area: leftmidarea; }
-.leftbottomarea { grid-area: leftbottomarea; }
-.rightarea {
-  grid-area: rightarea;
-  white-space: pre-wrap;
-}
-.bottombar {
-  grid-area: bottombar;
-  white-space: pre-wrap;
-}
-.keys { grid-area: keys; }
-
-.grid-container {
-  display: grid;
-  grid-template-areas:
-    'nav topbar topbar topbar'
-    'nav lefttoparea rightarea rightarea'
-    'nav leftmidarea rightarea rightarea'
-    'nav leftbottomarea rightarea rightarea'
-    'nav bottombar bottombar bottombar'
-    'nav keys keys keys';
-  grid-template-columns: 125px 1fr 1fr 1fr;
-  grid-gap: 0px;
-  background-color: rgba(122, 173, 221, 0.8);
-  padding: 0px;
-  margin: 10px 10px;
-}
-
-.grid-container > div {
-  background-color: rgba(255, 255, 255, 0.8);
-  text-align: center;
-  padding: 20px 0;
-  font-size: 16px;
-  text-align: left;
-  margin: 1px 1px;
-  padding: 5px 5px;
-}
-
-.topbar .topbar {
-  grid-template-columns: 1fr 1fr;
-}
-.d{
-  grid-column: col 1 / span 1;
-  grid-row: 1;
-  display: grid;
-  grid-gap: 1px;
-  grid-template-columns: 1fr 1fr;
-
-}
-.e {
-  grid-column: 1;
-  grid-row: 1;
-  text-align: left;
-}
-.f {
-  grid-column: 2;
-  grid-row: 1;
-  text-align: right;
 }
