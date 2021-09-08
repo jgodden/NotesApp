@@ -3,7 +3,7 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.redirect('/repo/Chemistry/notes');
+  res.redirect('/repo/0/0/0');
 });
 
 module.exports = router;

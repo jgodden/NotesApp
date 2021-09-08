@@ -1,12 +1,13 @@
 const { DateTime } = require("luxon");
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-global.subject_list = [ 'Chemistry', 'Biology', 'Geography'];
 var NoteSchema = new Schema({
-    subject: { type: String, required: true },
+    subject_id: { type: String, required: true },
+    topic_id: { type: String, required: true },
+    subtopic_id: { type: String, required: true },
     creationDate: { type: Date, required: true },
     updateDate: { type: Date, required: true },
-    topic: { type: String, required: true },
+    title: { type: String, required: true },
     lectureNote: { type: String, required: true },
     keywords: { type: String, required: false },
     questions: { type: String, required: false },
@@ -19,7 +20,7 @@ var NoteSchema = new Schema({
 NoteSchema
 .virtual('url')
 .get(function () {
-  return '/repo/' + this.subject + '/note/' + this._id;
+  return '/repo/' + this.subject_id + '/' + this.topic_id + '/' + this.subtopic_id + '/note/' + this.id;
 });
 
 NoteSchema

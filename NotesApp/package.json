@@ -29,6 +29,7 @@
     "morgan": "~1.9.1",
     "pug": "2.0.0-beta11",
     "sass-grid": "^3.0.0",
-    "semantic-ui-css": "^2.4.1"
+    "semantic-ui-css": "^2.4.1",
+    "zlib": "^1.0.5"
   }
 }

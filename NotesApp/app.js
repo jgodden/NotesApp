@@ -7,7 +7,6 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var repoRouter = require('./routes/repo');  //Import routes for "repo" area of site
-//var compression = require('compression');
 var helmet = require('helmet');
 var app = express();
 

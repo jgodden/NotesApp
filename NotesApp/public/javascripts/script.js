@@ -54,7 +54,7 @@ $().ready(function() {
     canvas.addEventListener('resize', resize);
     function resize() {
         canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        canvas.height = 200;//window.innerHeight;
         rect = canvas.getBoundingClientRect();
         scaleX = canvas.width / rect.width;
         scaleY = canvas.height / rect.height;

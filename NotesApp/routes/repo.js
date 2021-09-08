@@ -4,32 +4,20 @@ var router = express.Router();
 // Require controller modules.
 var note_controller = require('../controllers/noteController');
 
-//var run = require('../public/javascripts/script');
 /// NOTE ROUTES ///
 
 // GET repo home page.
-router.get('/:subject', note_controller.note_list);
+router.get( '/:subject/:topic/:subtopic', note_controller.note_list);
 
-// GET request for creating a Note. NOTE This must come before routes that display Note (uses id).
-router.get('/:subject/note/create', note_controller.note_create_get);
+router.get( '/:subject/:topic/:subtopic/note/create', note_controller.note_create_get);
+router.post('/:subject/:topic/:subtopic/note/create', note_controller.note_create_post);
 
-// POST request for creating Note.
-router.post('/:subject/note/create', note_controller.note_create_post);
+router.get( '/:subject/:topic/:subtopic/note/:note/delete', note_controller.note_delete_get);
+router.post('/:subject/:topic/:subtopic/note/:note/delete', note_controller.note_delete_post);
 
-// GET request to delete Note.
-router.get('/:subject/note/:note/delete', note_controller.note_delete_get);
+router.get( '/:subject/:topic/:subtopic/note/:note', note_controller.note_update_get);
+router.post('/:subject/:topic/:subtopic/note/:note', note_controller.note_update_post);
 
-// POST request to delete Note.
-router.post('/:subject/note/:note/delete', note_controller.note_delete_post);
-
-// GET request to update Note.
-router.get('/:subject/note/:note', note_controller.note_update_get);
-
-// POST request to update Note.
-router.post('/:subject/note/:note', note_controller.note_update_post);
-
-// GET request for list of all Note items.
-router.get('/:subject/notes', note_controller.note_list);
-
+router.get( '/:subject/:topic/:subtopic/notes', note_controller.note_list);
 
 module.exports = router;

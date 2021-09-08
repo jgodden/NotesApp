@@ -8,13 +8,15 @@ block content
           p Creation date:  #{note.creationDate_formatted}
         div(class="col-6 text-end")
           p Last updated: #{note.updateDate_formatted}
-    div.form-group
-      input#subjectid.form-control(type='hidden', name='subject', required='true', value=subject)
+    div(class="row gx-0")
+      input#subjectid.form-control(type='hidden', name='subjectid', required='true', value=subjectid)
+      input#topicid.form-control(type='hidden', name='topicid', required='true', value=topicid)
+      input#subtopicid.form-control(type='hidden', name='subtopicid', required='true', value=subtopicid)
       input#image.form-control(type='hidden', name='image', required='false', value=(undefined===note ? '' : note.image))
     div(class="border-bottom border-secondary")
       div(class="row gx-0")
         div(class="col-12")
-          input#topic.form-control(type='text', placeholder='Topic' name='topic' required='true' class="form-control form-control-sm" value=(undefined===note ? '' : note.topic) )
+          input#title.form-control(type='text', placeholder='Title' name='title' required='true' class="form-control form-control-sm" value=(undefined===note ? '' : note.title) )
     div(class="row gx-0")
       div(class="col-4 align-self-center")
         div(class="border-end border-secondary")
@@ -55,7 +57,15 @@ block content
           img(src="/images/space.jpg" alt="Space" width="16" height="5" id='space')
           img(src="/images/thick_width_button.jpg" alt="Thick" width="16" height="5" id='thick_width_button')
     .keys
-      button.btn.btn-primary.btn-sm(type='submit' id='save_button') Save
+      div(class="row mt-3 gx-0")
+        div(class="col-4")
+          button.btn.btn-primary.btn-sm(type='submit' id='save_button') Save
+        div(class="col-4")
+          a(class='btn btn-secondary btn-sm' href='/repo/' + subjectid + '/' + topicid + '/' + subtopicid + '/notes' role='button')  Cancel
+        if note
+          div(class="col-4")
+            a(class='btn btn-danger btn-sm' href='/repo/' + subjectid + '/' + topicid + '/' + subtopicid + '/note/' + note._id + '/delete' role='button')  Delete
+
 
   if errors
     ul

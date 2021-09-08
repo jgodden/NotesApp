@@ -1,27 +1,11 @@
-th {
-  font-size: 1.0em;
-  padding:0;
-}
-td {
-  font-size: 0.9em;
-  padding: 0;
-}
-
 body {
   background: white;
   color: black;
 }
 
-ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  text-align: left;
-}
-
-p, a {
-  font-size: 14px;
-  padding: 0px;
+p, a, select {
+  font-size: 10px;
+  padding: 3px 5px;
   text-indent: 2px;
   display: block;
   margin-top: 0;
@@ -29,3 +13,16 @@ p, a {
   margin-left: 0;
   margin-right: 0;
 }
+
+.selcls {
+  font-size: 10px;
+  padding: 2px; 
+  border: solid 1px #517B97; 
+  outline: 0; 
+  background: -webkit-gradient(linear, left top, left 25, from(#FFFFFF), color-stop(4%, #CAD9E3), to(#FFFFFF)); 
+  background: -moz-linear-gradient(top, #FFFFFF, #CAD9E3 1px, #FFFFFF 25px); 
+  box-shadow: rgba(0,0,0, 0.1) 0px 0px 8px; 
+  -moz-box-shadow: rgba(0,0,0, 0.1) 0px 0px 8px; 
+  -webkit-box-shadow: rgba(0,0,0, 0.1) 0px 0px 8px; 
+
+  } 
