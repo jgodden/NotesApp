@@ -1,0 +1,23 @@
+{
+  "name": "training-fundamentals-for-developers",
+  "version": "0.0.1",
+  "description": "Repository to be used with Cloudinary's Training Fundamentals for Developers course.",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CloudinaryLtd/training-fundamentals-for-developers.git"
+  },
+  "author": "Cloudinary",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/CloudinaryLtd/training-fundamentals-for-developers/issues"
+  },
+  "homepage": "https://github.com/CloudinaryLtd/training-fundamentals-for-developers#readme",
+  "dependencies": {
+    "cloudinary": "^1.22.0",
+    "dotenv": "^7.0.0",
+    "http-server": "^0.12.3",
+    "minimist": "^1.2.3"
+  }
+}

@@ -4,10 +4,9 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-var repoRouter = require('./routes/repo');  //Import routes for "repo" area of site
-var helmet = require('helmet');
+const indexRouter = require('./routes/index');
+const usersRouter = require('./routes/users');
+const repoRouter = require('./routes/repo');  //Import routes for "repo" area of site
 var app = express();
 
 //app.use(compression()); //Compress all routes
@@ -17,7 +16,7 @@ var dev_db_url = 'mongodb+srv://Admin:M4rmoset52@cluster0.j8m3g.mongodb.net/Note
 var mongoDB = process.env.MONGODB_URI || dev_db_url;
 mongoose.connect(mongoDB, { useNewUrlParser: true , useUnifiedTopology: true, useFindAndModify: false});
 var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+db.on('error', console.error.bind(console, 'MongoDB connection error:')); 
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

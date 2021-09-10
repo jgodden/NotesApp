@@ -9,10 +9,12 @@ block content
         div(class="col-6 text-end")
           p Last updated: #{note.updateDate_formatted}
     div(class="row gx-0")
+      input#noteid.form-control(type='hidden', name='noteid', required='true', value=(undefined===note ? '' : note._id))
       input#subjectid.form-control(type='hidden', name='subjectid', required='true', value=subjectid)
       input#topicid.form-control(type='hidden', name='topicid', required='true', value=topicid)
       input#subtopicid.form-control(type='hidden', name='subtopicid', required='true', value=subtopicid)
-      input#image.form-control(type='hidden', name='image', required='false', value=(undefined===note ? '' : note.image))
+      input#imageUrl.form-control(type='hidden', name='imageUrl', required='false', value=(undefined===note ? '' : note.image))
+      input#imageData.form-control(type='hidden', name='imageData', required='false', value='initial')
     div(class="border-bottom border-secondary")
       div(class="row gx-0")
         div(class="col-12")
@@ -37,6 +39,7 @@ block content
           textarea#summary.form-control(type='textarea', placeholder='Summary' name='summary' required='true' rows='4' class="form-control form-control-sm") #{undefined===note ? '' : note.summary}
     div(class="row gx-0" id='canvas-div')
       canvas(id='canvas')
+      script(src="/javascripts/script.js" type="text/javascript")
     div(class="row gx-0")
       div(class="col-1")
         img(src="/images/blue_button.jpg" alt="Blue" width="16" height="16" id='blue_button')
@@ -58,12 +61,12 @@ block content
           img(src="/images/thick_width_button.jpg" alt="Thick" width="16" height="5" id='thick_width_button')
     .keys
       div(class="row mt-3 gx-0")
-        div(class="col-4")
+        div(class="col-3")
           button.btn.btn-primary.btn-sm(type='submit' id='save_button') Save
-        div(class="col-4")
+        div(class="col-3")
           a(class='btn btn-secondary btn-sm' href='/repo/' + subjectid + '/' + topicid + '/' + subtopicid + '/notes' role='button')  Cancel
         if note
-          div(class="col-4")
+          div(class="col-3")
             a(class='btn btn-danger btn-sm' href='/repo/' + subjectid + '/' + topicid + '/' + subtopicid + '/note/' + note._id + '/delete' role='button')  Delete
 
 

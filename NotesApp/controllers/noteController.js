@@ -6,6 +6,7 @@ var Subtopic = require('../models/subtopic');
 
 var async = require('async');
 const topic = require('../models/topic');
+const note = require('../models/note');
 
 exports.index = function(req, res, next) {
     res.render('index', {});
@@ -37,7 +38,7 @@ exports.note_list = function(req, res, next) {
     var subjectid = req.params.subject;
     var topicid = req.params.topic;
     var subtopicid = req.params.subtopic;
-    //console.log('note_list subjectid ' + subjectid + ' topicid ' + topicid + ' subtopicid ' + subtopicid);
+    console.log('note_list subjectid ' + subjectid + ' topicid ' + topicid + ' subtopicid ' + subtopicid);
     async.series({
         // Get list of subject objects (three in array)
         subject_list: async function(callback) {
@@ -50,7 +51,7 @@ exports.note_list = function(req, res, next) {
             if (subjectid) {
                 if (subjectid == 0) {
                   subjectid = subject_list[0]._id;
-                  console.log('note_list setting initial subjectid of ' + subjectid);
+                  //console.log('note_list setting initial subjectid of ' + subjectid);
                 }
             } else {
                 subjectid = subject_list[0]._id;
@@ -353,9 +354,9 @@ exports.note_update_get = function(req, res, next) {
 
     async.series({
         // Get the note to be updated
-        note: async function(callback) {
-            note = await Note.findById(noteid).exec(callback);
-            //console.log('update note ' + note);
+        note_object: async function(callback) {
+            note_object = await Note.findById(noteid).exec(callback);
+            console.log('update note ' + note_object);
         },
         // Get list of subject objects (three in array)
         subject_list: async function(callback) {
@@ -421,15 +422,16 @@ exports.note_update_get = function(req, res, next) {
     }, function(err, results) {
         if (err) { return next(err); }
         // Success.
-        note.title = decodeEntities(note.title);
-        note.lectureNote = decodeEntities(note.lectureNote);
-        note.keywords = decodeEntities(note.keywords);
-        note.questions = decodeEntities(note.questions);
-        note.comments = decodeEntities(note.comments);
-        note.summary = decodeEntities(note.summary);
+        // decode text for form inputs to translate any special chars
+        note_object.title = decodeEntities(note_object.title);
+        note_object.lectureNote = decodeEntities(note_object.lectureNote);
+        note_object.keywords = decodeEntities(note_object.keywords);
+        note_object.questions = decodeEntities(note_object.questions);
+        note_object.comments = decodeEntities(note_object.comments);
+        note_object.summary = decodeEntities(note_object.summary);
         res.render('note_form', {
             title: 'Update',
-            note: note,
+            note: note_object,
             subject_list: subject_list,
             topic_list: topic_list,
             subjectid: subjectid,
@@ -452,41 +454,63 @@ exports.note_update_post = [
 
     // Process request after validation and sanitization.
     (req, res, next) => {
-        // Extract the validation errors from a request.
-        const errors = validationResult(req);
-        // Create a Note object with escaped/trimmed data and old id.
-        var date = Date.now();
+        var image_url = req.body.imageUrl;
+        var image_err = 0;
+        var tags = req.body.keywords.split(" ");
 
-        var note = new Note({
-            title: req.body.title,
-            lectureNote: req.body.lectureNote,
-            creationDate: date,
-            updateDate: date,
-            keywords: req.body.keywords,
-            questions: req.body.questions,
-            comments: req.body.comments,
-            summary: req.body.summary,
-            subject_id: req.body.subjectid,
-            topic_id: req.body.topicid,
-            subtopic_id: req.body.subtopicid,
-            image: req.body.image,
-            _id:req.params.note // This is required, or a new ID will be assigned!
+        require('dotenv').config();
+        const cloudinary = require('cloudinary').v2;
+        var uploadResponse = '';
+        (async () => {
+            var uploadResponse = '';
+            // Save the canvas image to cloud
+            await cloudinary.uploader.upload(req.body.imageData,
+            {
+                overwrite: true,
+                invalidate: true,
+                folder: req.body.subjectid + '/' + req.body.topicid + '/' + req.body.subtopicid,
+                tags: tags,
+                public_id: req.params.note
+            })
+            .then(uploadResult => uploadResponse = uploadResult)
+            .catch(error => image_err = 1);
+            image_url = uploadResponse.url;
+
+            // Extract the validation errors from a request.
+            const errors = await validationResult(req);
+            var date = Date.now();
+            // Create a Note object with escaped/trimmed data and old id.
+            var note = await new Note({
+                title: req.body.title,
+                lectureNote: req.body.lectureNote,
+                creationDate: date,
+                updateDate: date,
+                keywords: req.body.keywords,
+                questions: req.body.questions,
+                comments: req.body.comments,
+                summary: req.body.summary,
+                subject_id: req.body.subjectid,
+                topic_id: req.body.topicid,
+                subtopic_id: req.body.subtopicid,
+                image: image_url,   // use the cloud url instead of the image data
+                _id:req.params.note // This is required, or a new ID will be assigned!
             });
 
-        if (!errors.isEmpty()) {
-            // There are errors. Render form again with sanitized values/error messages.
-            res.render('note_form', { data: results });
-            return;
-        }
-        else {
-            // Data from form is valid. Update the record.
-            Note.findByIdAndUpdate(req.params.note, note, {}, function (err,thenote) {
-                if (err) {
-                    return next(err);
-                }
-                // Successful - redirect to note list page.
-                res.redirect(thenote.url);
-            });
-        }
+            if (!errors.isEmpty() || (image_err == 1)) {
+                // There are errors. Render form again with sanitized values/error messages.
+                res.render('note_form', { note: note });
+                return;
+            }
+            else {
+                // Data from form is valid so update the record
+                Note.findByIdAndUpdate(req.params.note, note, {}, function (err,thenote) {
+                    if (err) {
+                        return next(err);
+                    }
+                    // Successful - redirect to note list page.
+                    res.redirect(thenote.url);
+                });
+            }
+        })();
     }
 ];
