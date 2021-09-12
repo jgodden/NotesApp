@@ -14,18 +14,21 @@ html(lang='en')
         div(class="col-sm-2")
           form(class="form-inline my-2 my-lg-0")
             select#subject(class='form-control selcls', type='select', name='subject' required='true', class="form-control form-control-sm" onchange="ChangeSelection(this);")
+              option(value=1) &lt;search all&gt;
               for subject in subject_list
                 if subjectid
                   option(value=subject._id selected=(subject._id.toString()===subjectid.toString() ? 'selected' : false) ) #{subject.title}
                 else 
                   option(value=subject._id) #{subject.title}
             select#topic(class='form-control selcls', type='select', name='topic' required='true', class="form-control form-control-sm" onchange="ChangeSelection(this);")
+              option(value=1) &lt;search all&gt;
               for topic in topic_list
                 if topicid
                   option(value=topic._id selected=(topic._id.toString()===topicid.toString() ? 'selected' : false) ) #{topic.title}
                 else 
                   option(value=topic._id) #{topic.title}
             select#subtopic(class='form-control selcls', type='select', name='subtopic' required='true', class="form-control form-control-sm" onchange="ChangeSelection(this);")
+              option(value=1) &lt;search all&gt;
               for subtopic in subtopic_list
                 if subtopicid
                   option(value=subtopic._id selected=(subtopic._id.toString()===subtopicid.toString() ? 'selected' : false) ) #{subtopic.title}
@@ -43,12 +46,26 @@ html(lang='en')
                 topicid = topic_element.options[topic_selected_index].value;
                 subtopicid = subtopic_element.options[subtopic_selected_index].value
                 if (element.name === 'subject') {
-                  topicid = 0;
-                  subtopicid = 0;
+                  if (subjectid == 1) {
+                    // <search all> selected in subject so set
+                    // topic and subtopic to be the same
+                    topicid = 1;
+                    subtopicid = 1;
+                  } else {
+                    topicid = 0;
+                    subtopicid = 0;
+                  }
                 }
                 if (element.name === 'topic') {
-                  subtopicid = 0;
+                  if (topicid == 1) {
+                    // <search all> selected in topic so set
+                    // subtopic to be the same
+                    subtopicid = 1;
+                  } else {
+                    subtopicid = 0;
+                  }
                 }
+                //alert('subjectid ' + subjectid + ' topicid ' + topicid + ' subtopicid ' + subtopicid);
                 window.location.href = '/repo/' + subjectid + '/' + topicid + '/' + subtopicid + '/notes';
               }
           div(class="row gx-0")
@@ -84,7 +101,7 @@ html(lang='en')
                     p  General
                     a(class="dropdown-item" href='https://www.guildfordcounty.co.uk/603/welcome-to-the-sixth-form' target='_blank' role='button') GCS Sixth Form
           div(class="row gx-0")
-            if (subjectid != '0' && topicid != '0' && subtopicid != '0')
+            if (subjectid != '1' && topicid != '1' && subtopicid != '1')
               a(class='btn btn-primary btn-sm btn-block' href='/repo/' + subjectid + '/' + topicid + '/' + subtopicid + '/note/create' role='button') Create New Note
         div(class="col-sm-10" id='form-div')
           block content

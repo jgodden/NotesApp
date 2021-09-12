@@ -4,20 +4,34 @@ block content
   div(class="border-bottom border-secondary")
     div(class="row gx-0")
       div(class="col-sm-12")
-        p You have !{note_count} notes under !{subject_name}->!{topic_name}->!{subtopic_name}
+        <p>
+        | You have !{note_count} notes 
+        if subject_name
+          | under !{subject_name}
+        if topic_name 
+          | -&gt;!{topic_name}
+        if subtopic_name 
+          | -&gt;!{subtopic_name}
+        </p>
   div(class="border-bottom border-secondary")
     div(class="row gx-0")
-      div(class="col-sm-4")
+      div(class="col-sm-3")
+        p Subject
+      div(class="col-sm-3")
         p Title
-      div(class="col-sm-4")
+      div(class="col-sm-3")
         p Creation date
-      div(class="col-sm-4")
+      div(class="col-sm-3")
         p Update date
-      - note_list.sort(function(a, b) {let textA = a.title.toUpperCase(); let textB = b.title.toUpperCase(); return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;});
+      - note_list.sort(function(a, b) {let textA = a.subject_id; let textB = b.subject_id; return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;});
       each note in note_list
-        div(class="col-sm-4")
+        each subject in subject_list 
+          if subject.id === note.subject_id 
+            div(class="col-sm-3")
+              p !{subject.title}
+        div(class="col-sm-3")
           a(href=note.update_url) #{note.title}
-        div(class="col-sm-4")
+        div(class="col-sm-3")
           p #{note.creationDate_formatted}
-        div(class="col-sm-4")
+        div(class="col-sm-3")
           p #{note.updateDate_formatted}

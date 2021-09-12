@@ -38,70 +38,143 @@ exports.note_list = function(req, res, next) {
     var subjectid = req.params.subject;
     var topicid = req.params.topic;
     var subtopicid = req.params.subtopic;
-    console.log('note_list subjectid ' + subjectid + ' topicid ' + topicid + ' subtopicid ' + subtopicid);
+    console.log('nl: subjectid ' + subjectid + ' topicid ' + topicid + ' subtopicid ' + subtopicid);
     async.series({
         // Get list of subject objects (three in array)
         subject_list: async function(callback) {
+            // always get full list of subjects whether subjectid is a subject or
+            // a <search all> indicator (1)
             subject_list = await Subject.find({}, 'title', callback);
-            console.log('note_list subject_list ' + subject_list);
+            //console.log('nl: subject_list ' + subject_list);
         },
         // Get the subject objects that match subjectid (one in array)
         subject_object: async function(callback) {
-            // if coming from /, no subjectid set, so get first one in list
+            if (subjectid == 1) {
+                // <search all> selected for subject
+                //console.log('nl: search all subjects, so no subjectid');
+                subject_object = null;
+                return;
+            }
             if (subjectid == 0) {
+                // if coming from /, no subjectid set, so get first one in list
                 subjectid = subject_list[0]._id;
-                console.log('note_list setting initial subjectid of ' + subjectid);
+                //console.log('nl: setting initial subjectid of ' + subjectid);
             }
             subject_object = await Subject.find({_id:subjectid}, 'title topic', callback);
-            console.log('note_list subject_object ' + subject_object[0]);
+            //console.log('nl: subject_object ' + subject_object[0]);
         },
         // Get list of topics for this subject
         topic_list: async function(callback) {
+            if (subjectid == 1) {
+                // <search all> selected for subject
+                //console.log('nl: search all subjects, so empty topic_list');
+                topic_list = [];
+                return;
+            }
             topic_list = await Topic.find({}, 'title subtopic').where('_id').in(subject_object[0].topic);
-            console.log('note_list topic_list ' + topic_list);
+            //console.log('nl: topic_list ' + topic_list);
         },
         // Get list of topics for this subject
         topic_object: async function(callback) {
+            if (topicid == 1) {
+                // <search all> selected for topic
+                //console.log('nl: search all topics, so no topicid');
+                topic_object = null;
+                return;
+            }
             if (topicid == 0) {
                 topicid = topic_list[0]._id;
-                console.log('note_list setting initial topicid of ' + topicid);
+                //console.log('nl: setting initial topicid of ' + topicid);
             }
             topic_object = await Topic.find({_id:topicid}, 'subtopic title');
-            console.log('note_list topic_object ' + topic_object[0]);
+            //console.log('nl: topic_object ' + topic_object[0]);
         },
         // Get list of subtopics for this topic
         subtopic_list: async function(callback) {
+            if (topicid == 1) {
+                // <search all> selected for topic
+                //console.log('nl: search all topics, so empty subtopic_list');
+                subtopic_list = [];
+                return;
+            }
             subtopic_list = await Subtopic.find({}, 'title').where('_id').in(topic_object[0].subtopic);
-            console.log('note_list subtopic_list ' + subtopic_list);
+            //console.log('nl: subtopic_list ' + subtopic_list);
         },
         subtopic_object: async function(callback) {
+            if (subtopicid == 1) {
+                // <search all> selected for subtopic
+                //console.log('nl: search all subtopics, so no subtopicid');
+                subtopic_object = null;
+                return;
+            }
             if (subtopicid == 0) {
                 subtopicid = subtopic_list[0]._id;
-                console.log('note_list setting initial subtopicid of ' + subtopicid);
+                //console.log('nl: setting initial subtopicid of ' + subtopicid);
             }
             subtopic_object = await Subtopic.find({_id:subtopicid}, 'title description');
-            console.log('note_list subtopic_object ' + subtopic_object[0]);
+            //console.log('nl: subtopic_object ' + subtopic_object[0]);
         },
         // Get list of notes for this subject, topic and subtopic. Retrieve title and dates for list and ids for urls.
         note_list: async function (callback) {
-            note_list = await Note.find({subject_id:subjectid, topic_id:topicid, subtopic_id:subtopicid}, 'title subject_id topic_id subtopic_id creationDate updateDate', callback);
-            //console.log('note_list ' + note_list);
+            if (subtopicid == 1) {
+                if (topicid == 1) {
+                    if (subjectid == 1) {
+                        //console.log('nl: subject, topic and subtopic <search all>');
+                        note_list = await Note.find({}, 'title subject_id topic_id subtopic_id creationDate updateDate', callback);
+                    } else {
+                        //console.log('nl: topic and subtopic <search all>');
+                        note_list = await Note.find({subject_id:subjectid}, 'title subject_id topic_id subtopic_id creationDate updateDate', callback);
+                    }
+                } else {
+                    //console.log('nl: subtopic <search all> ' + subjectid + ':' + topicid);
+                    note_list = await Note.find({subject_id:subjectid, topic_id:topicid}, 'title subject_id topic_id subtopic_id creationDate updateDate', callback);
+                }
+            } else {
+                //console.log('nl: no <search all>');
+                note_list = await Note.find({subject_id:subjectid, topic_id:topicid, subtopic_id:subtopicid}, 'title subject_id topic_id subtopic_id creationDate updateDate', callback);
+            }
+            //console.log('nl: note_list ' + note_list);
         },
         // Get number of notes with matching subjectid
         note_count: async function(callback) {
-            note_count = await Note.countDocuments({subject_id:subjectid, topic_id:topicid, subtopic_id:subtopicid})
-            .exec(callback);
-            //console.log('note_count ' + note_count);
+            if (subtopicid == 1) {
+                if (topicid == 1) {
+                    if (subjectid == 1) {
+                        note_count = await Note.countDocuments({}).exec(callback);
+                    } else {
+                        note_count = await Note.countDocuments({subject_id:subjectid}).exec(callback);
+                    }
+                } else {
+                    note_count = await Note.countDocuments({subject_id:subjectid, topic_id:topicid}).exec(callback);
+                }
+            } else {
+                note_count = await Note.countDocuments({subject_id:subjectid, topic_id:topicid, subtopic_id:subtopicid}).exec(callback);
+            }
+            //console.log('nl: note_count ' + note_count);
         },
     }, function(err, results) {
         if (err) {
-            console.log('Error processing note list: ' + err);
+            console.error('nl: Error processing note list: ' + err);
             return next(err);
         }
 
         note_list.forEach(function (item, index) {
             item.title = decodeEntities(item.title);
         });
+        var subject_name = null;
+        if (subject_object !== null) {
+            subject_name = subject_object[0].title;
+        }
+        var topic_name = null;
+        if (topic_object !== null) {
+            topic_name = topic_object[0].title;
+        }
+        var subtopic_name = null;
+        var subtopic_description = null;
+        if (subtopic_object !== null) {
+            subtopic_name = subtopic_object[0].title;
+            subtopic_description = subtopic_object[0].description;
+        }
         res.render('note_list', {
             title: 'List',
             note_count: note_count,
@@ -112,10 +185,10 @@ exports.note_list = function(req, res, next) {
             topicid: topicid,
             subtopicid: subtopicid,
             subtopic_list: subtopic_list,
-            subject_name: subject_object[0].title,
-            topic_name: topic_object[0].title,
-            subtopic_name: subtopic_object[0].title,
-            subtopic_description: subtopic_object[0].description
+            subject_name: subject_name,
+            topic_name: topic_name,
+            subtopic_name: subtopic_name,
+            subtopic_description: subtopic_description
         } );
     });
 };
