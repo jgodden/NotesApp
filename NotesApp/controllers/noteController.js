@@ -328,68 +328,119 @@ exports.note_delete_get = function(req, res, next) {
     async.series({
         // Get list of subject objects (three in array)
         subject_list: async function(callback) {
+            // always get full list of subjects whether subjectid is a subject or
+            // a <search all> indicator (1)
             subject_list = await Subject.find({}, 'title', callback);
-            //console.log('delete subject_list ' + subject_list);
+            //console.log('nd: subject_list ' + subject_list);
         },
         // Get the subject objects that match subjectid (one in array)
         subject_object: async function(callback) {
-            // if coming from /, no subjectid set, so get first one in list
-            if (subjectid) {
-                if (subjectid == 0) {
-                  subjectid = subject_list[0]._id;
-                  //console.log('delete setting initial subjectid of ' + subjectid);
-                }
-            } else {
+            if (subjectid == 1) {
+                // <search all> selected for subject
+                //console.log('nd: search all subjects, so no subjectid');
+                subject_object = null;
+                return;
+            }
+            if (subjectid == 0) {
+                // if coming from /, no subjectid set, so get first one in list
                 subjectid = subject_list[0]._id;
+                //console.log('nd: setting initial subjectid of ' + subjectid);
             }
             subject_object = await Subject.find({_id:subjectid}, 'title topic', callback);
-            //console.log('delete subject_object ' + subject_object[0]);
+            //console.log('nd: subject_object ' + subject_object[0]);
         },
         // Get list of topics for this subject
         topic_list: async function(callback) {
+            if (subjectid == 1) {
+                // <search all> selected for subject
+                //console.log('nd: search all subjects, so empty topic_list');
+                topic_list = [];
+                return;
+            }
             topic_list = await Topic.find({}, 'title subtopic').where('_id').in(subject_object[0].topic);
-            //console.log('delete topic_list ' + topic_list);
+            //console.log('nd: topic_list ' + topic_list);
         },
         // Get list of topics for this subject
         topic_object: async function(callback) {
-            if (topicid) {
-                if (topicid == 0) {
-                    topicid = subject_object[0].topic[0];
-                    //console.log('delete setting initial topicid of ' + topicid);
-                }
+            if (topicid == 1) {
+                // <search all> selected for topic
+                //console.log('nd: search all topics, so no topicid');
+                topic_object = null;
+                return;
+            }
+            if (topicid == 0) {
+                topicid = topic_list[0]._id;
+                //console.log('nd: setting initial topicid of ' + topicid);
             }
             topic_object = await Topic.find({_id:topicid}, 'subtopic title');
-            //console.log('delete topic_object ' + topic_object[0]);
+            //console.log('nd: topic_object ' + topic_object[0]);
         },
         // Get list of subtopics for this topic
         subtopic_list: async function(callback) {
+            if (topicid == 1) {
+                // <search all> selected for topic
+                //console.log('nd: search all topics, so empty subtopic_list');
+                subtopic_list = [];
+                return;
+            }
             subtopic_list = await Subtopic.find({}, 'title').where('_id').in(topic_object[0].subtopic);
-            //console.log('delete subtopic_list ' + subtopic_list);
+            //console.log('nd: subtopic_list ' + subtopic_list);
         },
         subtopic_object: async function(callback) {
-            if (subtopicid) {
-                if (subtopicid == 0) {
-                    subtopicid = topic_object[0].subtopic[0];
-                    //console.log('delete setting initial subtopicid of ' + subtopicid);
-                }
+            if (subtopicid == 1) {
+                // <search all> selected for subtopic
+                //console.log('nd: search all subtopics, so no subtopicid');
+                subtopic_object = null;
+                return;
             }
-            subtopic_object = await Subtopic.find({_id:subtopicid}, 'title');
-            //console.log('delete subtopic_object ' + subtopic_object[0]);
+            if (subtopicid == 0) {
+                subtopicid = subtopic_list[0]._id;
+                //console.log('nd: setting initial subtopicid of ' + subtopicid);
+            }
+            subtopic_object = await Subtopic.find({_id:subtopicid}, 'title description');
+            //console.log('nd: subtopic_object ' + subtopic_object[0]);
+        },
+        // Get list of notes for this subject, topic and subtopic. Retrieve title and dates for list and ids for urls.
+        note_object: async function (callback) {
+            note_object = await Note.find({subject_id:subjectid, topic_id:topicid, subtopic_id:subtopicid}, 'title subject_id topic_id subtopic_id creationDate updateDate', callback);
+            //console.log('nd: note_list ' + note_list);
         },
     }, function(err, results) {
-        if (err) { return next(err); }
+        if (err) {
+            console.error('nd: Error processing note list: ' + err);
+            return next(err);
+        }
+
+        note_object.forEach(function (item, index) {
+            item.title = decodeEntities(item.title);
+        });
+        var subject_name = null;
+        if (subject_object !== null) {
+            subject_name = subject_object[0].title;
+        }
+        var topic_name = null;
+        if (topic_object !== null) {
+            topic_name = topic_object[0].title;
+        }
+        var subtopic_name = null;
+        var subtopic_description = null;
+        if (subtopic_object !== null) {
+            subtopic_name = subtopic_object[0].title;
+            subtopic_description = subtopic_object[0].description;
+        }
+
         res.render('note_delete', {
-            title: 'List',
-            note_count: note_count,
+            title: 'Delete',
+            note: note_object[0],
             subject_list: subject_list,
             topic_list: topic_list,
             subjectid: subjectid,
             topicid: topicid,
             subtopicid: subtopicid,
             subtopic_list: subtopic_list,
-            subject_name: subject_object[0].title,
-            topic_name: topic_object[0].title,
-            subtopic_name: subtopic_object[0].title
+            subject_name: subject_name,
+            topic_name: topic_name,
+            subtopic_name: subtopic_name
         } );
     });
 };
