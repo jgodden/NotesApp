@@ -19,18 +19,11 @@ window.addEventListener("DOMContentLoaded", function() {
 
     // get canvas 2D context and set to correct size
     var ctx = canvas.getContext('2d');
-
+    var drawingSurfaceImageData;
     // Set to correct dimensions
     var rect = canvas.getBoundingClientRect();
-    resize();
-    canvas.addEventListener('resize', resize);
-    function resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = 200;//window.innerHeight;
-        rect = canvas.getBoundingClientRect();
-        scaleX = canvas.width / rect.width;
-        scaleY = canvas.height / rect.height;
-    }
+    var scaleX = 0;
+    var scaleY = 0;
     // Render bitmap data in hidden image element to canvas
     var img = new Image;
     img.src = image_url_element.value;
@@ -40,6 +33,17 @@ window.addEventListener("DOMContentLoaded", function() {
     img.onload = function(){
         ctx.drawImage(img, 0, 0); // Draw image at top right
     };
+    drawingSurfaceImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    resize();
+    window.addEventListener('resize', resize);
+    function resize() {
+        canvas.width = window.innerWidth;
+        ctx.putImageData(drawingSurfaceImageData, 0, 0);
+        rect = canvas.getBoundingClientRect();
+        scaleX = canvas.width / rect.width;
+        scaleY = canvas.height / rect.height;
+    }
+
 
     // Tie mouse click event listener to save image function
     save_button.addEventListener('click', saveImage);
@@ -142,8 +146,44 @@ window.addEventListener("DOMContentLoaded", function() {
     var isDrawing = false;
     var existingLines = [];
     var pos = { x: 0, y: 0 };
+
+    const lineMouseDownListener = (e) => {
+        if (e.button === 0) {
+            if (!isDrawing) {
+                startX = getXPosition(e);
+                startY = getYPosition(e);
+                isDrawing = true;
+            }
+            lineDraw(e);
+        }
+    }
     
-    function lineDraw() {
+    const lineMouseUpListener = (e) => {
+        if (e.button === 0) {
+            if (isDrawing) {
+                existingLines.push({
+                    startX: startX,
+                    startY: startY,
+                    endX: pos.x,
+                    endY: pos.y,
+                    lineWidth: lineWidth,
+                    strokeStyle: strokeStyle
+                });      
+                isDrawing = false;
+            }
+            lineDraw(e);
+        }
+    }
+    
+    const lineMouseMoveListener = (e) => {
+        setPosition(e);
+        //if (isDrawing) {
+        //    lineDraw();
+        //}
+    }
+     
+    function lineDraw(e) {
+        if (e.buttons !== 1) return;
         ctx.beginPath();
         for (var i = 0; i < existingLines.length; ++i) {
             var line = existingLines[i];
@@ -162,41 +202,7 @@ window.addEventListener("DOMContentLoaded", function() {
             ctx.lineTo(pos.x , pos.y);
             ctx.stroke();
         }
-    }
-    
-    const lineMouseDownListener = (e) => {
-        if (e.button === 0) {
-            if (!isDrawing) {
-                startX = ((e.clientX - rect.left) + (window.pageXOffset - windowScrollXStartPos)) * scaleX;
-                startY = ((e.clientY - rect.top) + (window.pageYOffset - windowScrollYStartPos)) * scaleY;
-                isDrawing = true;
-            }
-            lineDraw();
-        }
-    }
-    
-    const lineMouseUpListener = (e) => {
-        if (e.button === 0) {
-            if (isDrawing) {
-                existingLines.push({
-                    startX: startX,
-                    startY: startY,
-                    endX: pos.x,
-                    endY: pos.y,
-                    lineWidth: lineWidth,
-                    strokeStyle: strokeStyle
-                });      
-                isDrawing = false;
-            }
-            lineDraw();
-        }
-    }
-    
-    const lineMouseMoveListener = (e) => {
-        setPosition(e);
-        //if (isDrawing) {
-        //    lineDraw();
-        //}
+        drawingSurfaceImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     }
 
     function freeformDraw(e) {
@@ -209,14 +215,23 @@ window.addEventListener("DOMContentLoaded", function() {
         setPosition(e);
         ctx.lineTo(pos.x, pos.y); // to
         ctx.stroke(); // draw it!
+        drawingSurfaceImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     }
     // Mouse event handlers for freeform draw
     // Set event listeners to draw on mouse move
     canvas.addEventListener('mousemove', freeformDraw);
     canvas.addEventListener('mousedown', setPosition);
     canvas.addEventListener('mouseenter', setPosition);
+    function getXPosition(e) {
+        const x = ((e.clientX - rect.left) + (window.pageXOffset - windowScrollXStartPos)) * scaleX;
+        return x;
+    }
+    function getYPosition(e) {
+        const y = ((e.clientY - rect.top) + (window.pageYOffset - windowScrollYStartPos)) * scaleY;
+        return y;
+    }
     function setPosition(e) {
-        pos.x = ((e.clientX - rect.left) + (window.pageXOffset - windowScrollXStartPos)) * scaleX;
-        pos.y = ((e.clientY - rect.top) + (window.pageYOffset - windowScrollYStartPos)) * scaleY;
+        pos.x = getXPosition(e);
+        pos.y = getYPosition(e);
     }
 }, false);

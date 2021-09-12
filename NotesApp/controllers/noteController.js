@@ -30,6 +30,9 @@ function decodeEntities(encodedString) {
     }).replace(/&#x(\d+);/gi, function(match, numStr) {
         var num = parseInt(numStr, 16);
         return String.fromCharCode(num);
+    }).replace(/&#x(\d+)\w;/gi, function(match, numStr) {
+        var num = parseInt(numStr, 16);
+        return String.fromCharCode(num);
     });
 }
 
@@ -278,44 +281,65 @@ exports.note_create_post = [
 
     // Process request after validation and sanitization.
     (req, res, next) => {
+        var image_url = req.body.imageUrl;
+        var image_err = 0;
+        var tags = req.body.keywords.split(" ");
 
-        // Extract the validation errors from a request.
-        const errors = validationResult(req);
+        require('dotenv').config();
+        const cloudinary = require('cloudinary').v2;
+        var uploadResponse = '';
+        (async () => {
+            var uploadResponse = '';
+            // Save the canvas image to cloud
+            await cloudinary.uploader.upload(req.body.imageData,
+            {
+                overwrite: true,
+                invalidate: true,
+                folder: req.body.subjectid + '/' + req.body.topicid + '/' + req.body.subtopicid,
+                tags: tags,
+                public_id: req.params.note
+            })
+            .then(uploadResult => uploadResponse = uploadResult)
+            .catch(error => image_err = 1);
+            image_url = uploadResponse.url;
 
-        var date = Date.now();
-        // Create a Note object with escaped and trimmed data.
-        var note = new Note({
-            title: req.body.title,
-            lectureNote: req.body.lectureNote,
-            creationDate: date,
-            updateDate: date,
-            keywords: req.body.keywords,
-            questions: req.body.questions,
-            comments: req.body.comments,
-            summary: req.body.summary,
-            subject_id: req.body.subjectid,
-            topic_id: req.body.topicid,
-            subtopic_id: req.body.subtopicid,
-            image: req.body.image
-        });
-        if (!errors.isEmpty()) {
-            // There are errors. Render form again with sanitized values/error messages.
-            res.render('note_form', {
-                title: 'Create',
-                subject: subject
+            // Extract the validation errors from a request.
+            const errors = await validationResult(req);
+            var now = Date.now();
+            // Create a Note object with escaped and trimmed data.
+            var note = new Note({
+                title: req.body.title,
+                lectureNote: req.body.lectureNote,
+                creationDate: now,
+                updateDate: now,
+                keywords: req.body.keywords,
+                questions: req.body.questions,
+                comments: req.body.comments,
+                summary: req.body.summary,
+                subject_id: req.body.subjectid,
+                topic_id: req.body.topicid,
+                subtopic_id: req.body.subtopicid,
+                image: image_url
             });
-            return;
-        }
-        else {
-            // Data from form is valid. Save note.
-            note.save(function (err) {
-                if (err) {
-                    return next(err);
-                }
-                //successful - redirect to new note record.
-                res.redirect(note.list_url);
-            });
-        }
+            if (!errors.isEmpty()) {
+                // There are errors. Render form again with sanitized values/error messages.
+                res.render('note_form', {
+                    title: 'Create',
+                    subject: subject
+                });
+                return;
+            }
+            else {
+                // Data from form is valid. Save note.
+                note.save(function (err) {
+                    if (err) {
+                        return next(err);
+                    }
+                    //successful - redirect to new note record.
+                    res.redirect(note.list_url);
+                });
+            }
+        })();
     }
 ];
 
