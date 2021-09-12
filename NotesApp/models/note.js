@@ -16,11 +16,18 @@ var NoteSchema = new Schema({
     image: { type: String, required: false }
 });
 
-// Virtual for note's URL
+// Virtual for note list URL
 NoteSchema
-.virtual('url')
+.virtual('list_url')
 .get(function () {
-  return '/repo/' + this.subject_id + '/' + this.topic_id + '/' + this.subtopic_id + '/note/' + this.id;
+  return '/repo/' + this.subject_id + '/' + this.topic_id + '/' + this.subtopic_id + '/notes/';
+});
+
+// Virtual for update note URL
+NoteSchema
+.virtual('update_url')
+.get(function () {
+  return '/repo/' + this.subject_id + '/' + this.topic_id + '/' + this.subtopic_id + '/note/' + this._id;
 });
 
 NoteSchema

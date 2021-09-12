@@ -16,7 +16,7 @@ block content
       - note_list.sort(function(a, b) {let textA = a.title.toUpperCase(); let textB = b.title.toUpperCase(); return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;});
       each note in note_list
         div(class="col-sm-4")
-          a(href=note.url) #{note.title}
+          a(href=note.update_url) #{note.title}
         div(class="col-sm-4")
           p #{note.creationDate_formatted}
         div(class="col-sm-4")

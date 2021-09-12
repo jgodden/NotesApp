@@ -43,52 +43,44 @@ exports.note_list = function(req, res, next) {
         // Get list of subject objects (three in array)
         subject_list: async function(callback) {
             subject_list = await Subject.find({}, 'title', callback);
-            //console.log('note_list subject_list ' + subject_list);
+            console.log('note_list subject_list ' + subject_list);
         },
         // Get the subject objects that match subjectid (one in array)
         subject_object: async function(callback) {
             // if coming from /, no subjectid set, so get first one in list
-            if (subjectid) {
-                if (subjectid == 0) {
-                  subjectid = subject_list[0]._id;
-                  //console.log('note_list setting initial subjectid of ' + subjectid);
-                }
-            } else {
+            if (subjectid == 0) {
                 subjectid = subject_list[0]._id;
+                console.log('note_list setting initial subjectid of ' + subjectid);
             }
             subject_object = await Subject.find({_id:subjectid}, 'title topic', callback);
-            //console.log('note_list subject_object ' + subject_object[0]);
+            console.log('note_list subject_object ' + subject_object[0]);
         },
         // Get list of topics for this subject
         topic_list: async function(callback) {
             topic_list = await Topic.find({}, 'title subtopic').where('_id').in(subject_object[0].topic);
-            //console.log('note_list topic_list ' + topic_list);
+            console.log('note_list topic_list ' + topic_list);
         },
         // Get list of topics for this subject
         topic_object: async function(callback) {
-            if (topicid) {
-                if (topicid == 0) {
-                    topicid = subject_object[0].topic[0];
-                    //console.log('note_list setting initial topicid of ' + topicid);
-                }
+            if (topicid == 0) {
+                topicid = topic_list[0]._id;
+                console.log('note_list setting initial topicid of ' + topicid);
             }
             topic_object = await Topic.find({_id:topicid}, 'subtopic title');
-            //console.log('note_list topic_object ' + topic_object[0]);
+            console.log('note_list topic_object ' + topic_object[0]);
         },
         // Get list of subtopics for this topic
         subtopic_list: async function(callback) {
             subtopic_list = await Subtopic.find({}, 'title').where('_id').in(topic_object[0].subtopic);
-            //console.log('note_list subtopic_list ' + subtopic_list);
+            console.log('note_list subtopic_list ' + subtopic_list);
         },
         subtopic_object: async function(callback) {
-            if (subtopicid) {
-                if (subtopicid == 0) {
-                    subtopicid = topic_object[0].subtopic[0];
-                    //console.log('note_list setting initial subtopicid of ' + subtopicid);
-                }
+            if (subtopicid == 0) {
+                subtopicid = subtopic_list[0]._id;
+                console.log('note_list setting initial subtopicid of ' + subtopicid);
             }
             subtopic_object = await Subtopic.find({_id:subtopicid}, 'title description');
-            //console.log('note_list subtopic_object ' + subtopic_object[0]);
+            console.log('note_list subtopic_object ' + subtopic_object[0]);
         },
         // Get list of notes for this subject, topic and subtopic. Retrieve title and dates for list and ids for urls.
         note_list: async function (callback) {
@@ -102,7 +94,10 @@ exports.note_list = function(req, res, next) {
             //console.log('note_count ' + note_count);
         },
     }, function(err, results) {
-        if (err) { return next(err); }
+        if (err) {
+            console.log('Error processing note list: ' + err);
+            return next(err);
+        }
 
         note_list.forEach(function (item, index) {
             item.title = decodeEntities(item.title);
@@ -245,7 +240,7 @@ exports.note_create_post = [
                     return next(err);
                 }
                 //successful - redirect to new note record.
-                res.redirect(note.url);
+                res.redirect(note.list_url);
             });
         }
     }
@@ -478,13 +473,13 @@ exports.note_update_post = [
 
             // Extract the validation errors from a request.
             const errors = await validationResult(req);
-            var date = Date.now();
+            var now = Date.now();
             // Create a Note object with escaped/trimmed data and old id.
             var note = await new Note({
                 title: req.body.title,
                 lectureNote: req.body.lectureNote,
-                creationDate: date,
-                updateDate: date,
+                creationDate: req.body.creationDate,
+                updateDate: now,
                 keywords: req.body.keywords,
                 questions: req.body.questions,
                 comments: req.body.comments,
@@ -508,7 +503,7 @@ exports.note_update_post = [
                         return next(err);
                     }
                     // Successful - redirect to note list page.
-                    res.redirect(thenote.url);
+                    res.redirect(thenote.list_url);
                 });
             }
         })();

@@ -68,6 +68,8 @@ window.addEventListener("DOMContentLoaded", function() {
     // Render bitmap data in hidden image element to canvas
     var img = new Image;
     img.src = image_url_element.value;
+    // Set cross origin otherwise the retrieved png image from clouinary will be
+    // tainted, and the canvas.toDataUrl will fail with security error
     img.setAttribute('crossOrigin', 'anonymous');
     img.onload = function(){
         ctx.drawImage(img, 0, 0); // Draw image at top right

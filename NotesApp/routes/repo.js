@@ -7,6 +7,8 @@ var note_controller = require('../controllers/noteController');
 /// NOTE ROUTES ///
 
 // GET repo home page.
+router.get('/', note_controller.note_list);
+
 router.get( '/:subject/:topic/:subtopic', note_controller.note_list);
 
 router.get( '/:subject/:topic/:subtopic/note/create', note_controller.note_create_get);
