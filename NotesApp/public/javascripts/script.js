@@ -20,10 +20,39 @@ window.addEventListener("DOMContentLoaded", function() {
     // get canvas 2D context and set to correct size
     var ctx = canvas.getContext('2d');
 
-    // Set default line color, width and shape
-    var strokeStyle = 'black';
-    var lineWidth = 4;
-    ctx.lineCap = 'round';
+    // Set to correct dimensions
+    var rect = canvas.getBoundingClientRect();
+    resize();
+    canvas.addEventListener('resize', resize);
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = 200;//window.innerHeight;
+        rect = canvas.getBoundingClientRect();
+        scaleX = canvas.width / rect.width;
+        scaleY = canvas.height / rect.height;
+    }
+    // Render bitmap data in hidden image element to canvas
+    var img = new Image;
+    img.src = image_url_element.value;
+    // Set cross origin otherwise the retrieved png image from clouinary will be
+    // tainted, and the canvas.toDataUrl will fail with security error
+    img.setAttribute('crossOrigin', 'anonymous');
+    img.onload = function(){
+        ctx.drawImage(img, 0, 0); // Draw image at top right
+    };
+
+    // Tie mouse click event listener to save image function
+    save_button.addEventListener('click', saveImage);
+    function saveImage(e) {
+        try {
+            var urlData = canvas.toDataURL("image/png");
+            image_data_element.value = urlData;
+        } catch(e) {
+            alert('update data error: ' + e);
+        }
+    }
+
+
 
     document.getElementById('blue_button').addEventListener('click', setColor);
     document.getElementById('red_button').addEventListener('click', setColor);
@@ -52,62 +81,127 @@ window.addEventListener("DOMContentLoaded", function() {
     document.getElementById('thin_width_button').addEventListener('click', setWidth);
     document.getElementById('mid_width_button').addEventListener('click', setWidth);
     document.getElementById('thick_width_button').addEventListener('click', setWidth);
+    document.getElementById('thickest_width_button').addEventListener('click', setWidth);
     function setWidth(e) {
         document.getElementById('thin_width_button').style.border = "none";
         document.getElementById('mid_width_button').style.border = "none";
         document.getElementById('thick_width_button').style.border = "none";
+        document.getElementById('thickest_width_button').style.border = "none";
         e.target.style.border = "thin solid black";
         if (e.currentTarget.id === 'thin_width_button') {
             lineWidth = 2;
         }
         if (e.currentTarget.id === 'mid_width_button') {
-            lineWidth = 4;
+            lineWidth = 5;
         }
         if (e.currentTarget.id === 'thick_width_button') {
-            lineWidth = 6;
+            lineWidth = 8;
+        }
+        if (e.currentTarget.id === 'thickest_width_button') {
+            lineWidth = 12;
+        }
+    }
+
+    // Set default line color, width and shape
+    var strokeStyle = 'black';
+    var lineWidth = 4;
+    var drawStyle = 0; // freeform
+    ctx.lineCap = 'round';
+    ctx.fillStyle = 'white';
+    
+    document.getElementById('pencil').addEventListener('click', setDrawStyle);
+    document.getElementById('line').addEventListener('click', setDrawStyle);
+    function setDrawStyle(e) {
+        document.getElementById('pencil').style.border = "none";
+        document.getElementById('line').style.border = "none";
+        e.target.style.border = "thin solid black";
+        if (e.currentTarget.id === 'pencil') {
+            //freeform
+            drawStyle = 0;
+            canvas.removeEventListener('mousedown', lineMouseDownListener);
+            canvas.removeEventListener('mousemove', lineMouseMoveListener);
+            canvas.removeEventListener('mouseup', lineMouseUpListener);
+            canvas.addEventListener('mousemove', freeformDraw);
+            canvas.addEventListener('mousedown', setPosition);
+            canvas.addEventListener('mouseenter', setPosition);
+        }
+        if (e.currentTarget.id === 'line') {
+            // line
+            drawStyle = 1;
+            canvas.removeEventListener('mousemove', freeformDraw);
+            canvas.removeEventListener('mousedown', setPosition);
+            canvas.removeEventListener('mouseenter', setPosition);
+            canvas.addEventListener('mousedown', lineMouseDownListener);
+            canvas.addEventListener('mousemove', lineMouseMoveListener);
+            canvas.addEventListener('mouseup', lineMouseUpListener);
+        }
+    }
+
+    var windowScrollXStartPos = window.pageXOffset; //window.scrollX;
+    var windowScrollYStartPos = window.pageYOffset; //window.scrollY;
+    var isDrawing = false;
+    var existingLines = [];
+    var pos = { x: 0, y: 0 };
+    
+    function lineDraw() {
+        ctx.beginPath();
+        for (var i = 0; i < existingLines.length; ++i) {
+            var line = existingLines[i];
+            ctx.beginPath();
+            ctx.lineWidth = line.lineWidth;
+            ctx.strokeStyle = line.strokeStyle;
+            ctx.moveTo(line.startX,line.startY);
+            ctx.lineTo(line.endX,line.endY);
+        }
+        ctx.stroke();
+        if (isDrawing) {
+            ctx.lineWidth = lineWidth;
+            ctx.strokeStyle = strokeStyle;
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(pos.x , pos.y);
+            ctx.stroke();
         }
     }
     
-    // Set to correct dimensions
-    resize();
-    canvas.addEventListener('resize', resize);
-    function resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = 200;//window.innerHeight;
-        rect = canvas.getBoundingClientRect();
-        scaleX = canvas.width / rect.width;
-        scaleY = canvas.height / rect.height;
-    }
-    // Render bitmap data in hidden image element to canvas
-    var img = new Image;
-    img.src = image_url_element.value;
-    // Set cross origin otherwise the retrieved png image from clouinary will be
-    // tainted, and the canvas.toDataUrl will fail with security error
-    img.setAttribute('crossOrigin', 'anonymous');
-    img.onload = function(){
-        ctx.drawImage(img, 0, 0); // Draw image at top right
-    };
-
-    // last known position
-    var pos = { x: 0, y: 0 };
-    var windowScrollXStartPos = window.pageXOffset; //window.scrollX;
-    var windowScrollYStartPos = window.pageYOffset; //window.scrollY;
-
-    // Tie mouse click event listener to save image function
-    save_button.addEventListener('click', saveImage);
-    function saveImage(e) {
-        try {
-            var urlData = canvas.toDataURL("image/png");
-            image_data_element.value = urlData;
-        } catch(e) {
-            alert('update data error: ' + e);
+    const lineMouseDownListener = (e) => {
+        if (e.button === 0) {
+            if (!isDrawing) {
+                startX = ((e.clientX - rect.left) + (window.pageXOffset - windowScrollXStartPos)) * scaleX;
+                startY = ((e.clientY - rect.top) + (window.pageYOffset - windowScrollYStartPos)) * scaleY;
+                isDrawing = true;
+            }
+            lineDraw();
         }
     }
-   
-    // Set event listeners to draw on mouse move
-    canvas.addEventListener('mousemove', draw);
-    function draw(e) {
+    
+    const lineMouseUpListener = (e) => {
+        if (e.button === 0) {
+            if (isDrawing) {
+                existingLines.push({
+                    startX: startX,
+                    startY: startY,
+                    endX: pos.x,
+                    endY: pos.y,
+                    lineWidth: lineWidth,
+                    strokeStyle: strokeStyle
+                });      
+                isDrawing = false;
+            }
+            lineDraw();
+        }
+    }
+    
+    const lineMouseMoveListener = (e) => {
+        setPosition(e);
+        //if (isDrawing) {
+        //    lineDraw();
+        //}
+    }
+
+    function freeformDraw(e) {
         if (e.buttons !== 1) return;
+
         ctx.beginPath(); // begin
         ctx.lineWidth = lineWidth;
         ctx.strokeStyle = strokeStyle;
@@ -116,7 +210,9 @@ window.addEventListener("DOMContentLoaded", function() {
         ctx.lineTo(pos.x, pos.y); // to
         ctx.stroke(); // draw it!
     }
-    // Set event listeners to record x, y positions on mouse down/enter
+    // Mouse event handlers for freeform draw
+    // Set event listeners to draw on mouse move
+    canvas.addEventListener('mousemove', freeformDraw);
     canvas.addEventListener('mousedown', setPosition);
     canvas.addEventListener('mouseenter', setPosition);
     function setPosition(e) {
