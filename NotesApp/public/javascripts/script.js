@@ -22,7 +22,7 @@ window.addEventListener("DOMContentLoaded", function() {
 
     // Set default line color, width and shape
     var strokeStyle = 'black';
-    var lineWidth = 2;
+    var lineWidth = 4;
     ctx.lineCap = 'round';
 
     document.getElementById('blue_button').addEventListener('click', setColor);
@@ -31,6 +31,12 @@ window.addEventListener("DOMContentLoaded", function() {
     document.getElementById('black_button').addEventListener('click', setColor);
     document.getElementById('erase_button').addEventListener('click', setColor);
     function setColor(e) {
+        document.getElementById('blue_button').style.border = "none";
+        document.getElementById('red_button').style.border = "none";
+        document.getElementById('green_button').style.border = "none";
+        document.getElementById('black_button').style.border = "none";
+        document.getElementById('erase_button').style.border = "none";
+        e.target.style.border = "thin solid black";
         if (e.currentTarget.id === 'black_button')
             strokeStyle = 'black';
         if (e.currentTarget.id === 'blue_button')
@@ -47,12 +53,19 @@ window.addEventListener("DOMContentLoaded", function() {
     document.getElementById('mid_width_button').addEventListener('click', setWidth);
     document.getElementById('thick_width_button').addEventListener('click', setWidth);
     function setWidth(e) {
-        if (e.currentTarget.id === 'thin_width_button')
+        document.getElementById('thin_width_button').style.border = "none";
+        document.getElementById('mid_width_button').style.border = "none";
+        document.getElementById('thick_width_button').style.border = "none";
+        e.target.style.border = "thin solid black";
+        if (e.currentTarget.id === 'thin_width_button') {
             lineWidth = 2;
-        if (e.currentTarget.id === 'mid_width_button')
+        }
+        if (e.currentTarget.id === 'mid_width_button') {
             lineWidth = 4;
-        if (e.currentTarget.id === 'thick_width_button')
+        }
+        if (e.currentTarget.id === 'thick_width_button') {
             lineWidth = 6;
+        }
     }
     
     // Set to correct dimensions
