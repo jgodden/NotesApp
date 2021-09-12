@@ -2,6 +2,7 @@ window.addEventListener("DOMContentLoaded", function() {
     // Get ref to save buton so we can set up an event listener to
     // send the image bitmap to the database when saving the note
     var save_button = document.getElementById('save_button');
+
     // Get ref to image data url element which will initially receive the
     // cloudinary url. This will be used as the src attribute of the canvas
     // image, and the image data will be retrieved from cloudinary using this
@@ -43,7 +44,6 @@ window.addEventListener("DOMContentLoaded", function() {
         scaleX = canvas.width / rect.width;
         scaleY = canvas.height / rect.height;
     }
-
 
     // Tie mouse click event listener to save image function
     save_button.addEventListener('click', saveImage);

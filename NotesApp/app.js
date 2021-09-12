@@ -7,8 +7,12 @@ var logger = require('morgan');
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const repoRouter = require('./routes/repo');  //Import routes for "repo" area of site
+//var compression = require('compression');
+//var helmet = require('helmet');
+
 var app = express();
 
+//app.use(helmet());
 //app.use(compression()); //Compress all routes
 //Set up mongoose connection
 var mongoose = require('mongoose');

@@ -153,7 +153,7 @@ exports.note_list = function(req, res, next) {
             } else {
                 note_count = await Note.countDocuments({subject_id:subjectid, topic_id:topicid, subtopic_id:subtopicid}).exec(callback);
             }
-            //console.log('nl: note_count ' + note_count);
+            console.log('nl: note_count ' + note_count);
         },
     }, function(err, results) {
         if (err) {
@@ -499,7 +499,7 @@ exports.note_update_get = function(req, res, next) {
         // Get the note to be updated
         note_object: async function(callback) {
             note_object = await Note.findById(noteid).exec(callback);
-            console.log('update note ' + note_object);
+            //console.log('update note ' + note_object);
         },
         // Get list of subject objects (three in array)
         subject_list: async function(callback) {

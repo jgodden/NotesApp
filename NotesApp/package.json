@@ -12,8 +12,8 @@
   },
   "author": "Jon Godden",
   "dependencies": {
+    "@popperjs/core": "^2.10.1",
     "async": "^3.2.1",
-    "bootstrap": "^5.1.0",
     "canvas": "^2.8.0",
     "cloudinary": "^1.26.3",
     "compression": "^1.7.4",
@@ -34,5 +34,8 @@
     "sass-grid": "^3.0.0",
     "semantic-ui-css": "^2.4.1",
     "zlib": "^1.0.5"
+  },
+  "devDependencies": {
+    "bootstrap": "^5.1.1"
   }
 }
