@@ -8,10 +8,11 @@
             "type": "pwa-node",
             "request": "launch",
             "name": "Launch Program",
+            "console": "integratedTerminal",
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}\\..\\..\\..\\..\\AppData\\Local\\Programs\\Microsoft VS Code\\<node_internals>\\internal\\modules\\cjs\\loader.js"
+            "program": "C:\\Users\\jon\\AppData\\Local\\Programs\\Microsoft VS Code\\resources\\app\\out\\vs\\loader.js"
         }
     ]
 }

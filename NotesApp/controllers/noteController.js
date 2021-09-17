@@ -41,7 +41,7 @@ exports.note_list = function(req, res, next) {
     var subjectid = req.params.subject;
     var topicid = req.params.topic;
     var subtopicid = req.params.subtopic;
-    console.log('nl: subjectid ' + subjectid + ' topicid ' + topicid + ' subtopicid ' + subtopicid);
+    //console.log('nl: subjectid ' + subjectid + ' topicid ' + topicid + ' subtopicid ' + subtopicid);
     async.series({
         // Get list of subject objects (three in array)
         subject_list: async function(callback) {
@@ -153,7 +153,7 @@ exports.note_list = function(req, res, next) {
             } else {
                 note_count = await Note.countDocuments({subject_id:subjectid, topic_id:topicid, subtopic_id:subtopicid}).exec(callback);
             }
-            console.log('nl: note_count ' + note_count);
+            //console.log('nl: note_count ' + note_count);
         },
     }, function(err, results) {
         if (err) {

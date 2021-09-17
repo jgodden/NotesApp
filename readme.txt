@@ -9,3 +9,5 @@ Mongo details
 User: Admin
 Password: M4rmoset52
 Connection URL: mongodb+srv://Admin:M4rmoset52@cluster0.j8m3g.mongodb.net/NotesApp?retryWrites=true&w=majority
+
+Make sure bootstrap is uninstalled. It's functionality is provided by popper

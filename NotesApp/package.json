@@ -35,7 +35,5 @@
     "semantic-ui-css": "^2.4.1",
     "zlib": "^1.0.5"
   },
-  "devDependencies": {
-    "bootstrap": "^5.1.1"
-  }
+  "devDependencies": {}
 }
