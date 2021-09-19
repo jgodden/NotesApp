@@ -6,8 +6,16 @@ MongoDB
 Download the server here https://www.mongodb.com/download-center 
 
 Mongo details
-User: Admin
-Password: M4rmoset52
-Connection URL: mongodb+srv://Admin:M4rmoset52@cluster0.j8m3g.mongodb.net/NotesApp?retryWrites=true&w=majority
+ Remote connection (using Atlas)
+  User: Admin
+  Password: M4rmoset52
+  Connection URL: mongodb+srv://Admin:M4rmoset52@cluster0.j8m3g.mongodb.net/NotesApp?retryWrites=true&w=majority
+ Local Connection
+  User/Password: running as Network Service
+  Connection URL: mongodb://127.0.0.1:27017/local
 
 Make sure bootstrap is uninstalled. It's functionality is provided by popper
+
+Cloudinary
+For remote image management, use Cloudinary
+For local, store to file system using same structure as in Cloudinary (ids for subject/topic/subtopic/note)

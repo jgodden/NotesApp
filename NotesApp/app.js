@@ -1,30 +1,48 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
 const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
 const repoRouter = require('./routes/repo');  //Import routes for "repo" area of site
-var compression = require('compression');
-var helmet = require('helmet');
+const compression = require('compression');
+const helmet = require('helmet');
+global.usingInternet = 1;
 
-var app = express();
+const app = express();
 
-app.use(helmet());
+app.use(
+  helmet({
+      contentSecurityPolicy: {
+          directives: {
+              defaultSrc: ["'self'"],
+              connectSrc: ["'self'", "mongodb+srv://cluster0.j8m3g.mongodb.net"],
+              imgSrc: ["'self'", "http://127.0.0.1:8080", "http://res.cloudinary.com/", "data:"],
+              scriptSrc:["'self'","https://cdnjs.cloudflare.com/", "'unsafe-inline'"],
+              styleSrc:["'self'","https://cdnjs.cloudflare.com/", "'unsafe-inline'"],
+              fontSrc:["'self'","https://cdnjs.cloudflare.com/"]
+          }
+      },
+  })
+);
 app.use(compression()); //Compress all routes
+
 //Set up mongoose connection
-var mongoose = require('mongoose');
-var dev_db_url = 'mongodb+srv://Admin:M4rmoset52@cluster0.j8m3g.mongodb.net/NotesApp?retryWrites=true'
-var mongoDB = process.env.MONGODB_URI || dev_db_url;
+const mongoose = require('mongoose');
+const atlas_db_url = 'mongodb+srv://Admin:M4rmoset52@cluster0.j8m3g.mongodb.net/NotesApp?retryWrites=true';
+const local_db_url = 'mongodb://127.0.0.1:27017/local';
+const mongoDB = process.env.MONGODB_URI || local_db_url;
 mongoose.connect(mongoDB, { useNewUrlParser: true , useUnifiedTopology: true, useFindAndModify: false});
-var db = mongoose.connection;
+const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:')); 
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
+
+// favicon setup
+var favicon = require('serve-favicon');
+app.use(favicon(path.join(__dirname,'public','images','favicon.ico')));
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -33,12 +51,11 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
 app.use('/repo', repoRouter);  // Add repo routes to middleware chain.
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  next(createError(404));
+  next(createError(404, req.originalUrl));
 });
 
 // error handler

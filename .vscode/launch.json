@@ -5,14 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "pwa-node",
+            "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "console": "integratedTerminal",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "program": "C:\\Users\\jon\\AppData\\Local\\Programs\\Microsoft VS Code\\resources\\app\\out\\vs\\loader.js"
+            "program": "${workspaceFolder}\\NotesApp\\bin\\www"
         }
     ]
 }

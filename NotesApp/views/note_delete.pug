@@ -18,6 +18,7 @@ block content
   form(method='POST' action='')
     div.form-group
       input#noteid.form-control(type='hidden',name='noteid', required='true', value=note._id )
+      input#note_image.form-control(type='hidden',name='note_image', required='true', value=note.image )
       input#subjectid.form-control(type='hidden',name='subjectid', required='true', value=note.subject_id )
       input#topicid.form-control(type='hidden',name='topicid', required='true', value=note.topic_id )
       input#subtopicid.form-control(type='hidden',name='subtopicid', required='true', value=note.subtopic_id )

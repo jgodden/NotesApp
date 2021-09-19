@@ -12,14 +12,12 @@ window.addEventListener("DOMContentLoaded", function() {
     // cloudinary
     var image_data_element = document.getElementById('imageData');
     var image_url_element = document.getElementById('imageUrl');
-    // Get ref to canvas
+    // Get ref to canvas, but it isn't instantiated yet, so can't set style at this point
     var canvas = document.getElementById('canvas');
-
-    // Set canvas border
-    canvas.style.border = "thin dashed #888888";
-
     // get canvas 2D context and set to correct size
     var ctx = canvas.getContext('2d');
+    // Set canvas border
+    canvas.style.border = "thin dashed #888888";
     var drawingSurfaceImageData;
     // Set to correct dimensions
     var rect = canvas.getBoundingClientRect();
@@ -28,7 +26,7 @@ window.addEventListener("DOMContentLoaded", function() {
     // Render bitmap data in hidden image element to canvas
     var img = new Image;
     img.src = image_url_element.value;
-    // Set cross origin otherwise the retrieved png image from clouinary will be
+    // Set cross origin otherwise the retrieved png image from cloudinary will be
     // tainted, and the canvas.toDataUrl will fail with security error
     img.setAttribute('crossOrigin', 'anonymous');
     img.onload = function(){
