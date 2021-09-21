@@ -18,7 +18,11 @@ window.addEventListener("DOMContentLoaded", function() {
     var ctx = canvas.getContext('2d');
     // Set canvas border
     canvas.style.border = "thin dashed #888888";
-    var drawingSurfaceImageData;
+    function updateImageData() {
+        drawingSurfaceImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    }
+    updateImageData();
+
     // Set to correct dimensions
     var rect = canvas.getBoundingClientRect();
     var scaleX = 0;
@@ -31,8 +35,9 @@ window.addEventListener("DOMContentLoaded", function() {
     img.setAttribute('crossOrigin', 'anonymous');
     img.onload = function(){
         ctx.drawImage(img, 0, 0); // Draw image at top right
+        updateImageData();
     };
-    drawingSurfaceImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    
     resize();
     window.addEventListener('resize', resize);
     function resize() {
@@ -50,34 +55,58 @@ window.addEventListener("DOMContentLoaded", function() {
             var urlData = canvas.toDataURL("image/png");
             image_data_element.value = urlData;
         } catch(e) {
-            alert('update data error: ' + e);
+            alert('save image data error: ' + e);
         }
     }
 
+    var textValue="";
+    var fontSize="10";
 
-
-    document.getElementById('blue_button').addEventListener('click', setColor);
-    document.getElementById('red_button').addEventListener('click', setColor);
-    document.getElementById('green_button').addEventListener('click', setColor);
-    document.getElementById('black_button').addEventListener('click', setColor);
-    document.getElementById('erase_button').addEventListener('click', setColor);
-    function setColor(e) {
+    document.getElementById('blue_button').addEventListener('click', controlAction);
+    document.getElementById('red_button').addEventListener('click', controlAction);
+    document.getElementById('green_button').addEventListener('click', controlAction);
+    document.getElementById('black_button').addEventListener('click', controlAction);
+    document.getElementById('white_button').addEventListener('click', controlAction);
+    document.getElementById('fill_button').addEventListener('click', controlAction);
+    document.getElementById('text_button').addEventListener('click', controlAction);
+    document.getElementById('text').addEventListener('input', controlAction);
+    document.getElementById('fontSize').addEventListener('change', controlAction);
+    function controlAction(e) {
         document.getElementById('blue_button').style.border = "none";
         document.getElementById('red_button').style.border = "none";
         document.getElementById('green_button').style.border = "none";
         document.getElementById('black_button').style.border = "none";
-        document.getElementById('erase_button').style.border = "none";
+        document.getElementById('white_button').style.border = "none";
+        document.getElementById('fill_button').style.border = "none";
         e.target.style.border = "thin solid black";
         if (e.currentTarget.id === 'black_button')
             strokeStyle = 'black';
+        if (e.currentTarget.id === 'white_button')
+            strokeStyle = 'white';
         if (e.currentTarget.id === 'blue_button')
             strokeStyle = 'blue';
         if (e.currentTarget.id === 'red_button')
             strokeStyle = 'red';
         if (e.currentTarget.id === 'green_button')
             strokeStyle = 'green';
-        if (e.currentTarget.id === 'erase_button')
-            strokeStyle = 'white';
+        if (e.currentTarget.id === 'fill_button') {
+            ctx.fillStyle = strokeStyle;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            updateImageData();
+        }
+        if (e.currentTarget.id === 'text_button') {
+            ctx.fillStyle = strokeStyle;
+            ctx.font = fontSize + 'px serif';
+            ctx.fillText(textValue, pos.x, pos.y, textValue.length * (fontSize / 2));
+            updateImageData();
+        }
+        if (e.currentTarget.id === 'text') {
+            textValue = e.currentTarget.value;
+        }
+        if (e.currentTarget.id === 'fontSize') {
+            fontSize = e.currentTarget.value;
+        }
+
     }
 
     document.getElementById('thin_width_button').addEventListener('click', setWidth);

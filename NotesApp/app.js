@@ -8,6 +8,12 @@ const repoRouter = require('./routes/repo');  //Import routes for "repo" area of
 const compression = require('compression');
 const helmet = require('helmet');
 global.usingInternet = 1;
+global.numberSymbols;
+global.fractionSymbols;
+global.shapeSymbols;
+global.symbolSymbols;
+global.operatorSymbols;
+global.arrowSymbols;
 
 const app = express();
 
@@ -31,10 +37,23 @@ app.use(compression()); //Compress all routes
 const mongoose = require('mongoose');
 const atlas_db_url = 'mongodb+srv://Admin:M4rmoset52@cluster0.j8m3g.mongodb.net/NotesApp?retryWrites=true';
 const local_db_url = 'mongodb://127.0.0.1:27017/local';
-const mongoDB = process.env.MONGODB_URI || local_db_url;
+const mongoDB = process.env.MONGODB_URI || atlas_db_url;
 mongoose.connect(mongoDB, { useNewUrlParser: true , useUnifiedTopology: true, useFindAndModify: false});
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:')); 
+
+var _Symbol = require('./models/symbol');
+
+// Get Symbols
+(async () => {
+  numberSymbols = await _Symbol.find({type:"number"});
+  fractionSymbols = await _Symbol.find({type:"fraction"});
+  shapeSymbols = await _Symbol.find({type:"shape"});
+  symbolSymbols = await _Symbol.find({type:"symbol"});
+  operatorSymbols = await _Symbol.find({type:"operator"});
+  arrowSymbols = await _Symbol.find({type:"arrow"});
+  console.log('arrows ' + arrowSymbols);
+})();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

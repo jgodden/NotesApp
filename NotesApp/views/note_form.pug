@@ -4,9 +4,34 @@ block content
   form(method='POST' action='')
     if note
       div(class="row gx-0")
-        div(class="col-6")
+        div(class="col-3")
           p Creation date:  #{note.creationDate_formatted}
-        div(class="col-6 text-end")
+        div(class="col-1")
+          select#numberSymbolSelect(class='form-control selcls', type='select', name='numberSymbolSelect' class="form-control form-control-sm" onchange="insertThisInThere(this);")
+            for symbol in number_symbol_list 
+              option(value=symbol.index) #{symbol.char} (#{symbol.description})
+        div(class="col-1")
+          select#fractionSymbolSelect(class='form-control selcls', type='select', name='fractionSymbolSelect' class="form-control form-control-sm" onchange="insertThisInThere(this);")
+            for symbol in fraction_symbol_list 
+              option(value=symbol.index) #{symbol.char} (#{symbol.description})
+        div(class="col-1")
+          select#shapeSymbolSelect(class='form-control selcls', type='select', name='shapeSymbolSelect' class="form-control form-control-sm" onchange="insertThisInThere(this);")
+            for symbol in shape_symbol_list 
+              option(value=symbol.index) #{symbol.char} (#{symbol.description})
+        div(class="col-1")
+          select#symbolSymbolSelect(class='form-control selcls', type='select', name='symbolSymbolSelect' class="form-control form-control-sm" onchange="insertThisInThere(this);")
+            for symbol in symbol_symbol_list 
+              option(value=symbol.index) #{symbol.char} (#{symbol.description})
+        div(class="col-1")
+          select#operatorSymbolSelect(class='form-control selcls', type='select', name='operatorSymbolSelect' class="form-control form-control-sm" onchange="insertThisInThere(this);")
+            for symbol in operator_symbol_list 
+              option(value=symbol.index) #{symbol.char} (#{symbol.description})
+        div(class="col-1")
+          select#arrowSymbolSelect(class='form-control selcls', type='select', name='arrowSymbolSelect' class="form-control form-control-sm" onchange="insertThisInThere(this);")
+            for symbol in arrow_symbol_list 
+              option(value=symbol.index) #{symbol.char} (#{symbol.description})
+          script(src="/javascripts/populateSymbolSelect.js" type="text/javascript")
+        div(class="col-3 text-end")
           p Last updated: #{note.updateDate_formatted}
     div(class="row gx-0")
       input#noteid.form-control(type='hidden', name='noteid', required='true', value=(undefined===note ? '' : note._id))
@@ -50,11 +75,24 @@ block content
       div(class="col-4")
         div(class="row gx-0")
           span(class="border border-none")
-            img(class="rounded" src="/images/blue_button.jpg" alt="Blue" width="32" height="32" id='blue_button')
-            img(class="rounded" src="/images/red_button.jpg" alt="Red" width="32" height="32" id='red_button')
-            img(class="rounded" src="/images/green_button.jpg" alt="Green" width="32" height="32" id='green_button')
-            img(class="rounded" src="/images/black_button.jpg" alt="Black" width="32" height="32" id='black_button' style="border:1px solid black")
-            img(class="rounded" src="/images/erase_button.jpg" alt="Erase" width="32" height="32" id='erase_button')
+            div(class="row gx-0")
+              div(class="col-12")
+                img(class="rounded" src="/images/blue_button.jpg" title="Blue" alt="Blue" width="32" height="32" id='blue_button')
+                img(class="rounded" src="/images/red_button.jpg" title="Red" alt="Red" width="32" height="32" id='red_button')
+                img(class="rounded" src="/images/green_button.jpg" title="Green" alt="Green" width="32" height="32" id='green_button')
+                img(class="rounded" src="/images/black_button.jpg" title="Black" alt="Black" width="32" height="32" id='black_button' style="border:1px solid black")
+                img(class="rounded" src="/images/white_button.jpg" title="White" alt="White" width="32" height="32" id='white_button')
+                img(class="rounded" src="/images/fill.png" title="Fill" alt="Fill" width="32" height="32" id='fill_button')
+                img(class="rounded" src="/images/text.png" title="Place Text" alt="Place Text" width="32" height="32" id='text_button')
+              div(class="col-2")
+                select#fontSize(class='form-control selcls', type='select', name='fontSize' class="form-control form-control-sm")
+                  option(value=12) tiny
+                  option(value=16) small
+                  option(value=20) mid
+                  option(value=28) big
+                  option(value=36) huge
+              div(class="col-10")
+                input#text.form-control(type='text', placeholder='Text' name='text' class="form-control form-control-sm" value="")
       div(class="col-4")
         div(class="row gx-0")
           span(class="border border-none")
@@ -62,7 +100,6 @@ block content
             img(class="rounded" src="/images/mid_width_button.jpg" alt="Mid" width="32" height="32" id='mid_width_button' style="border:1px solid black")
             img(class="rounded" src="/images/thick_width_button.jpg" alt="Thick" width="32" height="32" id='thick_width_button')
             img(class="rounded" src="/images/thickest_width_button.jpg" alt="Thickest" width="32" height="32" id='thickest_width_button')
-
     .keys
       div(class="row mt-3 gx-0")
         div(class="col-3")
@@ -72,6 +109,7 @@ block content
         if note
           div(class="col-3")
             a(class='btn btn-danger btn-sm' href='/repo/' + subjectid + '/' + topicid + '/' + subtopicid + '/note/' + note._id + '/delete' role='button')  Delete
+  script(src="/javascripts/processInput.js" type="text/javascript")
 
 
   if errors
