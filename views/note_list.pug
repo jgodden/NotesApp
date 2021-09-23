@@ -1,0 +1,43 @@
+extends layout
+
+block content
+  div(class="border-bottom border-secondary")
+    div(class="row gx-0")
+      div(class="col-sm-12")
+        <p>
+        | You have !{note_count} notes 
+        if subject_name
+          | under !{subject_name}
+        if topic_name 
+          | -&gt;!{topic_name}
+        if subtopic_name 
+          | -&gt;!{subtopic_name}
+        </p>
+  div(class="border-bottom border-secondary")
+    div(class="row gx-0")
+      div(class="col-sm-2")
+        p Subject
+      div(class="col-sm-3")
+        p Topic
+      div(class="col-sm-3")
+        p Title
+      div(class="col-sm-2")
+        p Creation date
+      div(class="col-sm-2")
+        p Update date
+      - note_list.sort(function(a, b) {let textA = a.subject_id; let textB = b.subject_id; return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;});
+      each note in note_list
+        each subject in subject_list 
+          if subject.id === note.subject_id 
+            div(class="col-sm-2")
+              p !{subject.title}
+        each topic in topic_list 
+          if topic.id === note.topic_id 
+            div(class="col-sm-3")
+              p !{topic.title}
+        div(class="col-sm-3")
+          a(href=note.update_url) #{note.title}
+        div(class="col-sm-2")
+          p #{note.creationDate_formatted}
+        div(class="col-sm-2")
+          p #{note.updateDate_formatted}

@@ -1,0 +1,43 @@
+{
+  "name": "notesapp",
+  "version": "0.0.0",
+  "engines": {
+    "node": "14.17.5"
+  },
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www",
+    "devstart": "nodemon ./bin/www",
+    "serverstart": "SET DEBUG=NotesApp,note_list:* & npm run devstart"
+  },
+  "author": "Jon Godden",
+  "dependencies": {
+    "@popperjs/core": "^2.10.1",
+    "async": "^3.2.1",
+    "canvas": "^2.8.0",
+    "cloudinary": "^1.26.3",
+    "compression": "^1.7.4",
+    "cookie-parser": "~1.4.4",
+    "custom-grid-scss": "^1.1.2",
+    "debug": "^2.6.9",
+    "dotenv": "^10.0.0",
+    "express": "~4.16.1",
+    "express-validator": "^6.12.1",
+    "helmet": "^4.6.0",
+    "http-errors": "~1.6.3",
+    "jsdom": "^17.0.0",
+    "luxon": "^2.0.2",
+    "mongodb": "^4.1.1",
+    "mongodb-extjson": "^2.1.5",
+    "mongoose": "^5.13.8",
+    "morgan": "~1.9.1",
+    "node-gyp": "^8.2.0",
+    "pug": "^3.0.2",
+    "pug-code-gen": "^2.0.3",
+    "sass-grid": "^3.0.0",
+    "semantic-ui-css": "^2.4.1",
+    "serve-favicon": "^2.5.0",
+    "zlib": "^1.0.5"
+  },
+  "devDependencies": {}
+}

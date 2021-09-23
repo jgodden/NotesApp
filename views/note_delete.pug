@@ -1,0 +1,30 @@
+extends layout
+
+block content
+  div(class="row gx-0")
+    div(class="col-sm-3")
+      p Title:
+    div(class="col-sm-6")
+      p #{note.title}
+  div(class="row mb-3 gx-0")
+    div(class="col-sm-3")
+      p Creation date:
+    div(class="col-sm-6")
+      p #{note.creationDate_formatted}
+  div(class="row mb-3 gx-0")
+    div(class="col-sm-12")
+      p Are you sure you want to delete this Note?
+
+  form(method='POST' action='')
+    div.form-group
+      input#noteid.form-control(type='hidden',name='noteid', required='true', value=note._id )
+      input#note_image.form-control(type='hidden',name='note_image', required='true', value=note.image )
+      input#subjectid.form-control(type='hidden',name='subjectid', required='true', value=note.subject_id )
+      input#topicid.form-control(type='hidden',name='topicid', required='true', value=note.topic_id )
+      input#subtopicid.form-control(type='hidden',name='subtopicid', required='true', value=note.subtopic_id )
+
+      div(class="row gx-0")
+        div(class="col-6")
+          a(class='btn btn-secondary btn-sm' href='/repo/' + subjectid + '/' + topicid + '/' + subtopicid + '/note/' + note._id role='button')  Cancel
+        div(class="col-6")
+          button.btn.btn-danger.btn-sm(type='submit') Delete

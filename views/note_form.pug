@@ -1,0 +1,127 @@
+extends layout
+
+block content
+  form(method='POST' action='')
+    if note
+      div(class="row gx-0")
+        div(class="col-3")
+          p Creation date:  #{note.creationDate_formatted}
+        div(class="col-1")
+          select#supersubSymbolSelect(class='form-control selcls', type='select', name='supersubSymbolSelect' class="form-control form-control-sm" onchange="insertThisInThere(this);")
+            option(value=-1) &lt;supersub&gt;
+            for symbol in supersub_symbol_list 
+              option(value=symbol.index) #{symbol.char} (#{symbol.description})
+        div(class="col-1")
+          select#fractionSymbolSelect(class='form-control selcls', type='select', name='fractionSymbolSelect' class="form-control form-control-sm" onchange="insertThisInThere(this);")
+            option(value=-1) &lt;fractions&gt;
+            for symbol in fraction_symbol_list 
+              option(value=symbol.index) #{symbol.char} (#{symbol.description})
+        div(class="col-1")
+          select#shapeSymbolSelect(class='form-control selcls', type='select', name='shapeSymbolSelect' class="form-control form-control-sm" onchange="insertThisInThere(this);")
+            option(value=-1) &lt;shapes&gt;
+            for symbol in shape_symbol_list 
+              option(value=symbol.index) #{symbol.char} (#{symbol.description})
+        div(class="col-1")
+          select#symbolSymbolSelect(class='form-control selcls', type='select', name='symbolSymbolSelect' class="form-control form-control-sm" onchange="insertThisInThere(this);")
+            option(value=-1) &lt;symbols&gt;
+            for symbol in symbol_symbol_list 
+              option(value=symbol.index) #{symbol.char} (#{symbol.description})
+        div(class="col-1")
+          select#operatorSymbolSelect(class='form-control selcls', type='select', name='operatorSymbolSelect' class="form-control form-control-sm" onchange="insertThisInThere(this);")
+            option(value=-1) &lt;operators&gt;
+            for symbol in operator_symbol_list 
+              option(value=symbol.index) #{symbol.char} (#{symbol.description})
+        div(class="col-1")
+          select#arrowSymbolSelect(class='form-control selcls', type='select', name='arrowSymbolSelect' class="form-control form-control-sm" onchange="insertThisInThere(this);")
+            option(value=-1) &lt;arrows&gt;
+            for symbol in arrow_symbol_list 
+              option(value=symbol.index) #{symbol.char} (#{symbol.description})
+        div(class="col-3 text-end")
+          p Last updated: #{note.updateDate_formatted}
+    div(class="row gx-0")
+      input#noteid.form-control(type='hidden', name='noteid', required='true', value=(undefined===note ? '' : note._id))
+      input#subjectid.form-control(type='hidden', name='subjectid', required='true', value=subjectid)
+      input#topicid.form-control(type='hidden', name='topicid', required='true', value=topicid)
+      input#subtopicid.form-control(type='hidden', name='subtopicid', required='true', value=subtopicid)
+      input#imageUrl.form-control(type='hidden', name='imageUrl', required='false', value=(undefined===note ? '' : note.image))
+      input#imageData.form-control(type='hidden', name='imageData', required='false', value='initial')
+    div(class="border-bottom border-secondary")
+      div(class="row gx-0")
+        div(class="col-12")
+          input#title.form-control(type='text', placeholder='Title' name='title' required='true' class="form-control form-control-sm" value=(undefined===note ? '' : note.title) )
+    div(class="row gx-0")
+      div(class="col-4 align-self-center")
+        div(class="border-end border-secondary")
+          div(class="row")
+            div(class="col-12")
+              textarea#keywords.form-control(type='textarea', placeholder='Keywords' name='keywords' required='false' rows='7' class="form-control form-control-sm") #{undefined===note ? '' : note.keywords}
+          div(class="row")
+            div(class="col-12")
+              textarea#questions.form-control(type='textarea', placeholder='Questions' name='questions' required='false' rows='7' class="form-control form-control-sm") #{undefined===note ? '' : note.questions}
+          div(class="row")
+            div(class="col-12")
+              textarea#comments.form-control(type='textarea', placeholder='Comments' name='comments' required='false' rows='7' class="form-control form-control-sm") #{undefined===note ? '' : note.comments}
+      div(class="col-8")
+        textarea#lectureNote.form-control(type='textarea', placeholder='Lecture Notes' name='lectureNote' required='true' rows='22' class="form-control form-control-sm") #{undefined===note ? '' : note.lectureNote}
+    div(class="border-top border-secondary")
+      div(class="row gx-0")
+        div(class="col-12")
+          textarea#summary.form-control(type='textarea', placeholder='Summary' name='summary' required='true' rows='4' class="form-control form-control-sm") #{undefined===note ? '' : note.summary}
+    div(class="row gx-0" id='canvas-div')
+      canvas(id='canvas')
+    div(class="row gx-0")
+      div(class="col-4")
+        div(class="row gx-0")
+          span(class="border border-none")
+            img(class="rounded" src="/images/pencil.png" title="Draw" alt="Draw" width="32" height="32" id='pencil' style="border:1px solid black")
+            img(class="rounded" src="/images/space.png" alt="Space" width="16" height="32" id='space')
+            img(class="rounded" src="/images/line.png" title="Line" alt="Line" width="32" height="32" id='line')
+            img(class="rounded" src="/images/space.png" alt="Space" width="16" height="32" id='space')
+            img(class="rounded" src="/images/undo.png" title="Undo" alt="Undo" width="32" height="32" id='undo')
+            img(class="rounded" src="/images/space.png" alt="Space" width="16" height="32" id='space')
+            img(class="rounded" src="/images/redo.png" title="Redo" alt="Redo" width="32" height="32" id='redo')
+      div(class="col-4")
+        div(class="row gx-0")
+          span(class="border border-none")
+            div(class="row gx-0")
+              div(class="col-12")
+                img(class="rounded" src="/images/blue_button.jpg" title="Blue" alt="Blue" width="32" height="32" id='blue_button')
+                img(class="rounded" src="/images/red_button.jpg" title="Red" alt="Red" width="32" height="32" id='red_button')
+                img(class="rounded" src="/images/green_button.jpg" title="Green" alt="Green" width="32" height="32" id='green_button')
+                img(class="rounded" src="/images/black_button.jpg" title="Black" alt="Black" width="32" height="32" id='black_button' style="border:1px solid black")
+                img(class="rounded" src="/images/white_button.jpg" title="White" alt="White" width="32" height="32" id='white_button')
+                img(class="rounded" src="/images/fill.png" title="Fill" alt="Fill" width="32" height="32" id='fill_button')
+                img(class="rounded" src="/images/text.png" title="Place Text" alt="Place Text" width="32" height="32" id='text_button')
+              div(class="col-2")
+                select#fontSize(class='form-control selcls', type='select', name='fontSize' class="form-control form-control-sm")
+                  option(value=12) tiny
+                  option(value=16) small
+                  option(value=20) mid
+                  option(value=28) big
+                  option(value=36) huge
+              div(class="col-10")
+                input#text.form-control(type='text', placeholder='Text' name='text' class="form-control form-control-sm" value="")
+      div(class="col-4")
+        div(class="row gx-0")
+          span(class="border border-none")
+            img(class="rounded" src="/images/thin_width_button.jpg" alt="Thin" width="32" height="32" id='thin_width_button')
+            img(class="rounded" src="/images/mid_width_button.jpg" alt="Mid" width="32" height="32" id='mid_width_button' style="border:1px solid black")
+            img(class="rounded" src="/images/thick_width_button.jpg" alt="Thick" width="32" height="32" id='thick_width_button')
+            img(class="rounded" src="/images/thickest_width_button.jpg" alt="Thickest" width="32" height="32" id='thickest_width_button')
+    .keys
+      div(class="row mt-3 gx-0")
+        div(class="col-3")
+          button.btn.btn-primary.btn-sm(type='submit' id='save_button') Save
+        div(class="col-3")
+          a(class='btn btn-secondary btn-sm' href='/repo/' + subjectid + '/' + topicid + '/' + subtopicid + '/notes' role='button')  Cancel
+        if note
+          div(class="col-3")
+            a(class='btn btn-danger btn-sm' href='/repo/' + subjectid + '/' + topicid + '/' + subtopicid + '/note/' + note._id + '/delete' role='button')  Delete
+  script(src="/javascripts/canvasDrawing.js" type="text/javascript")
+  script(src="/javascripts/processInput.js" type="text/javascript")
+
+
+  if errors
+    ul
+      for error in errors
+        li!= error.msg

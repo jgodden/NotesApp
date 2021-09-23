@@ -1,0 +1,6 @@
+/*!
+ * Microsoft Dynamic Proto Utility, 1.1.4
+ * Copyright (c) Microsoft and contributors. All rights reserved.
+ */
+
+/*! https://mths.be/punycode v1.4.1 by @mathias */
