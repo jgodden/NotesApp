@@ -69,12 +69,13 @@ exports.note_list = function(req, res, next) {
         // Get list of topics for this subject
         topic_list: async function(callback) {
             if (subjectid == 1) {
-                // <search all> selected for subject
-                dbgNoteList('search all subjects, so empty topic_list');
-                topic_list = [];
-                return;
+                // <search all> selected for subject so get all topics for display in list
+                dbgNoteList('search all subjects, so full topic_list');
+                topic_list = await Topic.find({}, 'title subtopic');
+            } else {
+                // restrict to topics for this subject
+                topic_list = await Topic.find({}, 'title subtopic').where('_id').in(subject_object[0].topic);
             }
-            topic_list = await Topic.find({}, 'title subtopic').where('_id').in(subject_object[0].topic);
             dbgNoteList('topic_list ' + topic_list);
         },
         // Get list of topics for this subject
@@ -496,7 +497,7 @@ exports.note_update_get = function(req, res, next) {
             topic_name: topic_object[0].title,
             subtopic_name: subtopic_object[0].title,
             subtopic_description: subtopic_object[0].description,
-            number_symbol_list: numberSymbols,
+            supersub_symbol_list: supersubSymbols,
             fraction_symbol_list: fractionSymbols,
             shape_symbol_list: shapeSymbols,
             symbol_symbol_list: symbolSymbols,

@@ -46,13 +46,12 @@ var _Symbol = require('./models/symbol');
 
 // Get Symbols
 (async () => {
-  numberSymbols = await _Symbol.find({type:"number"});
-  fractionSymbols = await _Symbol.find({type:"fraction"});
-  shapeSymbols = await _Symbol.find({type:"shape"});
-  symbolSymbols = await _Symbol.find({type:"symbol"});
-  operatorSymbols = await _Symbol.find({type:"operator"});
-  arrowSymbols = await _Symbol.find({type:"arrow"});
-  console.log('arrows ' + arrowSymbols);
+  supersubSymbols = await _Symbol.find({type:"supersub"}).sort({index: "ascending"});
+  fractionSymbols = await _Symbol.find({type:"fraction"}).sort({index: "ascending"});
+  shapeSymbols = await _Symbol.find({type:"shape"}).sort({index: "ascending"});
+  symbolSymbols = await _Symbol.find({type:"symbol"}).sort({index: "ascending"});
+  operatorSymbols = await _Symbol.find({type:"operator"}).sort({index: "ascending"});
+  arrowSymbols = await _Symbol.find({type:"arrow"}).sort({index: "ascending"});
 })();
 
 // view engine setup
