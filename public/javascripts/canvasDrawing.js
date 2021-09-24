@@ -12,6 +12,8 @@ window.addEventListener("DOMContentLoaded", function () {
     // cloudinary
     var image_data_element = document.getElementById('imageData');
     var image_url_element = document.getElementById('imageUrl');
+    var canvas_row_element = document.getElementById('canvas-row');
+    var keys_row_element = document.getElementById('keys-row');
     // Get ref to canvas, but it isn't instantiated yet, so can't set style at this point
     var canvas = document.getElementById('canvas');
     // get canvas 2D context and set to correct size
@@ -19,17 +21,6 @@ window.addEventListener("DOMContentLoaded", function () {
     // Set canvas border
     canvas.style.border = "thin dashed #888888";
 
-    // save mouse actions for undo/redo
-    //var actions_input = document.getElementById('actions');
-    //var startx_input = document.getElementById('startx');
-    //var starty_input = document.getElementById('starty');
-    //var endx_input = document.getElementById('endx');
-    //var endy_input = document.getElementById('endy');
-    //actions_input.value = '0';
-    //startx_input.value = '0';
-    //starty_input.value = '0';
-    //endx_input.value = '0';
-    //endy_input.value = '0';
     // Contains list of actions used to implement undo/redo
     var actions = [];
     // Contains array of actions popped from actions on undo
@@ -54,6 +45,7 @@ window.addEventListener("DOMContentLoaded", function () {
     // Render bitmap data in hidden image element to canvas
     var img = new Image;
     img.src = image_url_element.value;
+    alert('image url is ' + image_url_element.value);
     // Set cross origin otherwise the retrieved png image from cloudinary will be
     // tainted, and the canvas.toDataUrl will fail with security error
     img.setAttribute('crossOrigin', 'anonymous');
@@ -65,6 +57,7 @@ window.addEventListener("DOMContentLoaded", function () {
     window.addEventListener('resize', resize);
     function resize() {
         canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight - 120;
         rect = canvas.getBoundingClientRect();
         scaleX = canvas.width / rect.width;
         scaleY = canvas.height / rect.height;

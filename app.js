@@ -24,9 +24,14 @@ app.use(
               defaultSrc: ["'self'"],
               connectSrc: ["'self'", "mongodb+srv://cluster0.j8m3g.mongodb.net"],
               imgSrc: ["'self'", "http://127.0.0.1:8080", "http://res.cloudinary.com/", "data:"],
-              scriptSrc:["'self'","https://cdnjs.cloudflare.com/", "'unsafe-inline'"],
+              scriptSrc:["'self'","https://cdnjs.cloudflare.com/",
+                "https://upload-widget.cloudinary.com",
+                "https://media-library.cloudinary.com",
+                "'unsafe-inline'"],
               styleSrc:["'self'","https://cdnjs.cloudflare.com/", "'unsafe-inline'"],
-              fontSrc:["'self'","https://cdnjs.cloudflare.com/"]
+              fontSrc:["'self'","https://cdnjs.cloudflare.com/"],
+              frameSrc:[ "https://upload-widget.cloudinary.com",
+                "https://cloudinary.com/"]
           }
       },
   })

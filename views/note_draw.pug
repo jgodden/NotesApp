@@ -1,0 +1,72 @@
+doctype html
+html(lang='en')
+  head
+    meta(charset='utf-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.slim.min.js", integrity="sha512-6ORWJX/LrnSjBzwefdNUyLCMTIsGoNP6NftMy2UAm1JBm6PRZCO1d7OHBStWpVFZLO+RerTvqX/Z9mBFfCJZ4A==", crossorigin="anonymous")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.1/js/bootstrap.min.js", integrity="sha512-ewfXo9Gq53e1q1+WDTjaHAGZ8UvCWq0eXONhwDuIoaH8xz2r96uoAYaQCm1oQhnBfRXrvJztNXFsTloJfgbL5Q==", crossorigin="anonymous")
+    link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.1/css/bootstrap.min.css", integrity="sha512-6KY5s6UI5J7SVYuZB4S/CZMyPylqyyNZco376NM2Z8Sb8OxEdp02e1jkKk/wZxIEmjQ6DRCEBhni+gpr9c4tvA==", crossorigin="anonymous")
+    link(rel='stylesheet', href='/stylesheets/style.css')
+  body
+    div(class='container-fluid px-2' id='drawing-container')
+      form(method='POST' action='')
+        div(class="row gx-0" id='canvas-row')
+          canvas(id='canvas')
+        div(class="row gx-0" id='hidden-row')
+          input#noteid.form-control(type='hidden', name='noteid', value=(undefined===note ? '' : note._id))
+          input#subjectid.form-control(type='hidden', name='subjectid', value=subjectid)
+          input#topicid.form-control(type='hidden', name='topicid', value=topicid)
+          input#subtopicid.form-control(type='hidden', name='subtopicid', value=subtopicid)
+          input#imageUrl.form-control(type='hidden', name='imageUrl', required='false', value=(undefined===note ? '' : note.image))
+          input#imageData.form-control(type='hidden', name='imageData', required='false', value='initial')
+        div(class="row gx-0" id='drawing-controls-row')
+          div(class="col-4")
+            div(class="row gx-0")
+              span(class="border border-none")
+                img(class="rounded" src="/images/pencil.png" title="Draw" alt="Draw" width="32" height="32" id='pencil' style="border:1px solid black")
+                img(class="rounded" src="/images/space.png" alt="Space" width="16" height="32" id='space')
+                img(class="rounded" src="/images/line.png" title="Line" alt="Line" width="32" height="32" id='line')
+                img(class="rounded" src="/images/space.png" alt="Space" width="16" height="32" id='space')
+                img(class="rounded" src="/images/undo.png" title="Undo" alt="Undo" width="32" height="32" id='undo')
+                img(class="rounded" src="/images/space.png" alt="Space" width="16" height="32" id='space')
+                img(class="rounded" src="/images/redo.png" title="Redo" alt="Redo" width="32" height="32" id='redo')
+          div(class="col-4")
+            div(class="row gx-0")
+              span(class="border border-none")
+                div(class="row gx-0")
+                  div(class="col-12")
+                    img(class="rounded" src="/images/blue_button.jpg" title="Blue" alt="Blue" width="32" height="32" id='blue_button')
+                    img(class="rounded" src="/images/red_button.jpg" title="Red" alt="Red" width="32" height="32" id='red_button')
+                    img(class="rounded" src="/images/green_button.jpg" title="Green" alt="Green" width="32" height="32" id='green_button')
+                    img(class="rounded" src="/images/black_button.jpg" title="Black" alt="Black" width="32" height="32" id='black_button' style="border:1px solid black")
+                    img(class="rounded" src="/images/white_button.jpg" title="White" alt="White" width="32" height="32" id='white_button')
+                    img(class="rounded" src="/images/fill.png" title="Fill" alt="Fill" width="32" height="32" id='fill_button')
+                    img(class="rounded" src="/images/text.png" title="Place Text" alt="Place Text" width="32" height="32" id='text_button')
+                  div(class="col-2")
+                    select#fontSize(class='form-control selcls', type='select', name='fontSize' class="form-control form-control-sm")
+                      option(value=12) tiny
+                      option(value=16) small
+                      option(value=20) mid
+                      option(value=28) big
+                      option(value=36) huge
+                  div(class="col-10")
+                    input#text.form-control(type='text', placeholder='Text' name='text' class="form-control form-control-sm" value="")
+          div(class="col-4")
+            div(class="row gx-0")
+              span(class="border border-none")
+                img(class="rounded" src="/images/thin_width_button.jpg" alt="Thin" width="32" height="32" id='thin_width_button')
+                img(class="rounded" src="/images/mid_width_button.jpg" alt="Mid" width="32" height="32" id='mid_width_button' style="border:1px solid black")
+                img(class="rounded" src="/images/thick_width_button.jpg" alt="Thick" width="32" height="32" id='thick_width_button')
+                img(class="rounded" src="/images/thickest_width_button.jpg" alt="Thickest" width="32" height="32" id='thickest_width_button')
+        div(class="keys" id="keys-row")
+          div(class="row mt-3 gx-0")
+            div(class="col-2")
+              button.btn.btn-primary.btn-sm(type='submit' id='save_button') Save
+            div(class="col-2")
+              a(class='btn btn-secondary btn-sm' onclick="history.back(-1)", role='button')  Cancel
+      script(src="/javascripts/canvasDrawing.js" type="text/javascript")
+
+      if errors
+        ul
+          for error in errors
+            li!= error.msg

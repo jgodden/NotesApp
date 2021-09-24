@@ -25,6 +25,7 @@
     "express-validator": "^6.12.1",
     "helmet": "^4.6.0",
     "http-errors": "~1.6.3",
+    "js-sha256": "^0.9.0",
     "jsdom": "^17.0.0",
     "luxon": "^2.0.2",
     "mongodb": "^4.1.1",
