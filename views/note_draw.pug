@@ -12,6 +12,7 @@ html(lang='en')
       form(method='POST' action='')
         div(class="row gx-0" id='canvas-row')
           canvas(id='canvas')
+            p Your browser does not support canvas element.
         div(class="row gx-0" id='hidden-row')
           input#noteid.form-control(type='hidden', name='noteid', value=(undefined===note ? '' : note._id))
           input#subjectid.form-control(type='hidden', name='subjectid', value=subjectid)
