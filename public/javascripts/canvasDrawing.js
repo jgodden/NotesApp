@@ -326,7 +326,7 @@ window.addEventListener("DOMContentLoaded", function () {
             setLastPos(e.clientX, e.clientY);
         }
     }
-    const lineTouchEndListener = (e) => {
+    function lineTouchEndListener(e) {
         te.value = tev++;
         e.preventDefault();
         var mouseEvent = new MouseEvent("mouseup", {
@@ -335,7 +335,7 @@ window.addEventListener("DOMContentLoaded", function () {
         });
 		canvas.dispatchEvent(mouseEvent);
     }
-    const lineMouseUpListener = (e) => {
+    function lineMouseUpListener(e) {
         mu.value = muv++;
         if (!e.touches && (e.button !== 0)) return;
         if (e.touches) {
