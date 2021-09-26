@@ -310,10 +310,9 @@ window.addEventListener("DOMContentLoaded", function () {
     function touchStartListener(e) {
         ts.value = tsv++;
         e.preventDefault();
-        var touch = e.touches[0];
         var mouseEvent = new MouseEvent("mousedown", {
-            clientX: touch.clientX,
-            clientY: touch.clientY
+            clientX: e.touches[0].clientX,
+            clientY: e.touches[0].clientY
         });
         canvas.dispatchEvent(mouseEvent);
     }
@@ -329,16 +328,15 @@ window.addEventListener("DOMContentLoaded", function () {
     function lineTouchEndListener(e) {
         te.value = tev++;
         e.preventDefault();
-        var touch = e.touches[0];
         var mouseEvent = new MouseEvent("mouseup", {
-            clientX: touch.clientX,
-            clientY: touch.clientY
+            clientX: e.touches[0].clientX,
+            clientY: e.touches[0].clientY
         });
 		canvas.dispatchEvent(mouseEvent);
     }
     function lineMouseUpListener(e) {
         mu.value = muv++;
-        if (!e.touches && (e.button !== 0)) return;
+        //if (!e.touches && (e.button !== 0)) return;
         if (e.touches) {
             setCurrentPos(e.touches[0].clientX, e.touches[0].clientY);
         } else {
@@ -350,10 +348,9 @@ window.addEventListener("DOMContentLoaded", function () {
         tm.value = tmv++;
         // Call preventDefault() to prevent any mouse handling
         e.preventDefault();
-		var touch = e.touches[0];
 		var mouseEvent = new MouseEvent("mousemove", {
-			clientX: touch.clientX,
-			clientY: touch.clientY
+			clientX: e.touches[0].clientX,
+			clientY: e.touches[0].clientY
 		});
 		canvas.dispatchEvent(mouseEvent);
     }
