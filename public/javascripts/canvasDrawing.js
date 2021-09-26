@@ -59,7 +59,7 @@ window.addEventListener("DOMContentLoaded", function () {
     canvas.addEventListener('mousemove', penMouseMoveListener);
     canvas.addEventListener('mousedown', mouseDownListener);
     canvas.addEventListener('mouseup', penMouseUpListener);
-    canvas.addEventListener('touchstart', penTouchStartListener);
+    canvas.addEventListener('touchstart', touchStartListener);
     canvas.addEventListener('touchend', penTouchEndListener);
     canvas.addEventListener('touchmove', penTouchMoveListener);
 
@@ -273,12 +273,10 @@ window.addEventListener("DOMContentLoaded", function () {
         if (e.currentTarget.id === 'pencil') {
             //freeform
             drawStyle = 0;
-            canvas.removeEventListener('touchstart', lineTouchStartListener);
             canvas.removeEventListener('touchend', lineTouchEndListener);
             canvas.removeEventListener('mouseup', lineMouseUpListener);
             canvas.addEventListener('touchmove', penTouchMoveListener);
             canvas.addEventListener('mousemove', penMouseMoveListener);
-            canvas.addEventListener('touchstart', penTouchStartListener);
             canvas.addEventListener('touchend', penTouchEndListener);
             canvas.addEventListener('mouseup', penMouseUpListener);
         }
@@ -287,10 +285,8 @@ window.addEventListener("DOMContentLoaded", function () {
             drawStyle = 1;
             canvas.removeEventListener('touchmove', penTouchMoveListener);
             canvas.removeEventListener('mousemove', penMouseMoveListener);
-            canvas.removeEventListener('touchstart', penTouchStartListener);
             canvas.removeEventListener('touchend', penTouchEndListener);
             canvas.removeEventListener('mouseup', penMouseUpListener);
-            canvas.addEventListener('touchstart', lineTouchStartListener);
             canvas.addEventListener('touchend', lineTouchEndListener);
             canvas.addEventListener('mouseup', lineMouseUpListener);
         }
@@ -311,7 +307,7 @@ window.addEventListener("DOMContentLoaded", function () {
 			e.preventDefault();
 		}
 	}, false);
-    const lineTouchStartListener = (e) => {
+    const touchStartListener = (e) => {
         ts.value = tsv++;
         e.preventDefault();
         var touch = e.touches[0];
@@ -321,10 +317,22 @@ window.addEventListener("DOMContentLoaded", function () {
         });
         canvas.dispatchEvent(mouseEvent);
     }
+    function mouseDownListener(e) {
+        md.value = mdv++;
+        isDrawing = true;
+        if (e.touches) {
+            setLastPos(e.touches[0].clientX, e.touches[0].clientY);
+        } else {
+            setLastPos(e.clientX, e.clientY);
+        }
+    }
     const lineTouchEndListener = (e) => {
         te.value = tev++;
         e.preventDefault();
-        var mouseEvent = new MouseEvent("mouseup", {});
+        var mouseEvent = new MouseEvent("mouseup", {
+            clientX: touch.clientX,
+            clientY: touch.clientY
+        });
 		canvas.dispatchEvent(mouseEvent);
     }
     const lineMouseUpListener = (e) => {
@@ -337,7 +345,6 @@ window.addEventListener("DOMContentLoaded", function () {
         }
         lineDraw();
     }
-    // touchmove handler
     function penTouchMoveListener(e) {
         tm.value = tmv++;
         // Call preventDefault() to prevent any mouse handling
@@ -360,25 +367,6 @@ window.addEventListener("DOMContentLoaded", function () {
             setCurrentPos(e.clientX, e.clientY);
         }
         penDraw();
-    }
-    function penTouchStartListener(e) {
-        ts.value = tsv++;
-        e.preventDefault();
-        var touch = e.touches[0];
-        var mouseEvent = new MouseEvent("mousedown", {
-            clientX: touch.clientX,
-            clientY: touch.clientY
-        });
-        canvas.dispatchEvent(mouseEvent);
-    }
-    function mouseDownListener(e) {
-        md.value = mdv++;
-        isDrawing = true;
-        if (e.touches) {
-            setLastPos(e.touches[0].clientX, e.touches[0].clientY);
-        } else {
-            setLastPos(e.clientX, e.clientY);
-        }
     }
     function penTouchEndListener(e) {
         te.value = tev++;
