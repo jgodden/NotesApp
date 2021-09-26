@@ -43,7 +43,7 @@ const mongoose = require('mongoose');
 const atlas_db_url = 'mongodb+srv://Admin:M4rmoset52@cluster0.j8m3g.mongodb.net/NotesApp?retryWrites=true';
 const local_db_url = 'mongodb://127.0.0.1:27017/local';
 const mongoDB = process.env.MONGODB_URI || atlas_db_url;
-mongoose.connect(mongoDB, { useNewUrlParser: true , useUnifiedTopology: true, useFindAndModify: false});
+mongoose.connect(mongoDB, { useNewUrlParser: true , useUnifiedTopology: true});
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:')); 
 

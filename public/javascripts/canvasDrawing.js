@@ -55,11 +55,13 @@ window.addEventListener("DOMContentLoaded", function () {
     var isDrawing = false;
     var lastpos = { x: 0, y: 0 };
     var currentpos = { x: 0, y: 0 };
-    // Mouse event handlers for freeform draw
-    // Set event listeners to draw on mouse move
+    // Mouse and touch event handlers for freeform draw
     canvas.addEventListener('mousemove', penMouseMoveListener);
     canvas.addEventListener('mousedown', mouseDownListener);
     canvas.addEventListener('mouseup', penMouseUpListener);
+    canvas.addEventListener('touchstart', penTouchStartListener);
+    canvas.addEventListener('touchend', penTouchEndListener);
+    canvas.addEventListener('touchmove', penTouchMoveListener);
 
     // Render bitmap data in hidden image element to canvas
     var img = new Image;
