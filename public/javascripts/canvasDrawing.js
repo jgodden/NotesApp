@@ -1,4 +1,24 @@
 window.addEventListener("DOMContentLoaded", function () {
+    var lx = document.getElementById('lastposx');
+    var lxv = 0;
+    var ly = document.getElementById('lastposy');
+    var lyv = 0;
+    var cx = document.getElementById('currentposx');
+    var cxv = 0;
+    var cy = document.getElementById('currentposy');
+    var cyv = 0;
+    var md = document.getElementById('mousedown');
+    var mdv = 0;
+    var mu = document.getElementById('mouseup');
+    var muv = 0;
+    var mm = document.getElementById('mousemove');
+    var mmv = 0;
+    var ts = document.getElementById('touchstart');
+    var tsv = 0;
+    var te = document.getElementById('touchend');
+    var tev = 0;
+    var tm = document.getElementById('touchmove');
+    var tmv = 0;
     // Get ref to save buton so we can set up an event listener to
     // send the image bitmap to the database when saving the note
     var save_button = document.getElementById('save_button');
@@ -12,8 +32,6 @@ window.addEventListener("DOMContentLoaded", function () {
     // cloudinary
     var image_data_element = document.getElementById('imageData');
     var image_url_element = document.getElementById('imageUrl');
-    var canvas_row_element = document.getElementById('canvas-row');
-    var keys_row_element = document.getElementById('keys-row');
     // Get ref to canvas, but it isn't instantiated yet, so can't set style at this point
     var canvas = document.getElementById('canvas');
     // get canvas 2D context and set to correct size
@@ -35,12 +53,13 @@ window.addEventListener("DOMContentLoaded", function () {
     var windowScrollXStartPos = window.pageXOffset;
     var windowScrollYStartPos = window.pageYOffset;
     var isDrawing = false;
-    var pos = { x: 0, y: 0 };
+    var lastpos = { x: 0, y: 0 };
+    var currentpos = { x: 0, y: 0 };
     // Mouse event handlers for freeform draw
     // Set event listeners to draw on mouse move
-    canvas.addEventListener('mousemove', drawMouseMoveListener);
-    canvas.addEventListener('mousedown', drawMouseDownListener);
-    canvas.addEventListener('mouseenter', drawMouseDownListener);
+    canvas.addEventListener('mousemove', penMouseMoveListener);
+    canvas.addEventListener('mousedown', mouseDownListener);
+    canvas.addEventListener('mouseup', penMouseUpListener);
 
     // Render bitmap data in hidden image element to canvas
     var img = new Image;
@@ -122,8 +141,8 @@ window.addEventListener("DOMContentLoaded", function () {
             ctx.font = fontSize + 'px serif';
             ctx.fillText(textValue, pos.x, pos.y, textValue.length * (fontSize / 2));
             storeAction({
-                startx: pos.x,
-                starty: pos.y,
+                startx: currentpos.x,
+                starty: currentpos.y,
                 strokeStyle: strokeStyle,
                 fontSize: fontSize,
                 textValue: textValue,
@@ -168,43 +187,6 @@ window.addEventListener("DOMContentLoaded", function () {
     ctx.lineCap = 'round';
     ctx.fillStyle = 'white';
 
-    document.getElementById('pencil').addEventListener('click', setDrawStyle);
-    document.getElementById('line').addEventListener('click', setDrawStyle);
-    document.getElementById('undo').addEventListener('click', undo);
-    document.getElementById('redo').addEventListener('click', redo);
-    function setDrawStyle(e) {
-        document.getElementById('pencil').style.border = "none";
-        document.getElementById('line').style.border = "none";
-        e.target.style.border = "thin solid black";
-        if (e.currentTarget.id === 'pencil') {
-            //freeform
-            drawStyle = 0;
-            canvas.removeEventListener('touchstart', lineTouchStartListener);
-            canvas.removeEventListener('mousedown', lineMouseDownListener);
-            canvas.removeEventListener('touchend', lineTouchEndListener);
-            canvas.removeEventListener('mouseup', lineMouseUpListener);
-            canvas.addEventListener('touchmove', drawTouchMoveListener);
-            canvas.addEventListener('mousemove', drawMouseMoveListener);
-            canvas.addEventListener('touchstart', drawTouchStartListener);
-            canvas.addEventListener('mousedown', drawMouseDownListener);
-            canvas.addEventListener('touchend', drawTouchEndListener);
-            canvas.addEventListener('mouseup', drawMouseUpListener);
-        }
-        if (e.currentTarget.id === 'line') {
-            // line
-            drawStyle = 1;
-            canvas.removeEventListener('touchmove', drawTouchMoveListener);
-            canvas.removeEventListener('mousemove', drawMouseMoveListener);
-            canvas.removeEventListener('touchstart', drawTouchStartListener);
-            canvas.removeEventListener('mousedown', drawMouseDownListener);
-            canvas.removeEventListener('touchend', drawTouchEndListener);
-            canvas.removeEventListener('mouseup', drawMouseUpListener);
-            canvas.addEventListener('touchstart', lineTouchStartListener);
-            canvas.addEventListener('mousedown', lineMouseDownListener);
-            canvas.addEventListener('touchend', lineTouchEndListener);
-            canvas.addEventListener('mouseup', lineMouseUpListener);
-        }
-    }
     function storeAction(a) {
         actions.push(a);
     }
@@ -263,112 +245,209 @@ window.addEventListener("DOMContentLoaded", function () {
             alert('nothing to redo');
         }
     }
+
+    // Get a regular interval for drawing to the screen
+    window.requestAnimFrame = (function (callback) {
+        return window.requestAnimationFrame ||
+        function (callback) {
+            window.setTimeout(callback, 1000 / 60);
+        };
+    })();
+
+    // Allow for animation
+    (function drawLoop () {
+        requestAnimFrame(drawLoop);
+        //renderCanvas();
+    })();
+
+    document.getElementById('pencil').addEventListener('click', setDrawStyle);
+    document.getElementById('line').addEventListener('click', setDrawStyle);
+    document.getElementById('undo').addEventListener('click', undo);
+    document.getElementById('redo').addEventListener('click', redo);
+    function setDrawStyle(e) {
+        document.getElementById('pencil').style.border = "none";
+        document.getElementById('line').style.border = "none";
+        e.target.style.border = "thin solid black";
+        if (e.currentTarget.id === 'pencil') {
+            //freeform
+            drawStyle = 0;
+            canvas.removeEventListener('touchstart', lineTouchStartListener);
+            canvas.removeEventListener('touchend', lineTouchEndListener);
+            canvas.removeEventListener('mouseup', lineMouseUpListener);
+            canvas.addEventListener('touchmove', penTouchMoveListener);
+            canvas.addEventListener('mousemove', penMouseMoveListener);
+            canvas.addEventListener('touchstart', penTouchStartListener);
+            canvas.addEventListener('touchend', penTouchEndListener);
+            canvas.addEventListener('mouseup', penMouseUpListener);
+        }
+        if (e.currentTarget.id === 'line') {
+            // line
+            drawStyle = 1;
+            canvas.removeEventListener('touchmove', penTouchMoveListener);
+            canvas.removeEventListener('mousemove', penMouseMoveListener);
+            canvas.removeEventListener('touchstart', penTouchStartListener);
+            canvas.removeEventListener('touchend', penTouchEndListener);
+            canvas.removeEventListener('mouseup', penMouseUpListener);
+            canvas.addEventListener('touchstart', lineTouchStartListener);
+            canvas.addEventListener('touchend', lineTouchEndListener);
+            canvas.addEventListener('mouseup', lineMouseUpListener);
+        }
+    }
+    // Prevent scrolling when touching the canvas
+	document.body.addEventListener("touchstart", function (e) {
+		if (e.target == canvas) {
+			e.preventDefault();
+		}
+	}, false);
+	document.body.addEventListener("touchend", function (e) {
+		if (e.target == canvas) {
+			e.preventDefault();
+		}
+	}, false);
+	document.body.addEventListener("touchmove", function (e) {
+		if (e.target == canvas) {
+			e.preventDefault();
+		}
+	}, false);
     const lineTouchStartListener = (e) => {
+        ts.value = tsv++;
         e.preventDefault();
         lineMouseDownListener(e, true);
     }
-    const lineMouseDownListener = (e, touch) => {
-        if (!touch && (e.button !== 0)) return;
-        if (!isDrawing) {
-            drawMouseDownListener(e);
-            isDrawing = !isDrawing;
-        }
-    }
     const lineTouchEndListener = (e) => {
+        te.value = tev++;
         e.preventDefault();
         lineMouseUpListener(e, true);
     }
     const lineMouseUpListener = (e, touch) => {
+        mu.value = muv++;
         if (!touch && (e.button !== 0)) return;
+        if (touch) {
+            setCurrentPos(e.touches[0].clientX, e.touches[0].clientY);
+        } else {
+            setCurrentPos(e.clientX, e.clientY);
+        }
+        lineDraw();
+    }
+    // touchmove handler
+    function penTouchMoveListener(e) {
+        tm.value = tmv++;
+        // Call preventDefault() to prevent any mouse handling
+        e.preventDefault();
+		var touch = e.touches[0];
+		var mouseEvent = new MouseEvent("mousemove", {
+			clientX: touch.clientX,
+			clientY: touch.clientY
+		});
+		canvas.dispatchEvent(mouseEvent);
+    }
+    // draw freeform
+    function penMouseMoveListener(e, touch) {
+        mm.value = mmv++;
+        // draw freeform
+        if (!isDrawing) return;
+        if (touch) {
+            setCurrentPos(e.touches[0].clientX, e.touches[0].clientY);
+        } else {
+            setCurrentPos(e.clientX, e.clientY);
+        }
+        penDraw();
+    }
+    function penTouchStartListener(e) {
+        ts.value = tsv++;
+        e.preventDefault();
+        mousePos = getTouchPos(canvas, e);
+        var touch = e.touches[0];
+        var mouseEvent = new MouseEvent("mousedown", {
+            clientX: touch.clientX,
+            clientY: touch.clientY
+        });
+        canvas.dispatchEvent(mouseEvent);
+    }
+    function mouseDownListener(e, touch) {
+        md.value = mdv++;
+        isDrawing = true;
+        if (touch) {
+            setLastPos(e.touches[0].clientX, e.touches[0].clientY);
+        } else {
+            setLastPos(e.clientX, e.clientY);
+        }
+    }
+    function penTouchEndListener(e) {
+        te.value = tev++;
+        e.preventDefault();
+        var mouseEvent = new MouseEvent("mouseup", {});
+		canvas.dispatchEvent(mouseEvent);
+    }
+    function penMouseUpListener(e, touch) {
+        mu.value = muv++;
+        isDrawing = false;
+    }
+    function setLastPos(x, y) {
+        lastpos.x = ((x - rect.left) + (window.pageXOffset - windowScrollXStartPos)) * scaleX;
+        lastpos.y = ((y - rect.top) + (window.pageYOffset - windowScrollYStartPos)) * scaleY;
+        lx.value = lastpos.x;
+        ly.value = lastpos.y;
+    }
+    function setCurrentPos(x, y) {
+        currentpos.x = ((x - rect.left) + (window.pageXOffset - windowScrollXStartPos)) * scaleX;
+        currentpos.y = ((y - rect.top) + (window.pageYOffset - windowScrollYStartPos)) * scaleY;
+        cx.value = currentpos.x;
+        cy.value = currentpos.y;
+    }
+    function penDraw() {
+        if (!isDrawing) return;
+        ctx.beginPath();
+        ctx.lineWidth = lineWidth;
+        ctx.strokeStyle = strokeStyle;
+        ctx.moveTo(lastpos.x, lastpos.y);
+        ctx.lineTo(currentpos.x, currentpos.y);
+        ctx.stroke();
+        // For redo, save the mouse position and 
+        // the size/color of the brush to the "undo" array
+        storeAction({
+            startx: lastpos.x,
+            starty: lastpos.y,
+            endx: currentpos.x,
+            endy: currentpos.y,
+            lineWidth: lineWidth,
+            strokeStyle: strokeStyle,
+            mode: "draw"
+        });
+        lastpos.x = currentpos.x;
+        lastpos.y = currentpos.y;
+    }
+    function lineDraw() {
         if (isDrawing) {
-            let startx = pos.x;
-            let starty = pos.y;
-            drawMouseDownListener(e);
             storeAction({
-                startx: startx,
-                starty: starty,
-                endx: pos.x,
-                endy: pos.y,
+                startx: lastpos.x,
+                starty: lastpos.y,
+                endx: currentpos.x,
+                endy: currentpos.y,
                 lineWidth: lineWidth,
                 strokeStyle: strokeStyle,
                 mode: "line"
             });
             isDrawing = !isDrawing;
         }
-        lineAction();
-    }
-    // draw a line
-    function lineAction() {
-        var numberOfActions = actions.length;
         ctx.beginPath();
-        for (var i = 0; i < numberOfActions; ++i) {
-            var action = actions[i];
+        actions.forEach(action => {
             if (action.mode != 'line')
-                continue;
+                return;
             ctx.beginPath();
             ctx.lineWidth = action.lineWidth;
             ctx.strokeStyle = action.strokeStyle;
             ctx.moveTo(action.startx, action.starty);
             ctx.lineTo(action.endx, action.endy);
-        }
-        var a = actions[numberOfActions-1];
+        });
         ctx.stroke();
         if (isDrawing) {
+            var a = actions[actions.length-1];
             ctx.lineWidth = a.lineWidth;
             ctx.strokeStyle = a.strokeStyle;
             ctx.moveTo(a.startx, a.starty);
             ctx.lineTo(a.endx, a.endy);
             ctx.stroke();
         }
-    }
-    // touchmove handler
-    function drawTouchMoveListener(e) {
-        // Call preventDefault() to prevent any mouse handling
-        e.preventDefault();
-        drawMouseMoveListener(e, true);
-    }
-    // draw freeform
-    function drawMouseMoveListener(e, touch) {
-        if (!touch && (e.buttons !== 1)) return;
-        ctx.beginPath();
-        ctx.lineWidth = lineWidth;
-        ctx.strokeStyle = strokeStyle;
-        let startX = pos.x;
-        let startY = pos.y;
-        ctx.moveTo(startX, startY);
-        drawMouseDownListener(e);
-        ctx.lineTo(pos.x, pos.y);
-        ctx.stroke();
-        // For redo, save the mouse position and 
-        // the size/color of the brush to the "undo" array
-        storeAction({
-            startx: startX,
-            starty: startY,
-            endx: pos.x,
-            endy: pos.y,
-            lineWidth: lineWidth,
-            strokeStyle: strokeStyle,
-            mode: "draw"
-        });
-    }
-    function drawTouchStartListener(e) {
-        e.preventDefault();
-        var touches = e.changedTouches;
-        setPos(touches.clientX, touches.clientY);
-    }
-    function drawMouseDownListener(e) {
-        setPos(e.clientX, e.clientY);
-    }
-    function drawTouchEndListener(e) {
-        e.preventDefault();
-        var touches = e.changedTouches;
-        setPos(touches.clientX, touches.clientY);
-    }
-    function drawMouseUpListener(e) {
-        setPos(e.clientX, e.clientY);
-    }
-    function setPos(x, y) {
-        pos.x = ((x - rect.left) + (window.pageXOffset - windowScrollXStartPos)) * scaleX;
-        pos.y = ((y - rect.top) + (window.pageYOffset - windowScrollYStartPos)) * scaleY;
     }
 }, false);
