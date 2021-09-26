@@ -323,7 +323,7 @@ window.addEventListener("DOMContentLoaded", function () {
     }
     function lineTouchEndListener(e) {
         te.value = tev++;
-        alert('e.touches' + e.touches);
+        alert('e.touches' + e.touches[0]);
         alert('setCurrentPos(' + e.touches[0].clientX + ',' + e.touches[0].clientY + ')');
         e.preventDefault();
         setCurrentPos(e.touches[0].clientX, e.touches[0].clientY);
