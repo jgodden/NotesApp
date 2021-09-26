@@ -310,17 +310,14 @@ window.addEventListener("DOMContentLoaded", function () {
     function touchStartListener(e) {
         ts.value = tsv++;
         e.preventDefault();
-        setLastPos(e.touches[0].clientX, e.touches[0].clientY);
-        var mouseEvent = new MouseEvent("mousedown", {
-            clientX: e.touches[0].clientX,
-            clientY: e.touches[0].clientY
-        });
-        canvas.dispatchEvent(mouseEvent);
+        mouseDownListener(e);
     }
     function mouseDownListener(e) {
         md.value = mdv++;
         isDrawing = true;
-        if (!e.touches) {
+        if (e.touches) {
+            setLastPos(e.touches[0].clientX, e.touches[0].clientY);
+        } else {
             setLastPos(e.clientX, e.clientY);
         }
     }
@@ -328,13 +325,16 @@ window.addEventListener("DOMContentLoaded", function () {
         te.value = tev++;
         e.preventDefault();
         setCurrentPos(e.touches[0].clientX, e.touches[0].clientY);
-        var mouseEvent = new MouseEvent("mouseup", {});
-		canvas.dispatchEvent(mouseEvent);
+        lineMouseUpListener(e);
     }
     function lineMouseUpListener(e) {
         mu.value = muv++;
-        if (e.button === 0) {
-            setCurrentPos(e.clientX, e.clientY);
+        if (e.touches) {
+            setCurrentPos(e.touches[0].clientX, e.touches[0].clientY);
+        } else {
+            if (e.button === 0) {
+                setCurrentPos(e.clientX, e.clientY);
+            }
         }
         lineDraw();
     }
@@ -342,11 +342,7 @@ window.addEventListener("DOMContentLoaded", function () {
         tm.value = tmv++;
         // Call preventDefault() to prevent any mouse handling
         e.preventDefault();
-		var mouseEvent = new MouseEvent("mousemove", {
-			clientX: e.touches[0].clientX,
-			clientY: e.touches[0].clientY
-		});
-		canvas.dispatchEvent(mouseEvent);
+		penMouseMoveListener(e);
     }
     // draw freeform
     function penMouseMoveListener(e) {
@@ -363,8 +359,7 @@ window.addEventListener("DOMContentLoaded", function () {
     function penTouchEndListener(e) {
         te.value = tev++;
         e.preventDefault();
-        var mouseEvent = new MouseEvent("mouseup", {});
-		canvas.dispatchEvent(mouseEvent);
+        penMouseUpListener(e);
     }
     function penMouseUpListener(e) {
         mu.value = muv++;
