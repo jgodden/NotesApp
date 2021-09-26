@@ -324,13 +324,12 @@ window.addEventListener("DOMContentLoaded", function () {
     function lineTouchEndListener(e) {
         te.value = tev++;
         e.preventDefault();
-        setCurrentPos(e.changedTouches[0].pageX, e.changedTouches[0].pageY);
         lineMouseUpListener(e);
     }
     function lineMouseUpListener(e) {
         mu.value = muv++;
         if (e.touches) {
-            setCurrentPos(e.touches[0].clientX, e.touches[0].clientY);
+            setCurrentPos(e.changedTouches[0].pageX, e.changedTouches[0].pageY);
         } else {
             if (e.button === 0) {
                 setCurrentPos(e.clientX, e.clientY);
