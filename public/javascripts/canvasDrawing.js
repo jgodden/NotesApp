@@ -329,6 +329,7 @@ window.addEventListener("DOMContentLoaded", function () {
     function lineTouchEndListener(e) {
         te.value = tev++;
         e.preventDefault();
+        var touch = e.touches[0];
         var mouseEvent = new MouseEvent("mouseup", {
             clientX: touch.clientX,
             clientY: touch.clientY
