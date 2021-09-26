@@ -307,7 +307,7 @@ window.addEventListener("DOMContentLoaded", function () {
 			e.preventDefault();
 		}
 	}, false);
-    const touchStartListener = (e) => {
+    function touchStartListener(e) {
         ts.value = tsv++;
         e.preventDefault();
         var touch = e.touches[0];
