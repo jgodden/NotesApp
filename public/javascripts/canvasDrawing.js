@@ -324,6 +324,7 @@ window.addEventListener("DOMContentLoaded", function () {
     function lineTouchEndListener(e) {
         te.value = tev++;
         e.preventDefault();
+        alert('setCurrentPos(' + e.touchs[0].clientX + ',' + e.touchs[0].clientY + ')');
         setCurrentPos(e.touches[0].clientX, e.touches[0].clientY);
         lineMouseUpListener(e);
     }
