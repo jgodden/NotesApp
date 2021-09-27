@@ -13,6 +13,7 @@ html(lang='en')
         div(class="row gx-0" id='canvas-row')
           canvas(id='canvas')
             p Your browser does not support canvas element.
+          input#floating.form-control(type='hidden' style="width:10px" value="floating")
         div(class="row gx-0" id='hidden-row')
           input#noteid.form-control(type='hidden', name='noteid', value=(undefined===note ? '' : note._id))
           input#subjectid.form-control(type='hidden', name='subjectid', value=subjectid)
@@ -21,21 +22,23 @@ html(lang='en')
           input#imageUrl.form-control(type='hidden', name='imageUrl', required='false', value=(undefined===note ? '' : note.image))
           input#imageData.form-control(type='hidden', name='imageData', required='false', value='initial')
         div(class="row gx-0" id='drawing-controls-row')
-          div(class="col-4")
+          div(class="col-2")
             div(class="row gx-0")
               span(class="border border-none")
                 img(class="rounded" src="/images/pencil.png" title="Draw" alt="Draw" width="32" height="32" id='pencil' style="border:1px solid black")
                 img(class="rounded" src="/images/space.png" alt="Space" width="16" height="32" id='space')
                 img(class="rounded" src="/images/line.png" title="Line" alt="Line" width="32" height="32" id='line')
-                img(class="rounded" src="/images/space.png" alt="Space" width="16" height="32" id='space')
+          div(class="col-2")
+            div(class="row gx-0")
+              span(class="border border-none")
                 img(class="rounded" src="/images/undo.png" title="Undo" alt="Undo" width="32" height="32" id='undo')
                 img(class="rounded" src="/images/space.png" alt="Space" width="16" height="32" id='space')
                 img(class="rounded" src="/images/redo.png" title="Redo" alt="Redo" width="32" height="32" id='redo')
-          div(class="col-4")
+          div(class="col-6")
             div(class="row gx-0")
               span(class="border border-none")
                 div(class="row gx-0")
-                  div(class="col-12")
+                  div(class="col-6")
                     img(class="rounded" src="/images/blue_button.jpg" title="Blue" alt="Blue" width="32" height="32" id='blue_button')
                     img(class="rounded" src="/images/red_button.jpg" title="Red" alt="Red" width="32" height="32" id='red_button')
                     img(class="rounded" src="/images/green_button.jpg" title="Green" alt="Green" width="32" height="32" id='green_button')
@@ -44,15 +47,25 @@ html(lang='en')
                     img(class="rounded" src="/images/fill.png" title="Fill" alt="Fill" width="32" height="32" id='fill_button')
                     img(class="rounded" src="/images/text.png" title="Place Text" alt="Place Text" width="32" height="32" id='text_button')
                   div(class="col-2")
+                    select#font(class='form-control selcls', type='select', name='font' class="form-control form-control-sm")
+                      option(value=1) Arial
+                      option(value=2) Helvetica
+                      option(value=3) Courier
+                      option(value=4) Times New Roman
+                  div(class="col-1")
                     select#fontSize(class='form-control selcls', type='select', name='fontSize' class="form-control form-control-sm")
-                      option(value=12) tiny
-                      option(value=16) small
-                      option(value=20) mid
-                      option(value=28) big
-                      option(value=36) huge
-                  div(class="col-10")
-                    input#text.form-control(type='text', placeholder='Text' name='text' class="form-control form-control-sm" value="")
-          div(class="col-4")
+                      option(value=1) xx-small
+                      option(value=2) x-small
+                      option(value=3) small
+                      option(value=4) medium
+                      option(value=5) large
+                      option(value=6) x-large
+                      option(value=7) xx-large
+                  div(class="col-3")
+                    img(class="rounded" src="/images/bold_button.jpg" title="Bold" alt="Bold" width="32" height="32" id='bold_button')
+                    img(class="rounded" src="/images/italic_button.jpg" title="Italic" alt="Italic" width="32" height="32" id='italic_button')
+                    img(class="rounded" src="/images/underline_button.jpg" title="Underline" alt="Underline" width="32" height="32" id='underline_button')
+          div(class="col-2")
             div(class="row gx-0")
               span(class="border border-none")
                 img(class="rounded" src="/images/thin_width_button.jpg" alt="Thin" width="32" height="32" id='thin_width_button')

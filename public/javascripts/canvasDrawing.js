@@ -53,6 +53,7 @@ window.addEventListener("DOMContentLoaded", function () {
     var windowScrollXStartPos = window.pageXOffset;
     var windowScrollYStartPos = window.pageYOffset;
     var isDrawing = false;
+    var firstLine = false;  // true if first line when line drawing, so we know whether to undo previous line
     var lastpos = { x: 0, y: 0 };
     var currentpos = { x: 0, y: 0 };
     // Mouse and touch event handlers for freeform draw
@@ -107,7 +108,6 @@ window.addEventListener("DOMContentLoaded", function () {
     document.getElementById('white_button').addEventListener('click', changeColor);
     document.getElementById('fill_button').addEventListener('click', controlAction);
     document.getElementById('text_button').addEventListener('click', controlAction);
-    document.getElementById('text').addEventListener('input', controlAction);
     document.getElementById('fontSize').addEventListener('change', controlAction);
     function changeColor(e) {
         document.getElementById('blue_button').style.border = "none";
@@ -150,9 +150,6 @@ window.addEventListener("DOMContentLoaded", function () {
                 textValue: textValue,
                 mode: "text"
             });
-        }
-        if (e.currentTarget.id === 'text') {
-            textValue = e.currentTarget.value;
         }
         if (e.currentTarget.id === 'fontSize') {
             fontSize = e.currentTarget.value;
@@ -198,9 +195,8 @@ window.addEventListener("DOMContentLoaded", function () {
             ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
         if (action.mode === 'text') {
-            ctx.fillStyle = action.strokeStyle;
-            ctx.font = action.fontSize + 'px serif';
-            ctx.fillText(action.textValue, action.startx, action.starty, action.textValue.length * (action.fontSize / 2));
+            ctx.font = action.font;
+            ctx.fillText(action.textValue, action.startx, action.starty);
         }
         if ((action.mode === 'draw') || (action.mode === 'line')) {
             if (action.mode === 'line') {
@@ -245,8 +241,88 @@ window.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    var fontElement = document.getElementById('font');
+    var fontSizeElement = document.getElementById('fontSize');
+    var floatingElement = document.getElementById('floating');
+    // initialize floating text box font familiy and size
+    floatingElement.style.fontFamily = fontElement[0].text;
+    floatingElement.style.fontSize = fontSizeElement[0].text;
+    setFloatingTextBoxSize();
+    fontElement.addEventListener('change', (event) => {
+        floatingElement.style.fontFamily = event.target[event.target.selectedIndex].text;
+        setFloatingTextBoxSize();
+      });
+    fontSizeElement.addEventListener('change', (event) => {
+        floatingElement.style.fontSize = event.target[event.target.selectedIndex].text;        
+        setFloatingTextBoxSize();
+    });
+    floatingElement.addEventListener('input', (event) => {
+        setFloatingTextBoxSize();
+    });
+    function setFloatingTextBoxSize() {
+        var computedFontSize = window.getComputedStyle(floatingElement).fontSize.replace(/[^.\d]/g, '');
+        floatingElement.style.height = 20 + (computedFontSize);
+        floatingElement.style.width = ((floatingElement.value.length + 10) * (computedFontSize / 2)) + "px";
+    }
+    // Prevent form from being submitted when pressing return in the floating text box and place text instead
+    $('form input').keydown(function (e) {
+        if (e.keyCode == 13) {
+            e.preventDefault();
+            fl.setAttribute("type", "hidden");
+            ctx.font = floatingElement.style.fontSize + ' ' + floatingElement.style.fontFamily;
+            ctx.fillText(floatingElement.value, lastpos.x, lastpos.y);
+            storeAction({
+                startx: lastpos.x,
+                starty: lastpos.y,
+                endx: lastpos.x,
+                endy: lastpos.y,
+                font: ctx.font,
+                textValue: floatingElement.value,
+                mode: "text"
+            });
+            return false;
+        }
+    });
+
+    function addLineEvents() {
+        canvas.addEventListener('touchend', lineTouchEndListener);
+        canvas.addEventListener('touchmove', lineTouchMoveListener);
+        canvas.addEventListener('mouseup', lineMouseUpListener);
+        canvas.addEventListener('mousemove', lineMouseMoveListener);
+        canvas.addEventListener('mousedown', mouseDownListener);
+    }
+    function removeLineEvents() {
+        canvas.removeEventListener('touchend', lineTouchEndListener);
+        canvas.removeEventListener('touchmove', lineTouchMoveListener);
+        canvas.removeEventListener('mouseup', lineMouseUpListener);
+        canvas.removeEventListener('mousemove', lineMouseMoveListener);
+        canvas.removeEventListener('mousedown', mouseDownListener);
+    }
+    function addPenEvents() {
+        canvas.addEventListener('touchmove', penTouchMoveListener);
+        canvas.addEventListener('mousemove', penMouseMoveListener);
+        canvas.addEventListener('touchend', penTouchEndListener);
+        canvas.addEventListener('mouseup', penMouseUpListener);
+        canvas.addEventListener('mousedown', mouseDownListener);
+    }
+    function removePenEvents() {
+        canvas.removeEventListener('touchmove', penTouchMoveListener);
+        canvas.removeEventListener('mousemove', penMouseMoveListener);
+        canvas.removeEventListener('touchend', penTouchEndListener);
+        canvas.removeEventListener('mouseup', penMouseUpListener);
+        canvas.removeEventListener('mousedown', mouseDownListener);
+    }
+    function addTextEvents() {
+        canvas.addEventListener('touchstart', textTouchStartListener);
+        canvas.addEventListener('mousedown', textMouseDownListener);
+    }
+    function removeTextEvents() {
+        canvas.removeEventListener('touchstart', textTouchStartListener);
+        canvas.removeEventListener('mousedown', textMouseDownListener);
+    }
     document.getElementById('pencil').addEventListener('click', setDrawStyle);
     document.getElementById('line').addEventListener('click', setDrawStyle);
+    document.getElementById('text_button').addEventListener('click', setDrawStyle);
     document.getElementById('undo').addEventListener('click', undo);
     document.getElementById('redo').addEventListener('click', redo);
     function setDrawStyle(e) {
@@ -254,24 +330,22 @@ window.addEventListener("DOMContentLoaded", function () {
         document.getElementById('line').style.border = "none";
         e.target.style.border = "thin solid black";
         if (e.currentTarget.id === 'pencil') {
-            //freeform
             drawStyle = 0;
-            canvas.removeEventListener('touchend', lineTouchEndListener);
-            canvas.removeEventListener('mouseup', lineMouseUpListener);
-            canvas.addEventListener('touchmove', penTouchMoveListener);
-            canvas.addEventListener('mousemove', penMouseMoveListener);
-            canvas.addEventListener('touchend', penTouchEndListener);
-            canvas.addEventListener('mouseup', penMouseUpListener);
+            removeLineEvents();
+            removeTextEvents();
+            addPenEvents();
         }
         if (e.currentTarget.id === 'line') {
-            // line
             drawStyle = 1;
-            canvas.removeEventListener('touchmove', penTouchMoveListener);
-            canvas.removeEventListener('mousemove', penMouseMoveListener);
-            canvas.removeEventListener('touchend', penTouchEndListener);
-            canvas.removeEventListener('mouseup', penMouseUpListener);
-            canvas.addEventListener('touchend', lineTouchEndListener);
-            canvas.addEventListener('mouseup', lineMouseUpListener);
+            removePenEvents();
+            removeTextEvents();
+            addLineEvents();
+        }
+        if (e.currentTarget.id === 'text_button') {
+            drawStyle = 2;
+            removePenEvents();
+            removeLineEvents();
+            addTextEvents();
         }
     }
     // Prevent scrolling when touching the canvas
@@ -290,6 +364,30 @@ window.addEventListener("DOMContentLoaded", function () {
 			e.preventDefault();
 		}
 	}, false);
+    function textTouchStartListener(e) {
+        ts.value = tsv++;
+        e.preventDefault();
+        textMouseDownListener(e);
+    }
+    function textMouseDownListener(e) {
+        md.value = mdv++;
+        if (e.touches) {
+            setLastPos(e.touches[0].clientX, e.touches[0].clientY);
+        } else {
+            setLastPos(e.clientX, e.clientY);
+        }
+        fl = document.getElementById('floating');
+        fl.setAttribute("type", "text");
+        fl.value = "";
+        fl.style.backgroundColor = "yellow";
+        fl.style.borderStyle = "dashed solid";
+        fl.style.position = "absolute";
+        fl.style.zIndex = "1";
+        fl.style.left = lastpos.x + "px";
+        fl.style.top = lastpos.y + "px";
+        fl.style.width = "300px";
+        fl.focus();
+    }
     function touchStartListener(e) {
         ts.value = tsv++;
         e.preventDefault();
@@ -298,6 +396,7 @@ window.addEventListener("DOMContentLoaded", function () {
     function mouseDownListener(e) {
         md.value = mdv++;
         isDrawing = true;
+        firstLine = true;
         if (e.touches) {
             setLastPos(e.touches[0].clientX, e.touches[0].clientY);
         } else {
@@ -318,8 +417,30 @@ window.addEventListener("DOMContentLoaded", function () {
                 setCurrentPos(e.clientX, e.clientY);
             }
         }
-        lineDraw();
+        isDrawing = false;
     }
+    function lineTouchMoveListener(e) {
+        tm.value = tmv++;
+        e.preventDefault();
+        lineMouseMoveListener(e);
+    }
+    function lineMouseMoveListener(e) {
+        mm.value = mmv++;
+        if (isDrawing && !firstLine) {
+            // if drawing in line mode, undo last line and draw current
+            undo(e);
+        }
+        if (e.touches) {
+            setCurrentPos(e.changedTouches[0].pageX, e.changedTouches[0].pageY);
+        } else {
+            if (e.button === 0) {
+                setCurrentPos(e.clientX, e.clientY);
+            }
+        }
+        lineDraw();
+        firstLine = false;
+    }
+
     function penTouchMoveListener(e) {
         tm.value = tmv++;
         // Call preventDefault() to prevent any mouse handling
@@ -392,7 +513,7 @@ window.addEventListener("DOMContentLoaded", function () {
                 strokeStyle: strokeStyle,
                 mode: "line"
             });
-            isDrawing = !isDrawing;
+            //isDrawing = !isDrawing;
         }
         ctx.beginPath();
         actions.forEach(action => {
