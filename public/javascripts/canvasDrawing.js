@@ -141,7 +141,7 @@ window.addEventListener("DOMContentLoaded", function () {
         if (e.currentTarget.id === 'text_button') {
             ctx.fillStyle = strokeStyle;
             ctx.font = fontSize + 'px serif';
-            ctx.fillText(textValue, pos.x, pos.y, textValue.length * (fontSize / 2));
+            ctx.fillText(textValue, lastpos.x, lastpos.y, textValue.length * (fontSize / 2));
             storeAction({
                 startx: currentpos.x,
                 starty: currentpos.y,
@@ -221,14 +221,11 @@ window.addEventListener("DOMContentLoaded", function () {
         }
     }
     function redrawAll() {
-        let index = 0;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(img, 0, 0);
-        while (index < actions.length) {
-            let action = actions[index];
+        actions.forEach(action => {
             drawAction(action);
-            index += 1;
-        }
+        });
     }
     function undo(e) {
         if (actions.length > 0) {
@@ -247,20 +244,6 @@ window.addEventListener("DOMContentLoaded", function () {
             alert('nothing to redo');
         }
     }
-
-    // Get a regular interval for drawing to the screen
-    window.requestAnimFrame = (function (callback) {
-        return window.requestAnimationFrame ||
-        function (callback) {
-            window.setTimeout(callback, 1000 / 60);
-        };
-    })();
-
-    // Allow for animation
-    (function drawLoop () {
-        requestAnimFrame(drawLoop);
-        //renderCanvas();
-    })();
 
     document.getElementById('pencil').addEventListener('click', setDrawStyle);
     document.getElementById('line').addEventListener('click', setDrawStyle);
