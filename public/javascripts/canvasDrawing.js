@@ -448,6 +448,7 @@ window.addEventListener("DOMContentLoaded", function () {
     }
     function mouseDownListener(e) {
         md.value = mdv++;
+        e.preventDefault();
         isDrawing = true;
         firstLine = true;
         if (e.touches) {
@@ -463,6 +464,7 @@ window.addEventListener("DOMContentLoaded", function () {
     }
     function lineMouseUpListener(e) {
         mu.value = muv++;
+        e.preventDefault();
         if (e.touches) {
             setCurrentPos(e.changedTouches[0].pageX, e.changedTouches[0].pageY);
         } else {
@@ -479,6 +481,7 @@ window.addEventListener("DOMContentLoaded", function () {
     }
     function lineMouseMoveListener(e) {
         mm.value = mmv++;
+        e.preventDefault();
         if (isDrawing && !firstLine) {
             // if drawing in line mode, undo last line and draw current
             undo(e);
@@ -504,6 +507,7 @@ window.addEventListener("DOMContentLoaded", function () {
     function penMouseMoveListener(e) {
         mm.value = mmv++;
         // draw freeform
+        e.preventDefault();
         if (!isDrawing) return;
         if (e.touches) {
             setCurrentPos(e.touches[0].clientX, e.touches[0].clientY);
