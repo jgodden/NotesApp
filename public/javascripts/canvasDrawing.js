@@ -54,6 +54,8 @@ window.addEventListener("DOMContentLoaded", function () {
     var windowScrollYStartPos = window.pageYOffset;
     var isDrawing = false;
     var firstLine = false;  // true if first line when line drawing, so we know whether to undo previous line
+    var bold = false;
+    var italic = false;
     var lastpos = { x: 0, y: 0 };
     var currentpos = { x: 0, y: 0 };
     // Mouse and touch event handlers for freeform draw
@@ -101,12 +103,146 @@ window.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    // Buttons and other controls
+    var fontElement = document.getElementById('font');
+    var fontSizeElement = document.getElementById('fontSize');
+    var floatingElement = document.getElementById('floating');
+    var boldElement = document.getElementById('bold_button');
+    var italicElement = document.getElementById('italic_button');
+    function hideFloatingText() {
+        floatingElement.style.top = "-100px";
+    }
+    document.getElementById('pencil').addEventListener('click', setDrawStyle);
+    document.getElementById('line').addEventListener('click', setDrawStyle);
+    document.getElementById('text_button').addEventListener('click', setDrawStyle);
+    boldElement.addEventListener('click', toggleBold);
+    italicElement.addEventListener('click', toggleItalic);
+    document.getElementById('undo').addEventListener('click', undo);
+    document.getElementById('redo').addEventListener('click', redo);
+    function setDrawStyle(e) {
+        document.getElementById('pencil').style.border = "none";
+        document.getElementById('line').style.border = "none";
+        document.getElementById('text_button').style.border = "none";
+        hideFloatingText();
+        e.target.style.border = "thin solid black";
+        if (e.currentTarget.id === 'pencil') {
+            drawStyle = 0;
+            removeLineEvents();
+            removeTextEvents();
+            addPenEvents();
+        }
+        if (e.currentTarget.id === 'line') {
+            drawStyle = 1;
+            removePenEvents();
+            removeTextEvents();
+            addLineEvents();
+        }
+        if (e.currentTarget.id === 'text_button') {
+            drawStyle = 2;
+            removePenEvents();
+            removeLineEvents();
+            addTextEvents();
+        }
+    }
+    function toggleBold(e) {
+        bold = !bold;
+        if (bold) {
+            boldElement.style.border = "thin solid black";
+            floatingElement.style.fontWeight = "bold";
+        } else {
+            boldElement.style.border = "none";
+            floatingElement.style.fontWeight = "normal";
+        }
+    }
+    function toggleItalic(e) {
+        italic = !italic;
+        if (italic) {
+            italicElement.style.border = "thin solid black";
+            floatingElement.style.fontStyle = "italic";
+        } else {
+            italicElement.style.border = "none";
+            floatingElement.style.fontStyle = "normal";
+        }
+    }
+    // initialize floating text box font familiy and size
+    floatingElement.style.fontFamily = fontElement[fontElement.selectedIndex].text;
+    floatingElement.style.fontSize = fontSizeElement[fontSizeElement.selectedIndex].text;
+    setFloatingTextBoxSize();
+    fontElement.addEventListener('change', (event) => {
+        floatingElement.style.fontFamily = event.target[event.target.selectedIndex].text;
+        setFloatingTextBoxSize();
+      });
+    fontSizeElement.addEventListener('change', (event) => {
+        floatingElement.style.fontSize = event.target[event.target.selectedIndex].text;        
+        setFloatingTextBoxSize();
+    });
+    floatingElement.addEventListener('input', (event) => {
+        setFloatingTextBoxSize();
+    });
+    function setFloatingTextBoxSize() {
+        var width = getTextWidth(floatingElement.value, getCanvasFontSize(floatingElement));
+        floatingElement.style.width = 30 + width + "px";
+    }
+    function getTextWidth(text, font) {
+        // re-use canvas object for better performance
+        const canvas = getTextWidth.canvas || (getTextWidth.canvas = document.createElement("canvas"));
+        const context = canvas.getContext("2d");
+        context.font = font;
+        const metrics = context.measureText(text);
+        return metrics.width;
+    }
+    function getCssStyle(element, prop) {
+        return window.getComputedStyle(element, null).getPropertyValue(prop);
+    }
+    function getCanvasFontSize(el = document.body) {
+        const fontWeight = getCssStyle(el, 'font-weight') || 'normal';
+        const fontSize = getCssStyle(el, 'font-size') || '16px';
+        const fontFamily = getCssStyle(el, 'font-family') || 'Times New Roman';
+        return `${fontWeight} ${fontSize} ${fontFamily}`;
+    }
+    // Prevent form from being submitted when pressing return in the
+    // floating text box
+    $(document).on('keydown', function(e) {
+        if (e.key == "Escape") {
+            e.preventDefault();
+            hideFloatingText();
+        }
+    });
+    $('form input').keydown(function (e) {
+        if (e.keyCode == 13) {  // enter - place text
+            e.preventDefault();
+            hideFloatingText();
+
+            floatingElement.style.fontWeight = "bold";
+            floatingElement.style.fontStyle = "italic";
+
+            let fontString = '';
+            if (bold)
+                fontString = fontString + ' bold';
+            if (italic)
+                fontString = fontString + ' italic';
+            fontString = fontString + ' ' + floatingElement.style.fontSize;
+            fontString = fontString + ' ' + floatingElement.style.fontFamily;
+            ctx.font = fontString;
+            ctx.fillText(floatingElement.value, lastpos.x, lastpos.y);
+            storeAction({
+                startx: lastpos.x,
+                starty: lastpos.y,
+                endx: lastpos.x,
+                endy: lastpos.y,
+                font: ctx.font,
+                textValue: floatingElement.value,
+                mode: "text"
+            });
+            return false;
+        }
+    });
+
     document.getElementById('blue_button').addEventListener('click', changeColor);
     document.getElementById('red_button').addEventListener('click', changeColor);
     document.getElementById('green_button').addEventListener('click', changeColor);
     document.getElementById('black_button').addEventListener('click', changeColor);
     document.getElementById('white_button').addEventListener('click', changeColor);
-    document.getElementById('fill_button').addEventListener('click', controlAction);
     document.getElementById('text_button').addEventListener('click', controlAction);
     document.getElementById('fontSize').addEventListener('change', controlAction);
     function changeColor(e) {
@@ -115,7 +251,6 @@ window.addEventListener("DOMContentLoaded", function () {
         document.getElementById('green_button').style.border = "none";
         document.getElementById('black_button').style.border = "none";
         document.getElementById('white_button').style.border = "none";
-        document.getElementById('fill_button').style.border = "none";
         e.target.style.border = "thin solid black";
         if (e.currentTarget.id === 'black_button')
             strokeStyle = 'black';
@@ -130,14 +265,6 @@ window.addEventListener("DOMContentLoaded", function () {
     }
     function controlAction(e) {
         e.target.style.border = "thin solid black";
-        if (e.currentTarget.id === 'fill_button') {
-            ctx.fillStyle = strokeStyle;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            storeAction({
-                strokeStyle: strokeStyle,
-                mode: "fill"
-            });
-        }
         if (e.currentTarget.id === 'text_button') {
             ctx.fillStyle = strokeStyle;
             ctx.font = fontSize + 'px serif';
@@ -180,9 +307,9 @@ window.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Set default line color, width and shape
+    // Drawing
     var strokeStyle = 'black';
-    var lineWidth = 4;
+    var lineWidth = 5;
     ctx.lineCap = 'round';
     ctx.fillStyle = 'white';
 
@@ -190,10 +317,6 @@ window.addEventListener("DOMContentLoaded", function () {
         actions.push(a);
     }
     function drawAction(action) {
-        if (action.mode === 'fill') {
-            ctx.fillStyle = action.strokeStyle;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
         if (action.mode === 'text') {
             ctx.font = action.font;
             ctx.fillText(action.textValue, action.startx, action.starty);
@@ -224,6 +347,7 @@ window.addEventListener("DOMContentLoaded", function () {
         });
     }
     function undo(e) {
+        hideFloatingText();
         if (actions.length > 0) {
             redoList.push(actions.pop());
             redrawAll();
@@ -232,6 +356,7 @@ window.addEventListener("DOMContentLoaded", function () {
         }
     }
     function redo(e) {
+        hideFloatingText();
         if (redoList.length > 0) {
             let a = redoList.pop();
             actions.push(a)
@@ -240,50 +365,6 @@ window.addEventListener("DOMContentLoaded", function () {
             alert('nothing to redo');
         }
     }
-
-    var fontElement = document.getElementById('font');
-    var fontSizeElement = document.getElementById('fontSize');
-    var floatingElement = document.getElementById('floating');
-    // initialize floating text box font familiy and size
-    floatingElement.style.fontFamily = fontElement[0].text;
-    floatingElement.style.fontSize = fontSizeElement[0].text;
-    setFloatingTextBoxSize();
-    fontElement.addEventListener('change', (event) => {
-        floatingElement.style.fontFamily = event.target[event.target.selectedIndex].text;
-        setFloatingTextBoxSize();
-      });
-    fontSizeElement.addEventListener('change', (event) => {
-        floatingElement.style.fontSize = event.target[event.target.selectedIndex].text;        
-        setFloatingTextBoxSize();
-    });
-    floatingElement.addEventListener('input', (event) => {
-        setFloatingTextBoxSize();
-    });
-    function setFloatingTextBoxSize() {
-        var computedFontSize = window.getComputedStyle(floatingElement).fontSize.replace(/[^.\d]/g, '');
-        floatingElement.style.height = 20 + (computedFontSize);
-        floatingElement.style.width = ((floatingElement.value.length + 10) * (computedFontSize / 2)) + "px";
-    }
-    // Prevent form from being submitted when pressing return in the floating text box and place text instead
-    $('form input').keydown(function (e) {
-        if (e.keyCode == 13) {
-            e.preventDefault();
-            fl.setAttribute("type", "hidden");
-            ctx.font = floatingElement.style.fontSize + ' ' + floatingElement.style.fontFamily;
-            ctx.fillText(floatingElement.value, lastpos.x, lastpos.y);
-            storeAction({
-                startx: lastpos.x,
-                starty: lastpos.y,
-                endx: lastpos.x,
-                endy: lastpos.y,
-                font: ctx.font,
-                textValue: floatingElement.value,
-                mode: "text"
-            });
-            return false;
-        }
-    });
-
     function addLineEvents() {
         canvas.addEventListener('touchend', lineTouchEndListener);
         canvas.addEventListener('touchmove', lineTouchMoveListener);
@@ -320,34 +401,6 @@ window.addEventListener("DOMContentLoaded", function () {
         canvas.removeEventListener('touchstart', textTouchStartListener);
         canvas.removeEventListener('mousedown', textMouseDownListener);
     }
-    document.getElementById('pencil').addEventListener('click', setDrawStyle);
-    document.getElementById('line').addEventListener('click', setDrawStyle);
-    document.getElementById('text_button').addEventListener('click', setDrawStyle);
-    document.getElementById('undo').addEventListener('click', undo);
-    document.getElementById('redo').addEventListener('click', redo);
-    function setDrawStyle(e) {
-        document.getElementById('pencil').style.border = "none";
-        document.getElementById('line').style.border = "none";
-        e.target.style.border = "thin solid black";
-        if (e.currentTarget.id === 'pencil') {
-            drawStyle = 0;
-            removeLineEvents();
-            removeTextEvents();
-            addPenEvents();
-        }
-        if (e.currentTarget.id === 'line') {
-            drawStyle = 1;
-            removePenEvents();
-            removeTextEvents();
-            addLineEvents();
-        }
-        if (e.currentTarget.id === 'text_button') {
-            drawStyle = 2;
-            removePenEvents();
-            removeLineEvents();
-            addTextEvents();
-        }
-    }
     // Prevent scrolling when touching the canvas
 	document.body.addEventListener("touchstart", function (e) {
 		if (e.target == canvas) {
@@ -370,23 +423,23 @@ window.addEventListener("DOMContentLoaded", function () {
         textMouseDownListener(e);
     }
     function textMouseDownListener(e) {
+        e.preventDefault(); // stops focus being stolen by another event
         md.value = mdv++;
         if (e.touches) {
             setLastPos(e.touches[0].clientX, e.touches[0].clientY);
         } else {
             setLastPos(e.clientX, e.clientY);
         }
-        fl = document.getElementById('floating');
-        fl.setAttribute("type", "text");
-        fl.value = "";
-        fl.style.backgroundColor = "yellow";
-        fl.style.borderStyle = "dashed solid";
-        fl.style.position = "absolute";
-        fl.style.zIndex = "1";
-        fl.style.left = lastpos.x + "px";
-        fl.style.top = lastpos.y + "px";
-        fl.style.width = "300px";
-        fl.focus();
+        floatingElement.value = "";
+        var fs = floatingElement.style;
+        fs.backgroundColor = "yellow";
+        fs.borderStyle = "dashed solid";
+        fs.position = "absolute";
+        fs.zIndex = "1";
+        fs.width = getTextWidth('', getCanvasFontSize(floatingElement));
+        fs.left = (lastpos.x - 16) + "px";
+        fs.top = (lastpos.y - 42) + "px";
+        floatingElement.focus();
     }
     function touchStartListener(e) {
         ts.value = tsv++;
@@ -513,7 +566,6 @@ window.addEventListener("DOMContentLoaded", function () {
                 strokeStyle: strokeStyle,
                 mode: "line"
             });
-            //isDrawing = !isDrawing;
         }
         ctx.beginPath();
         actions.forEach(action => {

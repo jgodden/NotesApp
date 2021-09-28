@@ -783,6 +783,7 @@ exports.note_draw_get = function(req, res, next) {
         }
 
         dbgNoteDrawGet('note_object ' + note_object);
+        res.setHeader('Cache-Control', 'no-cache');
         res.render('note_draw', {
             title: note_object.title,
             note: note_object,
@@ -806,7 +807,7 @@ exports.note_draw_post = function(req, res, next) {
             require('dotenv').config();
             const cloudinary = require('cloudinary').v2;
             var uploadResponse = '';
-            dbgNoteDrawPost('sending image to cloudinary');
+            dbgNoteDrawPost('sending image to cloudinary: ' + req.body.imageData);
             await cloudinary.uploader.upload(req.body.imageData,
             {
                 // Store drawing in folder with 'drawing' as name
@@ -817,8 +818,12 @@ exports.note_draw_post = function(req, res, next) {
             })
             .then(uploadResult => uploadResponse = uploadResult)
             .catch(error => image_err = 1);
-            image_url = uploadResponse.url;
-            dbgNoteDrawPost('cloudinary returned url ' + image_url);
+            if (image_err == 1) {
+                dbgNoteDrawPost('cloudinary error ' + error);
+            } else {
+                image_url = uploadResponse.url;
+                dbgNoteDrawPost('cloudinary returned url ' + image_url);
+            }
         } else {
             const base_filestore = 'C:/Users/jon/NotesApp';
             image_url = base_filestore + '/' + folder;
