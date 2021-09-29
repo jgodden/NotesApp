@@ -13,7 +13,7 @@ html(lang='en')
         div(class="row gx-0" id='canvas-row')
           canvas(id='canvas')
             p Your browser does not support canvas element.
-          input#floating.form-control(type='text' style="position:absolute;top:-100px" maxlength="40" value="floating")
+          input#floating.form-control(type='text' style="top:-100px" inputmode="search" maxlength="40" placeholder='' name='floating' required='true' class="form-control form-control-sm" value='')
         div(class="row gx-0" id='hidden-row')
           input#noteid.form-control(type='hidden', name='noteid', value=(undefined===note ? '' : note._id))
           input#subjectid.form-control(type='hidden', name='subjectid', value=subjectid)

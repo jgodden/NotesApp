@@ -48,8 +48,6 @@ window.addEventListener("DOMContentLoaded", function () {
     var scaleX = 0;
     var scaleY = 0;
     // Initialise some drawing properties
-    var textValue = "";
-    var fontSize = "10";
     var windowScrollXStartPos = window.pageXOffset;
     var windowScrollYStartPos = window.pageYOffset;
     var isDrawing = false;
@@ -107,6 +105,11 @@ window.addEventListener("DOMContentLoaded", function () {
     var fontElement = document.getElementById('font');
     var fontSizeElement = document.getElementById('fontSize');
     var floatingElement = document.getElementById('floating');
+    var fs = floatingElement.style;
+    fs.backgroundColor = "white";
+    fs.borderStyle = "dashed solid";
+    fs.position = "absolute";
+    fs.zIndex = "1";
     var boldElement = document.getElementById('bold_button');
     var italicElement = document.getElementById('italic_button');
     function hideFloatingText() {
@@ -146,6 +149,9 @@ window.addEventListener("DOMContentLoaded", function () {
     }
     function toggleBold(e) {
         bold = !bold;
+        setBold(bold);
+    }
+    function setBold(bold) {
         if (bold) {
             boldElement.style.border = "thin solid black";
             floatingElement.style.fontWeight = "bold";
@@ -156,6 +162,9 @@ window.addEventListener("DOMContentLoaded", function () {
     }
     function toggleItalic(e) {
         italic = !italic;
+        setItalic(italic);
+    }
+    function setItalic(italic) {
         if (italic) {
             italicElement.style.border = "thin solid black";
             floatingElement.style.fontStyle = "italic";
@@ -171,13 +180,16 @@ window.addEventListener("DOMContentLoaded", function () {
     fontElement.addEventListener('change', (event) => {
         floatingElement.style.fontFamily = event.target[event.target.selectedIndex].text;
         setFloatingTextBoxSize();
+        e.preventDefault();
       });
     fontSizeElement.addEventListener('change', (event) => {
         floatingElement.style.fontSize = event.target[event.target.selectedIndex].text;        
         setFloatingTextBoxSize();
+        e.preventDefault();
     });
     floatingElement.addEventListener('input', (event) => {
         setFloatingTextBoxSize();
+        e.preventDefault();
     });
     function setFloatingTextBoxSize() {
         var width = getTextWidth(floatingElement.value, getCanvasFontSize(floatingElement));
@@ -202,49 +214,51 @@ window.addEventListener("DOMContentLoaded", function () {
     }
     // Prevent form from being submitted when pressing return in the
     // floating text box
-    $(document).on('keydown', function(e) {
+    document.addEventListener('keydown', handleKey);
+    // Handle escape and enter
+    function handleKey(e) {
         if (e.key == "Escape") {
             e.preventDefault();
             hideFloatingText();
         }
-    });
-    $('form input').keydown(function (e) {
         if (e.keyCode == 13) {  // enter - place text
             e.preventDefault();
             hideFloatingText();
-
-            floatingElement.style.fontWeight = "bold";
-            floatingElement.style.fontStyle = "italic";
-
-            let fontString = '';
-            if (bold)
-                fontString = fontString + ' bold';
-            if (italic)
-                fontString = fontString + ' italic';
-            fontString = fontString + ' ' + floatingElement.style.fontSize;
-            fontString = fontString + ' ' + floatingElement.style.fontFamily;
-            ctx.font = fontString;
-            ctx.fillText(floatingElement.value, lastpos.x, lastpos.y);
-            storeAction({
-                startx: lastpos.x,
-                starty: lastpos.y,
-                endx: lastpos.x,
-                endy: lastpos.y,
-                font: ctx.font,
-                textValue: floatingElement.value,
-                mode: "text"
-            });
+            placeText();
             return false;
         }
-    });
+    }
 
+    function placeText() {
+        floatingElement.style.fontWeight = "bold";
+        floatingElement.style.fontStyle = "italic";
+
+        let fontString = '';
+        if (bold)
+            fontString += ' bold';
+        if (italic)
+            fontString += ' italic';
+        fontString += ' ' + floatingElement.style.fontSize;
+        fontString += ' ' + floatingElement.style.fontFamily;
+        ctx.font = fontString;
+        ctx.fillStyle = strokeStyle;
+        ctx.fillText(floatingElement.value, lastpos.x, lastpos.y);
+        storeAction({
+            startx: lastpos.x,
+            starty: lastpos.y,
+            endx: lastpos.x,
+            endy: lastpos.y,
+            font: ctx.font,
+            textValue: floatingElement.value,
+            mode: "text"
+        });
+    }
+    // colors
     document.getElementById('blue_button').addEventListener('click', changeColor);
     document.getElementById('red_button').addEventListener('click', changeColor);
     document.getElementById('green_button').addEventListener('click', changeColor);
     document.getElementById('black_button').addEventListener('click', changeColor);
     document.getElementById('white_button').addEventListener('click', changeColor);
-    document.getElementById('text_button').addEventListener('click', controlAction);
-    document.getElementById('fontSize').addEventListener('change', controlAction);
     function changeColor(e) {
         document.getElementById('blue_button').style.border = "none";
         document.getElementById('red_button').style.border = "none";
@@ -263,26 +277,8 @@ window.addEventListener("DOMContentLoaded", function () {
         if (e.currentTarget.id === 'green_button')
             strokeStyle = 'green';
     }
-    function controlAction(e) {
-        e.target.style.border = "thin solid black";
-        if (e.currentTarget.id === 'text_button') {
-            ctx.fillStyle = strokeStyle;
-            ctx.font = fontSize + 'px serif';
-            ctx.fillText(textValue, lastpos.x, lastpos.y, textValue.length * (fontSize / 2));
-            storeAction({
-                startx: currentpos.x,
-                starty: currentpos.y,
-                strokeStyle: strokeStyle,
-                fontSize: fontSize,
-                textValue: textValue,
-                mode: "text"
-            });
-        }
-        if (e.currentTarget.id === 'fontSize') {
-            fontSize = e.currentTarget.value;
-        }
-    }
 
+    // line width
     document.getElementById('thin_width_button').addEventListener('click', setWidth);
     document.getElementById('mid_width_button').addEventListener('click', setWidth);
     document.getElementById('thick_width_button').addEventListener('click', setWidth);
@@ -366,32 +362,36 @@ window.addEventListener("DOMContentLoaded", function () {
         }
     }
     function addLineEvents() {
+//        canvas.addEventListener('touchstart', touchStartListener);
         canvas.addEventListener('touchend', lineTouchEndListener);
         canvas.addEventListener('touchmove', lineTouchMoveListener);
+        canvas.addEventListener('mousedown', mouseDownListener);
         canvas.addEventListener('mouseup', lineMouseUpListener);
         canvas.addEventListener('mousemove', lineMouseMoveListener);
-        canvas.addEventListener('mousedown', mouseDownListener);
     }
     function removeLineEvents() {
-        canvas.removeEventListener('touchend', lineTouchEndListener);
+//        canvas.removeEventListener('touchstart', touchStartListener);
         canvas.removeEventListener('touchmove', lineTouchMoveListener);
-        canvas.removeEventListener('mouseup', lineMouseUpListener);
-        canvas.removeEventListener('mousemove', lineMouseMoveListener);
+        canvas.removeEventListener('touchend', lineTouchEndListener);
         canvas.removeEventListener('mousedown', mouseDownListener);
+        canvas.removeEventListener('mousemove', lineMouseMoveListener);
+        canvas.removeEventListener('mouseup', lineMouseUpListener);
     }
     function addPenEvents() {
+//        canvas.addEventListener('touchstart', touchStartListener);
         canvas.addEventListener('touchmove', penTouchMoveListener);
-        canvas.addEventListener('mousemove', penMouseMoveListener);
         canvas.addEventListener('touchend', penTouchEndListener);
-        canvas.addEventListener('mouseup', penMouseUpListener);
         canvas.addEventListener('mousedown', mouseDownListener);
+        canvas.addEventListener('mousemove', penMouseMoveListener);
+        canvas.addEventListener('mouseup', penMouseUpListener);
     }
     function removePenEvents() {
+//        canvas.removeEventListener('touchstart', touchStartListener);
         canvas.removeEventListener('touchmove', penTouchMoveListener);
-        canvas.removeEventListener('mousemove', penMouseMoveListener);
         canvas.removeEventListener('touchend', penTouchEndListener);
-        canvas.removeEventListener('mouseup', penMouseUpListener);
         canvas.removeEventListener('mousedown', mouseDownListener);
+        canvas.removeEventListener('mousemove', penMouseMoveListener);
+        canvas.removeEventListener('mouseup', penMouseUpListener);
     }
     function addTextEvents() {
         canvas.addEventListener('touchstart', textTouchStartListener);
@@ -406,49 +406,24 @@ window.addEventListener("DOMContentLoaded", function () {
 		if (e.target == canvas) {
 			e.preventDefault();
 		}
-	}, false);
+	}, { passive: false });
 	document.body.addEventListener("touchend", function (e) {
 		if (e.target == canvas) {
 			e.preventDefault();
 		}
-	}, false);
+	}, { passive: false });
 	document.body.addEventListener("touchmove", function (e) {
 		if (e.target == canvas) {
 			e.preventDefault();
 		}
-	}, false);
-    function textTouchStartListener(e) {
-        ts.value = tsv++;
-        e.preventDefault();
-        textMouseDownListener(e);
-    }
-    function textMouseDownListener(e) {
-        e.preventDefault(); // stops focus being stolen by another event
-        md.value = mdv++;
-        if (e.touches) {
-            setLastPos(e.touches[0].clientX, e.touches[0].clientY);
-        } else {
-            setLastPos(e.clientX, e.clientY);
-        }
-        floatingElement.value = "";
-        var fs = floatingElement.style;
-        fs.backgroundColor = "yellow";
-        fs.borderStyle = "dashed solid";
-        fs.position = "absolute";
-        fs.zIndex = "1";
-        fs.width = getTextWidth('', getCanvasFontSize(floatingElement));
-        fs.left = (lastpos.x - 16) + "px";
-        fs.top = (lastpos.y - 42) + "px";
-        floatingElement.focus();
-    }
+	}, { passive: false });
+
     function touchStartListener(e) {
         ts.value = tsv++;
-        e.preventDefault();
         mouseDownListener(e);
     }
     function mouseDownListener(e) {
         md.value = mdv++;
-        e.preventDefault();
         isDrawing = true;
         firstLine = true;
         if (e.touches) {
@@ -459,12 +434,10 @@ window.addEventListener("DOMContentLoaded", function () {
     }
     function lineTouchEndListener(e) {
         te.value = tev++;
-        e.preventDefault();
         lineMouseUpListener(e);
     }
     function lineMouseUpListener(e) {
         mu.value = muv++;
-        e.preventDefault();
         if (e.touches) {
             setCurrentPos(e.changedTouches[0].pageX, e.changedTouches[0].pageY);
         } else {
@@ -476,12 +449,10 @@ window.addEventListener("DOMContentLoaded", function () {
     }
     function lineTouchMoveListener(e) {
         tm.value = tmv++;
-        e.preventDefault();
         lineMouseMoveListener(e);
     }
     function lineMouseMoveListener(e) {
         mm.value = mmv++;
-        e.preventDefault();
         if (isDrawing && !firstLine) {
             // if drawing in line mode, undo last line and draw current
             undo(e);
@@ -496,7 +467,6 @@ window.addEventListener("DOMContentLoaded", function () {
         lineDraw();
         firstLine = false;
     }
-
     function penTouchMoveListener(e) {
         tm.value = tmv++;
         // Call preventDefault() to prevent any mouse handling
@@ -507,7 +477,6 @@ window.addEventListener("DOMContentLoaded", function () {
     function penMouseMoveListener(e) {
         mm.value = mmv++;
         // draw freeform
-        e.preventDefault();
         if (!isDrawing) return;
         if (e.touches) {
             setCurrentPos(e.touches[0].clientX, e.touches[0].clientY);
@@ -518,12 +487,30 @@ window.addEventListener("DOMContentLoaded", function () {
     }
     function penTouchEndListener(e) {
         te.value = tev++;
-        e.preventDefault();
         penMouseUpListener(e);
     }
     function penMouseUpListener(e) {
         mu.value = muv++;
         isDrawing = false;
+    }
+    function textTouchStartListener(e) {
+        ts.value = tsv++;
+        textMouseDownListener(e);
+    }
+    function textMouseDownListener(e) {
+        e.preventDefault(); // stops focus being stolen by another event
+        md.value = mdv++;
+        if (e.touches) {
+            setLastPos(e.touches[0].clientX, e.touches[0].clientY);
+        } else {
+            setLastPos(e.clientX, e.clientY);
+        }
+        setFloatingTextBoxSize();
+        fs.left = (lastpos.x - 16) + "px";
+        fs.top = (lastpos.y - 42) + "px";
+        floatingElement.focus();
+        setBold(bold);
+        setItalic(italic);
     }
     function setLastPos(x, y) {
         lastpos.x = ((x - rect.left) + (window.pageXOffset - windowScrollXStartPos)) * scaleX;
