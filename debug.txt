@@ -1,7 +1,8 @@
 All
-$Env:DEBUG="noteList,noteCreateGet,noteCreatePost,noteUpdateGet,noteUpdatePost,noteDeleteGet,noteDeletePost,noteDrawGet,noteDrawPost"
+$Env:DEBUG="noteList,noteCreateGet,noteCreatePost,noteUpdateGet,noteUpdatePost,noteMoveGet,noteMovePost,noteDeleteGet,noteDeletePost,noteDrawGet,noteDrawPost"
 $Env:DEBUG="noteList"
 $Env:DEBUG="noteCreateGet,noteCreatePost"
 $Env:DEBUG="noteUpdateGet,noteUpdatePost"
+$Env:DEBUG="noteMoveGet,noteMovePost"
 $Env:DEBUG="noteDeleteGet,noteDeletePost"
 $Env:DEBUG="noteDrawGet,noteDrawPost"

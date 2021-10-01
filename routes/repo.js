@@ -20,6 +20,9 @@ router.post('/:subject/:topic/:subtopic/note/create', note_controller.note_creat
 router.get( '/:subject/:topic/:subtopic/note/:note', note_controller.note_update_get);
 router.post('/:subject/:topic/:subtopic/note/:note', note_controller.note_update_post);
 
+router.get( '/:subject/:topic/:subtopic/note/:note/move', note_controller.note_move_get);
+router.post('/:subject/:topic/:subtopic/note/:note/move', note_controller.note_move_post);
+
 router.get( '/:subject/:topic/:subtopic/note/:note/delete', note_controller.note_delete_get);
 router.post('/:subject/:topic/:subtopic/note/:note/delete', note_controller.note_delete_post);
 

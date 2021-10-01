@@ -1,6 +1,3 @@
-var title = document.getElementById('title');
-var lectureNote = document.getElementById('lectureNote');
-
 function insertThisInThere(HTMLSelectElement) {
     let collection = HTMLSelectElement.selectedOptions;
     let theChar = "";
@@ -16,19 +13,21 @@ function insertThisInThere(HTMLSelectElement) {
 		return;
 	function theCursorPosition(ofThisInput) {
 		// set a fallback cursor location
-		var theCursorLocation = 0;
+		var pos = { start: 0, end: 0 };
  
 		// find the cursor location via IE method...
 		if (document.selection) {
 			ofThisInput.focus();
 			var theSelectionRange = document.selection.createRange();
 			theSelectionRange.moveStart('character', -ofThisInput.value.length);
-			theCursorLocation = theSelectionRange.text.length;
+			pos.start = theSelectionRange.text.length;
+			pos.end = pos.start;	// not sure how to calculate this, so use same value
 		} else if (ofThisInput.selectionStart || ofThisInput.selectionStart == '0') {
 			// or the FF way 
-			theCursorLocation = ofThisInput.selectionStart;
+			pos.start = ofThisInput.selectionStart;
+			pos.end = ofThisInput.selectionEnd;
 		}
-		return theCursorLocation;
+		return pos;
 	}
 	function getSelectionBoundaryElement(isStart) {
 		var range, sel, container;
@@ -68,10 +67,10 @@ function insertThisInThere(HTMLSelectElement) {
 	if (!((htmlElement instanceof HTMLInputElement) || (htmlElement instanceof HTMLTextAreaElement))) {
 		return;
 	}
-	var currentPos = theCursorPosition(htmlElement);
+	let pos = theCursorPosition(htmlElement);
 	var origValue = htmlElement.value;
-	var newValue = origValue.substr(0, currentPos) + theChar + origValue.substr(currentPos);
+	var newValue = origValue.substr(0, pos.start) + theChar + origValue.substr(pos.end);
 	htmlElement.value = newValue;
+	htmlElement.setSelectionRange(pos.start + 1, pos.start + 1)
 	htmlElement.focus();
-	htmlElement.setSelectionRange(currentPos + 1, currentPos + 1);
 }

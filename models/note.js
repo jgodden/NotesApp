@@ -8,11 +8,11 @@ var NoteSchema = new Schema({
     creationDate: { type: Date, required: true },
     updateDate: { type: Date, required: true },
     title: { type: String, required: true },
-    lectureNote: { type: String, required: true },
+    lectureNote: { type: String, required: false },
     keywords: { type: String, required: false },
     questions: { type: String, required: false },
     comments: { type: String, required: false },
-    summary: { type: String, required: true },
+    summary: { type: String, required: false },
     image: { type: String, required: false }
 });
 

@@ -254,17 +254,19 @@ window.addEventListener("DOMContentLoaded", function () {
         });
     }
     // colors
+    document.getElementById('black_button').addEventListener('click', changeColor);
+    document.getElementById('white_button').addEventListener('click', changeColor);
     document.getElementById('blue_button').addEventListener('click', changeColor);
     document.getElementById('red_button').addEventListener('click', changeColor);
     document.getElementById('green_button').addEventListener('click', changeColor);
-    document.getElementById('black_button').addEventListener('click', changeColor);
-    document.getElementById('white_button').addEventListener('click', changeColor);
+    document.getElementById('yellow_button').addEventListener('click', changeColor);
     function changeColor(e) {
+        document.getElementById('black_button').style.border = "none";
+        document.getElementById('white_button').style.border = "none";
         document.getElementById('blue_button').style.border = "none";
         document.getElementById('red_button').style.border = "none";
         document.getElementById('green_button').style.border = "none";
-        document.getElementById('black_button').style.border = "none";
-        document.getElementById('white_button').style.border = "none";
+        document.getElementById('yellow_button').style.border = "none";
         e.target.style.border = "thin solid black";
         if (e.currentTarget.id === 'black_button')
             strokeStyle = 'black';
@@ -276,6 +278,8 @@ window.addEventListener("DOMContentLoaded", function () {
             strokeStyle = 'red';
         if (e.currentTarget.id === 'green_button')
             strokeStyle = 'green';
+        if (e.currentTarget.id === 'yellow_button')
+            strokeStyle = 'orange';
     }
 
     // line width
@@ -308,6 +312,23 @@ window.addEventListener("DOMContentLoaded", function () {
     var lineWidth = 5;
     ctx.lineCap = 'round';
     ctx.fillStyle = 'white';
+
+    // Prevent scrolling when touching the canvas
+	document.body.addEventListener("touchstart", function (e) {
+		if (e.target == canvas) {
+			e.preventDefault();
+		}
+	}, { passive: false });
+	document.body.addEventListener("touchend", function (e) {
+		if (e.target == canvas) {
+			e.preventDefault();
+		}
+	}, { passive: false });
+	document.body.addEventListener("touchmove", function (e) {
+		if (e.target == canvas) {
+			e.preventDefault();
+		}
+	}, { passive: false });
 
     function storeAction(a) {
         actions.push(a);
@@ -401,23 +422,6 @@ window.addEventListener("DOMContentLoaded", function () {
         canvas.removeEventListener('touchstart', textTouchStartListener);
         canvas.removeEventListener('mousedown', textMouseDownListener);
     }
-    // Prevent scrolling when touching the canvas
-	document.body.addEventListener("touchstart", function (e) {
-		if (e.target == canvas) {
-			e.preventDefault();
-		}
-	}, { passive: false });
-	document.body.addEventListener("touchend", function (e) {
-		if (e.target == canvas) {
-			e.preventDefault();
-		}
-	}, { passive: false });
-	document.body.addEventListener("touchmove", function (e) {
-		if (e.target == canvas) {
-			e.preventDefault();
-		}
-	}, { passive: false });
-
     function touchStartListener(e) {
         ts.value = tsv++;
         mouseDownListener(e);

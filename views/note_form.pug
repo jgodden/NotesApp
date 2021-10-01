@@ -3,41 +3,42 @@ extends layout
 block content
   script(src="https://media-library.cloudinary.com/global/all.js")
   form(method='POST' action='')
-    if note
-      div(class="row gx-0")
-        div(class="col-3")
+    div(class="row gx-0")
+      div(class="col-3")
+        if note
           p Creation date:  #{note.creationDate_formatted}
-        div(class="col-1")
-          select#supersubSymbolSelect(class='form-control selcls', type='select', name='supersubSymbolSelect' class="form-control form-control-sm" onchange="insertThisInThere(this);")
-            option(value=-1) &lt;supersub&gt;
-            for symbol in supersub_symbol_list 
-              option(value=symbol.index) #{symbol.char} (#{symbol.description})
-        div(class="col-1")
-          select#fractionSymbolSelect(class='form-control selcls', type='select', name='fractionSymbolSelect' class="form-control form-control-sm" onchange="insertThisInThere(this);")
-            option(value=-1) &lt;fractions&gt;
-            for symbol in fraction_symbol_list 
-              option(value=symbol.index) #{symbol.char} (#{symbol.description})
-        div(class="col-1")
-          select#shapeSymbolSelect(class='form-control selcls', type='select', name='shapeSymbolSelect' class="form-control form-control-sm" onchange="insertThisInThere(this);")
-            option(value=-1) &lt;shapes&gt;
-            for symbol in shape_symbol_list 
-              option(value=symbol.index) #{symbol.char} (#{symbol.description})
-        div(class="col-1")
-          select#symbolSymbolSelect(class='form-control selcls', type='select', name='symbolSymbolSelect' class="form-control form-control-sm" onchange="insertThisInThere(this);")
-            option(value=-1) &lt;symbols&gt;
-            for symbol in symbol_symbol_list 
-              option(value=symbol.index) #{symbol.char} (#{symbol.description})
-        div(class="col-1")
-          select#operatorSymbolSelect(class='form-control selcls', type='select', name='operatorSymbolSelect' class="form-control form-control-sm" onchange="insertThisInThere(this);")
-            option(value=-1) &lt;operators&gt;
-            for symbol in operator_symbol_list 
-              option(value=symbol.index) #{symbol.char} (#{symbol.description})
-        div(class="col-1")
-          select#arrowSymbolSelect(class='form-control selcls', type='select', name='arrowSymbolSelect' class="form-control form-control-sm" onchange="insertThisInThere(this);")
-            option(value=-1) &lt;arrows&gt;
-            for symbol in arrow_symbol_list 
-              option(value=symbol.index) #{symbol.char} (#{symbol.description})
-        div(class="col-3 text-end")
+      div(class="col-1")
+        select#supersubSymbolSelect(class='form-control selcls', type='select', name='supersubSymbolSelect' class="form-control form-control-sm" onchange="insertThisInThere(this);")
+          option(value=-1) &lt;supersub&gt;
+          for symbol in supersub_symbol_list 
+            option(value=symbol.index) #{symbol.char} (#{symbol.description})
+      div(class="col-1")
+        select#fractionSymbolSelect(class='form-control selcls', type='select', name='fractionSymbolSelect' class="form-control form-control-sm" onchange="insertThisInThere(this);")
+          option(value=-1) &lt;fractions&gt;
+          for symbol in fraction_symbol_list 
+            option(value=symbol.index) #{symbol.char} (#{symbol.description})
+      div(class="col-1")
+        select#shapeSymbolSelect(class='form-control selcls', type='select', name='shapeSymbolSelect' class="form-control form-control-sm" onchange="insertThisInThere(this);")
+          option(value=-1) &lt;shapes&gt;
+          for symbol in shape_symbol_list 
+            option(value=symbol.index) #{symbol.char} (#{symbol.description})
+      div(class="col-1")
+        select#symbolSymbolSelect(class='form-control selcls', type='select', name='symbolSymbolSelect' class="form-control form-control-sm" onchange="insertThisInThere(this);")
+          option(value=-1) &lt;symbols&gt;
+          for symbol in symbol_symbol_list 
+            option(value=symbol.index) #{symbol.char} (#{symbol.description})
+      div(class="col-1")
+        select#operatorSymbolSelect(class='form-control selcls', type='select', name='operatorSymbolSelect' class="form-control form-control-sm" onchange="insertThisInThere(this);")
+          option(value=-1) &lt;operators&gt;
+          for symbol in operator_symbol_list 
+            option(value=symbol.index) #{symbol.char} (#{symbol.description})
+      div(class="col-1")
+        select#arrowSymbolSelect(class='form-control selcls', type='select', name='arrowSymbolSelect' class="form-control form-control-sm" onchange="insertThisInThere(this);")
+          option(value=-1) &lt;arrows&gt;
+          for symbol in arrow_symbol_list 
+            option(value=symbol.index) #{symbol.char} (#{symbol.description})
+      div(class="col-3 text-end")
+        if note
           p Last updated: #{note.updateDate_formatted}
     div(class="row gx-0")
       input#enc_sig.form-control(type='hidden', name='enc_sig', value=(enc_sig))
@@ -56,19 +57,19 @@ block content
         div(class="border-end border-secondary")
           div(class="row")
             div(class="col-12")
-              textarea#keywords.form-control(type='textarea', placeholder='Keywords' name='keywords' required='false' rows='7' class="form-control form-control-sm") #{undefined===note ? '' : note.keywords}
+              textarea#keywords.form-control(type='textarea', placeholder='Keywords' name='keywords' rows='7' class="form-control form-control-sm") #{undefined===note ? '' : note.keywords}
           div(class="row")
             div(class="col-12")
-              textarea#questions.form-control(type='textarea', placeholder='Questions' name='questions' required='false' rows='7' class="form-control form-control-sm") #{undefined===note ? '' : note.questions}
+              textarea#questions.form-control(type='textarea', placeholder='Questions' name='questions' rows='7' class="form-control form-control-sm") #{undefined===note ? '' : note.questions}
           div(class="row")
             div(class="col-12")
-              textarea#comments.form-control(type='textarea', placeholder='Comments' name='comments' required='false' rows='7' class="form-control form-control-sm") #{undefined===note ? '' : note.comments}
+              textarea#comments.form-control(type='textarea', placeholder='Comments' name='comments' rows='7' class="form-control form-control-sm") #{undefined===note ? '' : note.comments}
       div(class="col-8")
-        textarea#lectureNote.form-control(type='textarea', placeholder='Lecture Notes' name='lectureNote' required='true' rows='22' class="form-control form-control-sm") #{undefined===note ? '' : note.lectureNote}
+        textarea#lectureNote.form-control(type='textarea', placeholder='Lecture Notes' name='lectureNote' rows='22' class="form-control form-control-sm") #{undefined===note ? '' : note.lectureNote}
     div(class="border-top border-secondary")
       div(class="row gx-0")
         div(class="col-12")
-          textarea#summary.form-control(type='textarea', placeholder='Summary' name='summary' required='true' rows='4' class="form-control form-control-sm") #{undefined===note ? '' : note.summary}
+          textarea#summary.form-control(type='textarea', placeholder='Summary' name='summary' rows='4' class="form-control form-control-sm") #{undefined===note ? '' : note.summary}
     div(class="keys")
       div(class="row mt-3 gx-0")
         div(class="col-2")
@@ -77,16 +78,11 @@ block content
           a(class='btn btn-secondary btn-sm' href='/repo/' + subjectid + '/' + topicid + '/' + subtopicid + '/notes' role='button')  Cancel
         if note
           div(class="col-2")
+            a(class='btn btn-warning btn-sm' href='/repo/' + subjectid + '/' + topicid + '/' + subtopicid + '/note/' + note._id + '/move' role='button')  Move
+          div(class="col-2")
             a(class='btn btn-danger btn-sm' href='/repo/' + subjectid + '/' + topicid + '/' + subtopicid + '/note/' + note._id + '/delete' role='button')  Delete
           div(class="col-2")
-            a(class='btn btn-dark btn-sm' href='/repo/' + subjectid + '/' + topicid + '/' + subtopicid + '/note/' + note._id + '/draw' id='drawing_button' role='button')  Draw
+            a(class='btn btn-dark btn-sm' href='/repo/' + subjectid + '/' + topicid + '/' + subtopicid + '/note/' + note._id + '/draw' role='button')  Draw
           div(class="col-2")
             a(class='btn btn-success btn-sm' id='image_button' role='button')  Images
-            script(src="/javascripts/imageHandling.js" type="text/javascript")
-  script(src="/javascripts/processInput.js" type="text/javascript")
-
-
-  if errors
-    ul
-      for error in errors
-        li!= error.msg
+  script(src="/javascripts/imageHandling.js" type="text/javascript")

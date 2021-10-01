@@ -6,6 +6,7 @@ html(lang='en')
     script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.slim.min.js", integrity="sha512-6ORWJX/LrnSjBzwefdNUyLCMTIsGoNP6NftMy2UAm1JBm6PRZCO1d7OHBStWpVFZLO+RerTvqX/Z9mBFfCJZ4A==", crossorigin="anonymous")
     script(src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.1/js/bootstrap.min.js", integrity="sha512-ewfXo9Gq53e1q1+WDTjaHAGZ8UvCWq0eXONhwDuIoaH8xz2r96uoAYaQCm1oQhnBfRXrvJztNXFsTloJfgbL5Q==", crossorigin="anonymous")
     script(src="/javascripts/navDropdownChange.js" type="text/javascript")
+    script(src="/javascripts/noteForm.js" type="text/javascript")
     link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.1/css/bootstrap.min.css", integrity="sha512-6KY5s6UI5J7SVYuZB4S/CZMyPylqyyNZco376NM2Z8Sb8OxEdp02e1jkKk/wZxIEmjQ6DRCEBhni+gpr9c4tvA==", crossorigin="anonymous")
     link(rel='stylesheet', href='/stylesheets/style.css')
   body
@@ -13,21 +14,21 @@ html(lang='en')
       div(class="row mt-3")
         div(class="col-sm-2")
           form(class="form-inline my-2 my-lg-0")
-            select#subject(class='form-control selcls', type='select', name='subject' required='true', class="form-control form-control-sm" onchange="ChangeSelection(this);")
+            select#subject(class='form-control selcls', type='select', name='subject' class="form-control form-control-sm" onchange="ChangeSelection(this);")
               option(value=1) &lt;search all&gt;
               for subject in subject_list
                 if subjectid
                   option(value=subject._id selected=(subject._id.toString()===subjectid.toString() ? 'selected' : false) ) #{subject.title}
                 else 
                   option(value=subject._id) #{subject.title}
-            select#topic(class='form-control selcls', type='select', name='topic' required='true', class="form-control form-control-sm" onchange="ChangeSelection(this);")
+            select#topic(class='form-control selcls', type='select', name='topic' class="form-control form-control-sm" onchange="ChangeSelection(this);")
               option(value=1) &lt;search all&gt;
               for topic in topic_list
                 if topicid
                   option(value=topic._id selected=(topic._id.toString()===topicid.toString() ? 'selected' : false) ) #{topic.title}
                 else 
                   option(value=topic._id) #{topic.title}
-            select#subtopic(class='form-control selcls', type='select', name='subtopic' required='true', class="form-control form-control-sm" onchange="ChangeSelection(this);")
+            select#subtopic(class='form-control selcls', type='select', name='subtopic' class="form-control form-control-sm" onchange="ChangeSelection(this);")
               option(value=1) &lt;search all&gt;
               for subtopic in subtopic_list
                 if subtopicid
@@ -63,7 +64,11 @@ html(lang='en')
                 h6  General
                 a(class="dropdown-item" href='https://www.guildfordcounty.co.uk/603/welcome-to-the-sixth-form' target='_blank' role='button') GCS Sixth Form
           div(class="row mt-3 gx-0")
-            if (subjectid != '1' && topicid != '1' && subtopicid != '1')
+            if (note_list && (subjectid != '1' && topicid != '1' && subtopicid != '1'))
               a(class='btn btn-primary btn-sm btn-block' href='/repo/' + subjectid + '/' + topicid + '/' + subtopicid + '/note/create' role='button') Create New Note
         div(class="col-sm-10" id='form-div')
+          div(class="row mt-3 gx-0")
+            if errors
+              for error in errors
+                h1 Error: #{error}
           block content

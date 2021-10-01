@@ -76,21 +76,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/repo', repoRouter);  // Add repo routes to middleware chain.
 
-let setCache = function (req, res, next) {
-  const period = 60 * 5 
-
-  // only no-cache for GET requests
-  if (req.method == 'GET') {
-    res.set('Cache-control', `no-cache`)
-  } else {
-    // for the other requests set strict no caching parameters
-    res.set('Cache-control', `no-store`)
-  }
-  next()
-}
-
-app.use(setCache);
-
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404, req.originalUrl));

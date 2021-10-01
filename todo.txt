@@ -1,0 +1,13 @@
+* Make fields not required
+* Remove create note button while creating note
+* Supersub +,-,=,(,)
+* Paste onto selection
+* Divide (/) not rendered correctly
+* Add symbol selections to create note
+* Insert symbol scrolls to bottom of element
+
+Move note to different topic/subtopic
+* Set timezone of mongo
+
+Tables (not in textarea - perhaps as image)
+Geography notes

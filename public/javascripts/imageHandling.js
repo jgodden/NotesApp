@@ -19,5 +19,5 @@ var mediaLibraryWidget = cloudinary.createMediaLibrary({
     button_caption: 'Select Image or Video',
   });
 
-  var imageBtn = document.getElementById('image_button');
-  imageBtn.onclick = function() {mediaLibraryWidget.show({folder: {path: folder}})};
+var imageBtn = document.getElementById('image_button');
+imageBtn.onclick = function() {mediaLibraryWidget.show({folder: {path: folder}})};
