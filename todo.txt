@@ -5,6 +5,8 @@
 * Divide (/) not rendered correctly
 * Add symbol selections to create note
 * Insert symbol scrolls to bottom of element
+* roll description and links up into dropdown
+* confirm cancel if changes made to drawing and note
 
 Move note to different topic/subtopic
 * Set timezone of mongo

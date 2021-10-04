@@ -1,8 +1,7 @@
 extends layout
 
 block content
-  script(src="https://media-library.cloudinary.com/global/all.js")
-  form(method='POST' action='')
+  form(method='POST' action='' id='note_form')
     div(class="row gx-0")
       div(class="col-3")
         if note
@@ -75,15 +74,15 @@ block content
         div(class="col-2")
           button.btn.btn-primary.btn-sm(type='submit' id='save_button') Save
         div(class="col-2")
-          a(class='btn btn-secondary btn-sm' href='/repo/' + subjectid + '/' + topicid + '/' + subtopicid + '/notes' role='button')  Cancel
+          a(class='btn btn-secondary btn-sm' href='/repo/' + subjectid + '/' + topicid + '/' + subtopicid + '/notes' role='button' onclick="return confirmCancel();") Cancel
         if note
           div(class="col-2")
-            a(class='btn btn-warning btn-sm' href='/repo/' + subjectid + '/' + topicid + '/' + subtopicid + '/note/' + note._id + '/move' role='button')  Move
+            a(class='btn btn-warning btn-sm' href='/repo/' + subjectid + '/' + topicid + '/' + subtopicid + '/note/' + note._id + '/move' role='button') Move
           div(class="col-2")
-            a(class='btn btn-danger btn-sm' href='/repo/' + subjectid + '/' + topicid + '/' + subtopicid + '/note/' + note._id + '/delete' role='button')  Delete
+            a(class='btn btn-danger btn-sm' href='/repo/' + subjectid + '/' + topicid + '/' + subtopicid + '/note/' + note._id + '/delete' role='button') Delete
           div(class="col-2")
-            a(class='btn btn-dark btn-sm' href='/repo/' + subjectid + '/' + topicid + '/' + subtopicid + '/note/' + note._id + '/draw' role='button')  Draw
+            a(class='btn btn-dark btn-sm' href='/repo/' + subjectid + '/' + topicid + '/' + subtopicid + '/note/' + note._id + '/draw' role='button') Draw
           div(class="col-2")
-            a(class='btn btn-success btn-sm' id='image_button' role='button')  Images
+            button.btn.btn-success.btn-sm(type='button' id='image_button' role='button') Images
 block append foot
-  script(src="/javascripts/imageHandling.js" type="text/javascript")
+  script(src="/javascripts/noteForm.js" type="text/javascript")

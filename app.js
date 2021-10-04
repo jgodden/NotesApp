@@ -3,7 +3,6 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-const indexRouter = require('./routes/index');
 const repoRouter = require('./routes/repo');  //Import routes for "repo" area of site
 const compression = require('compression');
 const helmet = require('helmet');
@@ -21,27 +20,46 @@ app.use(
   helmet({
       contentSecurityPolicy: {
           directives: {
-              defaultSrc: ["'self'"],
-              connectSrc: ["'self'", "mongodb+srv://cluster0.j8m3g.mongodb.net"],
-              imgSrc: ["'self'", "http://127.0.0.1:8080", "http://res.cloudinary.com/", "data:"],
-              scriptSrc:["'self'","https://cdnjs.cloudflare.com/",
+              defaultSrc: [
+                "'self'"],
+              connectSrc: [
+                "'self'",
+                "mongodb+srv://cluster0.j8m3g.mongodb.net"],
+              imgSrc: [
+                "'self'",
+                "https://res.cloudinary.com/",
+                "data:"],
+              scriptSrc:[
+                "'self'",
+                "https://cdnjs.cloudflare.com/",
                 "https://upload-widget.cloudinary.com",
                 "https://media-library.cloudinary.com",
                 "https://code.jquery.com",
                 "https://maxcdn.bootstrapcdn.com",
                 "https://cdn.jsdelivr.net",
                 "'unsafe-inline'"],
-              styleSrc:["'self'","https://cdnjs.cloudflare.com/",
-              "https://maxcdn.bootstrapcdn.com",
-              "https://cdn.jsdelivr.net",
-              "'unsafe-inline'"],
-              fontSrc:["'self'","https://cdnjs.cloudflare.com/"],
-              frameSrc:[ "https://upload-widget.cloudinary.com",
+              styleSrc:[
+                "'self'",
+                "https://cdnjs.cloudflare.com/",
+                "https://maxcdn.bootstrapcdn.com",
+                "https://cdn.jsdelivr.net",
+                "'unsafe-inline'"],
+              fontSrc:[
+                "'self'","https://cdnjs.cloudflare.com/"],
+              frameSrc:[
+                "https://upload-widget.cloudinary.com",
                 "https://cloudinary.com/"]
-          }
+          },
       },
+      //crossOriginEmbedderPolicy: true,
+      //crossOriginOpenerPolicy: true,
+      //crossOriginResourcePolicy: { policy: "cross-origin" }
   })
 );
+app.use(helmet.noSniff());
+app.use(helmet.frameguard({ action: "deny", }));
+app.use(helmet.hidePoweredBy());
+app.use(helmet.xssFilter());
 app.use(compression()); //Compress all routes
 
 //Set up mongoose connection
@@ -79,8 +97,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/repo', repoRouter);  // Add repo routes to middleware chain.
+app.use('/repo/', repoRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

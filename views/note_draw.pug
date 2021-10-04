@@ -92,46 +92,4 @@ html(lang='en')
             div(class="col-2")
               button.btn.btn-primary.btn-sm(type='submit' id='save_button') Save
             div(class="col-2")
-              a(class='btn btn-secondary btn-sm' href='/repo/' + subjectid + '/' + topicid + '/' + subtopicid + '/note/' + note._id, role='button')  Cancel
-          div(class="row mt-3 gx-0")
-            div(class="col-1")
-              p lx
-            div(class="col-1")
-              p ly
-            div(class="col-1")
-              p cx
-            div(class="col-1")
-              p cy
-            div(class="col-1")
-              p md
-            div(class="col-1")
-              p mu
-            div(class="col-1")
-              p mm
-            div(class="col-1")
-              p ts
-            div(class="col-1")
-              p te
-            div(class="col-1")
-              p tm
-          div(class="row mt-3 gx-0")
-            div(class="col-1")
-              input#lastposx.form-control(type='text' name='lastposx' class="form-control form-control-sm" value="")
-            div(class="col-1")
-              input#lastposy.form-control(type='text' name='lastposy' class="form-control form-control-sm" value="")
-            div(class="col-1")
-              input#currentposx.form-control(type='text' name='currentposx' class="form-control form-control-sm" value="")
-            div(class="col-1")
-              input#currentposy.form-control(type='text' name='currentposy' class="form-control form-control-sm" value="")
-            div(class="col-1")
-              input#mousedown.form-control(type='text' name='mousedown' class="form-control form-control-sm" value="")
-            div(class="col-1")
-              input#mouseup.form-control(type='text' name='mouseup' class="form-control form-control-sm" value="")
-            div(class="col-1")
-              input#mousemove.form-control(type='text' name='mousemove' class="form-control form-control-sm" value="")
-            div(class="col-1")
-              input#touchstart.form-control(type='text' name='touchstart' class="form-control form-control-sm" value="")
-            div(class="col-1")
-              input#touchend.form-control(type='text' name='touchend' class="form-control form-control-sm" value="")
-            div(class="col-1")
-              input#touchmove.form-control(type='text' name='touchmove' class="form-control form-control-sm" value="")
+              a(class='btn btn-secondary btn-sm' href='/repo/' + subjectid + '/' + topicid + '/' + subtopicid + '/note/' + note._id, role='button' onclick="return confirmCancel();")  Cancel

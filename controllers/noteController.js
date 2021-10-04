@@ -5,10 +5,10 @@ const Topic = require('../models/topic');
 const Subtopic = require('../models/subtopic');
 
 const async = require('async');
-const { now } = require('mongoose');
 
-exports.index = function(req, res, next) {
-    res.render('index', {});
+exports.home_page = function(req, res, next) {
+    console.log('redirect from ' + req + ' to 0/0/0');
+    res.redirect('/repo/0/0/0');
 };
 
 // decode all html encoding to original text
@@ -365,7 +365,7 @@ exports.note_create_post = [
                     render_create_page(req, res, next, [error]);
                     return;
                 }
-                image_url = cl_result.url;
+                image_url = cl_result.secure_url;
                 dbgNoteCreatePost('cloudinary returned url ' + image_url);
                 
                 // Data from form is valid. Save note.
@@ -712,7 +712,7 @@ exports.note_move_post = function(req, res, next) {
                 render_move_page(req, res, next, [error]);
                 return;
             }
-            image_url = cl_result.url;
+            image_url = cl_result.secure_url;
             dbgNoteMovePost('cloudinary returned url ' + image_url);
             // update note with image url
             newnote.image = image_url;
@@ -886,7 +886,7 @@ exports.note_delete_post = function(req, res, next) {
                 render_move_page(req, res, next, [error]);
                 return;
             }
-            image_url = cl_result.url;
+            image_url = cl_result.secure_url;
             dbgNoteDeletePost('cloudinary returned url ' + image_url);
         })();
         var redirect = '/repo/' + req.body.subjectid + '/' + req.body.topicid + '/' + req.body.subtopicid + '/notes';
@@ -956,7 +956,6 @@ exports.note_draw_post = function(req, res, next) {
         })
         .then(result => cl_result = result)
         .catch(error => cl_error = error);
-        // update note with image url
         if (cl_error) {
             var error = handle_cloudinary_error(cl_error);
             render_draw_page(req, res, next, [error]);

@@ -1,28 +1,7 @@
 window.addEventListener("DOMContentLoaded", function () {
-    var lx = document.getElementById('lastposx');
-    var lxv = 0;
-    var ly = document.getElementById('lastposy');
-    var lyv = 0;
-    var cx = document.getElementById('currentposx');
-    var cxv = 0;
-    var cy = document.getElementById('currentposy');
-    var cyv = 0;
-    var md = document.getElementById('mousedown');
-    var mdv = 0;
-    var mu = document.getElementById('mouseup');
-    var muv = 0;
-    var mm = document.getElementById('mousemove');
-    var mmv = 0;
-    var ts = document.getElementById('touchstart');
-    var tsv = 0;
-    var te = document.getElementById('touchend');
-    var tev = 0;
-    var tm = document.getElementById('touchmove');
-    var tmv = 0;
     // Get ref to save buton so we can set up an event listener to
     // send the image bitmap to the database when saving the note
     var save_button = document.getElementById('save_button');
-
     // Get ref to image data url element which will initially receive the
     // cloudinary url. This will be used as the src attribute of the canvas
     // image, and the image data will be retrieved from cloudinary using this
@@ -39,6 +18,8 @@ window.addEventListener("DOMContentLoaded", function () {
     // Set canvas border
     canvas.style.border = "thin dashed #888888";
 
+    // true if changes made to drawing in this session
+    var changesMade = false;
     // Contains list of actions used to implement undo/redo
     var actions = [];
     // Contains array of actions popped from actions on undo
@@ -98,6 +79,11 @@ window.addEventListener("DOMContentLoaded", function () {
             image_data_element.value = urlData;
         } catch (e) {
             alert('save image data error: ' + e);
+        }
+    }
+    confirmCancel = function confirmCancel(e) {
+        if (changesMade) {
+            return confirm('You have made changes to this drawing which will be lost if you cancel\nOk to discard these changes?');
         }
     }
 
@@ -331,6 +317,7 @@ window.addEventListener("DOMContentLoaded", function () {
 	}, { passive: false });
 
     function storeAction(a) {
+        changesMade = true;
         actions.push(a);
     }
     function drawAction(action) {
@@ -363,10 +350,12 @@ window.addEventListener("DOMContentLoaded", function () {
             drawAction(action);
         });
     }
-    function undo(e) {
+    function undo(e, discard) {
         hideFloatingText();
         if (actions.length > 0) {
-            redoList.push(actions.pop());
+            var a = actions.pop();
+            if (!discard)
+                redoList.push(a);
             redrawAll();
         } else {
             alert('nothing to undo');
@@ -423,11 +412,9 @@ window.addEventListener("DOMContentLoaded", function () {
         canvas.removeEventListener('mousedown', textMouseDownListener);
     }
     function touchStartListener(e) {
-        ts.value = tsv++;
         mouseDownListener(e);
     }
     function mouseDownListener(e) {
-        md.value = mdv++;
         isDrawing = true;
         firstLine = true;
         if (e.touches) {
@@ -437,11 +424,9 @@ window.addEventListener("DOMContentLoaded", function () {
         }
     }
     function lineTouchEndListener(e) {
-        te.value = tev++;
         lineMouseUpListener(e);
     }
     function lineMouseUpListener(e) {
-        mu.value = muv++;
         if (e.touches) {
             setCurrentPos(e.changedTouches[0].pageX, e.changedTouches[0].pageY);
         } else {
@@ -452,14 +437,13 @@ window.addEventListener("DOMContentLoaded", function () {
         isDrawing = false;
     }
     function lineTouchMoveListener(e) {
-        tm.value = tmv++;
         lineMouseMoveListener(e);
     }
     function lineMouseMoveListener(e) {
-        mm.value = mmv++;
         if (isDrawing && !firstLine) {
-            // if drawing in line mode, undo last line and draw current
-            undo(e);
+            // if drawing in line mode, undo last line and draw current,
+            // discarding action from redo list
+            undo(e, true);
         }
         if (e.touches) {
             setCurrentPos(e.changedTouches[0].pageX, e.changedTouches[0].pageY);
@@ -472,14 +456,12 @@ window.addEventListener("DOMContentLoaded", function () {
         firstLine = false;
     }
     function penTouchMoveListener(e) {
-        tm.value = tmv++;
         // Call preventDefault() to prevent any mouse handling
         e.preventDefault();
 		penMouseMoveListener(e);
     }
     // draw freeform
     function penMouseMoveListener(e) {
-        mm.value = mmv++;
         // draw freeform
         if (!isDrawing) return;
         if (e.touches) {
@@ -490,20 +472,16 @@ window.addEventListener("DOMContentLoaded", function () {
         penDraw();
     }
     function penTouchEndListener(e) {
-        te.value = tev++;
         penMouseUpListener(e);
     }
     function penMouseUpListener(e) {
-        mu.value = muv++;
         isDrawing = false;
     }
     function textTouchStartListener(e) {
-        ts.value = tsv++;
         textMouseDownListener(e);
     }
     function textMouseDownListener(e) {
         e.preventDefault(); // stops focus being stolen by another event
-        md.value = mdv++;
         if (e.touches) {
             setLastPos(e.touches[0].clientX, e.touches[0].clientY);
         } else {
@@ -519,14 +497,10 @@ window.addEventListener("DOMContentLoaded", function () {
     function setLastPos(x, y) {
         lastpos.x = ((x - rect.left) + (window.pageXOffset - windowScrollXStartPos)) * scaleX;
         lastpos.y = ((y - rect.top) + (window.pageYOffset - windowScrollYStartPos)) * scaleY;
-        lx.value = lastpos.x;
-        ly.value = lastpos.y;
     }
     function setCurrentPos(x, y) {
         currentpos.x = ((x - rect.left) + (window.pageXOffset - windowScrollXStartPos)) * scaleX;
         currentpos.y = ((y - rect.top) + (window.pageYOffset - windowScrollYStartPos)) * scaleY;
-        cx.value = currentpos.x;
-        cy.value = currentpos.y;
     }
     function penDraw() {
         if (!isDrawing) return;

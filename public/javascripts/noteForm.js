@@ -1,3 +1,60 @@
+var changesMade = false;
+window.addEventListener("DOMContentLoaded", function () {
+	let script = document.createElement('script');
+	script.src = "https://media-library.cloudinary.com/global/all.js"
+	document.head.appendChild(script);
+	script.onload = function() {
+		var cloud_name = 'ddpa7qntq';
+		var api_key = '127533828577153';
+		var username = 'jgodden@hotmail.com';
+		var unixTimestamp = Math.floor(Date.now() / 1000);
+		var enc_sig = document.getElementById('enc_sig').value;
+		var subjectid = document.getElementById('subjectid').value;
+		var topicid = document.getElementById('topicid').value;
+		var subtopicid = document.getElementById('subtopicid').value;
+		var noteid = document.getElementById('noteid').value;
+		var folder = subjectid + '/' + topicid + '/' + subtopicid + '/' + noteid;
+
+		try {
+			var mediaLibraryWidget = cloudinary.createMediaLibrary({
+				cloud_name: cloud_name,
+				signature: enc_sig,
+				api_key: api_key,
+				username: username,
+				timestamp: unixTimestamp,
+				button_class: 'btn',
+				button_caption: 'Select Image or Video',
+			});
+
+			var imageBtn = document.getElementById('image_button');
+			imageBtn.onclick = function() {mediaLibraryWidget.show({folder: {path: folder}})};
+		} catch(err) {
+			// disable image button
+			image_button = document.getElementById('image_button');
+			image_button.disabled = true;
+			image_button.ariaDisabled = true;
+			alert('Images button disabled as unable to run cloudinary\n\nMore detailed error: Cannot load ' + err);
+		}
+	};
+	script.onerror = function() {
+		// disable image button
+		image_button = document.getElementById('image_button');
+		image_button.disabled = true;
+		image_button.ariaDisabled = true;
+		alert('Images button disabled as unable to load required code from cloudinary to make Images function work\n\nMore detailed error: Cannot load ' + this.src);
+	};
+
+	var note_form = document.getElementById('note_form');
+	note_form.addEventListener('keypress', formKeyPressed);
+});
+function formKeyPressed(e) {
+	changesMade = true;
+}
+confirmCancel = function confirmCancel(e) {
+	if (changesMade) {
+		return confirm('You have made changes to this note which will be lost if you cancel\nOk to discard these changes?');
+	}
+}
 function insertThisInThere(HTMLSelectElement) {
     let collection = HTMLSelectElement.selectedOptions;
     let theChar = "";
