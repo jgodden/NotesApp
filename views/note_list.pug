@@ -29,15 +29,15 @@ block content
       div(class="col-sm-2")
         a(class='text' href='#updateDate' onClick="redraw_page(this);") Update date
       script(type="text/javascript").
-        let ld = document.getElementById('list_div');
-        let nl = document.getElementById('nl');
-        let sl = document.getElementById('sl');
-        let tl = document.getElementById('tl');
-        let nl_val = JSON.parse(nl.value);        
-        let sl_val = JSON.parse(sl.value);
-        let tl_val = JSON.parse(tl.value);
+        let ld = document.getElementById('list_div'); // div element to which all dynamically sorted elements will be added
+        let nl = document.getElementById('nl'); // note_list hidden element
+        let sl = document.getElementById('sl'); // subject_list hidden element
+        let tl = document.getElementById('tl'); // topic_list hidden element
+        let nl_val = JSON.parse(nl.value);      // parse json in mongodb generated note_list to get array of key value pairs
+        let sl_val = JSON.parse(sl.value);      // parse json in mongodb generated subject_list to get array of key value pairs
+        let tl_val = JSON.parse(tl.value);      // parse json in mongodb generated topic_list to get array of key value pairs
         
-        let rows = [];
+        let rows = [];                          // generate a row for each note with subject and topic titles populated for sorting
         let subject, topic, title, url, created, updated;
         for (let nl_row of Object.values(nl_val)) {
           for (let sl_row of Object.values(sl_val)) { 
@@ -62,57 +62,40 @@ block content
         if (hash == "") {
           hash = "title";
         }
-        // sort note list based on that
+        // sort note list based on column title
         rows.sort(compareValues(hash, 'desc'));
         
-        let newDiv;
-        let newElement;
-        let newElement2;
+        // render sorted list to page
         for (let row of Object.values(rows)) {
-          newDiv = document.createElement("div");
-          newDiv.classList.add('col-sm-2');
-          newElement = document.createElement("p");
-          newElement2 = document.createTextNode(row.subject);
-          newElement.appendChild(newElement2);
-          newDiv.appendChild(newElement);
-          ld.appendChild(newDiv);
-
-          newDiv = document.createElement("div");
-          newDiv.classList.add('col-sm-3');
-          newElement = document.createElement("p");
-          newElement2 = document.createTextNode(row.topic);
-          newElement.appendChild(newElement2);
-          newDiv.appendChild(newElement);
-          ld.appendChild(newDiv);
-
-          newDiv = document.createElement("div");
-          newDiv.classList.add('col-sm-3');
-          newElement = document.createElement('a');
-          newElement.href  = row.url;
-          newElement.textContent = row.title;
-          newDiv.appendChild(newElement);
-          ld.appendChild(newDiv);
-
-          newDiv = document.createElement("div");
-          newDiv.classList.add('col-sm-2');
-          newElement = document.createElement("p");
-          newElement2 = document.createTextNode(row.creationDate);
-          newElement.appendChild(newElement2);
-          newDiv.appendChild(newElement);
-          ld.appendChild(newDiv);
-          
-          newDiv = document.createElement("div");
-          newDiv.classList.add('col-sm-2');
-          newElement = document.createElement("p");
-          newElement2 = document.createTextNode(row.updateDate);
-          newElement.appendChild(newElement2);
+          addNoteElement(2, row.subject);
+          addNoteElement(3, row.topic);
+          addNoteElement(3, row.title, row.url);
+          addNoteElement(2, row.creationDate);
+          addNoteElement(2, row.updateDate);
+        }
+        // add element to list div
+        function addNoteElement(width, text, url) {
+          let newDiv = document.createElement("div");
+          newDiv.classList.add('col-sm-' + width);
+          let newElement;
+          if (url) {
+            newElement = document.createElement('a');
+            newElement.href  = url;
+            newElement.textContent = text;
+          } else {
+            newElement = document.createElement("p");
+            let newElement2 = document.createTextNode(text);
+            newElement.appendChild(newElement2);
+          }
           newDiv.appendChild(newElement);
           ld.appendChild(newDiv);
         }
+        // redraw page with selected column title (after #) for sorting
         function redraw_page(url) {
           window.location.replace(url);
           window.location.reload();
         }
+        // compare function used by sort
         function compareValues(key, order = 'asc') {
           return function innerSort(a, b) {
             if (!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
@@ -120,10 +103,19 @@ block content
               return 0;
             }
 
-            const varA = (typeof a[key] === 'string')
-              ? a[key].toUpperCase() : a[key];
-            const varB = (typeof b[key] === 'string')
-              ? b[key].toUpperCase() : b[key];
+            let varA, varB;
+
+            if ((key == 'creationDate') || (key == 'updateDate')) {
+              // parse dates to get seconds from unix time 0
+              varA = Date.parse(a[key]);
+              varB = Date.parse(b[key]);
+            } else {
+              // assume text if not date
+              varA = (typeof a[key] === 'string')
+                ? a[key].toUpperCase() : a[key];
+              varB = (typeof b[key] === 'string')
+                ? b[key].toUpperCase() : b[key];
+            }
 
             let comparison = 0;
             if (varA > varB) {

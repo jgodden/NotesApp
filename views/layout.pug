@@ -11,21 +11,21 @@ html(lang='en')
       div(class="row mt-3")
         div(class="col-sm-2")
           form(class="form-inline my-2 my-sm-0")
-            select#subject(class='form-control selcls', type='select', name='subject' class="form-control form-control-sm" onchange="ChangeSelection(this);")
+            select#subject(class='form-control selcls' type='select', name='subject' class="form-control form-control-sm" onchange="ChangeSelection(this);")
               option(value=1) &lt;search all&gt;
               for subject in subject_list
                 if subjectid
                   option(value=subject._id selected=(subject._id.toString()===subjectid.toString() ? 'selected' : false) ) #{subject.title}
                 else 
                   option(value=subject._id) #{subject.title}
-            select#topic(class='form-control selcls', type='select', name='topic' class="form-control form-control-sm" onchange="ChangeSelection(this);")
+            select#topic(class='form-control selcls' type='select', name='topic' class="form-control form-control-sm" onchange="ChangeSelection(this);")
               option(value=1) &lt;search all&gt;
               for topic in topic_list
                 if topicid
                   option(value=topic._id selected=(topic._id.toString()===topicid.toString() ? 'selected' : false) ) #{topic.title}
                 else 
                   option(value=topic._id) #{topic.title}
-            select#subtopic(class='form-control selcls', type='select', name='subtopic' class="form-control form-control-sm" onchange="ChangeSelection(this);")
+            select#subtopic(class='form-control selcls' type='select', name='subtopic' class="form-control form-control-sm" onchange="ChangeSelection(this);")
               option(value=1) &lt;search all&gt;
               for subtopic in subtopic_list
                 if subtopicid
