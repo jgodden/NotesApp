@@ -14,6 +14,8 @@ var NoteSchema = new Schema({
     comments: { type: String, required: false },
     summary: { type: String, required: false },
     image: { type: String, required: false }
+  },
+  { toObject: { virtuals: true }, toJSON: { virtuals: true }
 });
 
 // Virtual for note list URL

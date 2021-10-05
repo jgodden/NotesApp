@@ -1,6 +1,9 @@
 extends layout
 
 block content
+  input#nl.form-control(type='hidden', name='note_list', value=(note_list))
+  input#sl.form-control(type='hidden', name='subject_list', value=(subject_list))
+  input#tl.form-control(type='hidden', name='topic_list', value=(topic_list))
   div(class="border-bottom border-secondary")
     div(class="row gx-0")
       div(class="col-sm-12")
@@ -14,30 +17,122 @@ block content
           | -&gt;!{subtopic_name}
         </p>
   div(class="border-bottom border-secondary")
-    div(class="row gx-0")
+    div(class="row gx-0" id='list_div')
       div(class="col-sm-2")
-        p Subject
+        a(class='text' href='#subject' onClick="redraw_page(this);") Subject
       div(class="col-sm-3")
-        p Topic
+        a(class='text' href='#topic' onClick="redraw_page(this);") Topic
       div(class="col-sm-3")
-        p Title
+        a(class='text' href='#title' onClick="redraw_page(this);") Title
       div(class="col-sm-2")
-        p Creation date
+        a(class='text' href='#creationDate' onClick="redraw_page(this);") Creation date
       div(class="col-sm-2")
-        p Update date
-      - note_list.sort(function(a, b) {let textA = a.subject_id; let textB = b.subject_id; return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;});
-      each note in note_list
-        each subject in subject_list 
-          if subject.id === note.subject_id 
-            div(class="col-sm-2")
-              p !{subject.title}
-        each topic in topic_list 
-          if topic.id === note.topic_id 
-            div(class="col-sm-3")
-              p !{topic.title}
-        div(class="col-sm-3")
-          a(href=note.update_url) #{note.title}
-        div(class="col-sm-2")
-          p #{note.creationDate_formatted}
-        div(class="col-sm-2")
-          p #{note.updateDate_formatted}
+        a(class='text' href='#updateDate' onClick="redraw_page(this);") Update date
+      script(type="text/javascript").
+        let ld = document.getElementById('list_div');
+        let nl = document.getElementById('nl');
+        let sl = document.getElementById('sl');
+        let tl = document.getElementById('tl');
+        let nl_val = JSON.parse(nl.value);        
+        let sl_val = JSON.parse(sl.value);
+        let tl_val = JSON.parse(tl.value);
+        
+        let rows = [];
+        let subject, topic, title, url, created, updated;
+        for (let nl_row of Object.values(nl_val)) {
+          for (let sl_row of Object.values(sl_val)) { 
+            if (sl_row._id === nl_row.subject_id) {
+              subject = sl_row.title;
+            }
+          }
+          for (let tl_row of Object.values(tl_val)) { 
+            if (tl_row._id === nl_row.topic_id) {
+              topic = tl_row.title;
+            }
+          }
+          url = nl_row.update_url;
+          title = nl_row.title;
+          created = nl_row.creationDate_formatted;
+          updated = nl_row.updateDate_formatted;
+          rows.push({'subject':subject,'topic':topic,'url':url,'title':title,'creationDate':created,'updateDate':updated});
+        }
+
+        // get column title from text after # in url
+        let hash = location.hash.substr(1);
+        if (hash == "") {
+          hash = "title";
+        }
+        // sort note list based on that
+        rows.sort(compareValues(hash, 'desc'));
+        
+        let newDiv;
+        let newElement;
+        let newElement2;
+        for (let row of Object.values(rows)) {
+          newDiv = document.createElement("div");
+          newDiv.classList.add('col-sm-2');
+          newElement = document.createElement("p");
+          newElement2 = document.createTextNode(row.subject);
+          newElement.appendChild(newElement2);
+          newDiv.appendChild(newElement);
+          ld.appendChild(newDiv);
+
+          newDiv = document.createElement("div");
+          newDiv.classList.add('col-sm-3');
+          newElement = document.createElement("p");
+          newElement2 = document.createTextNode(row.topic);
+          newElement.appendChild(newElement2);
+          newDiv.appendChild(newElement);
+          ld.appendChild(newDiv);
+
+          newDiv = document.createElement("div");
+          newDiv.classList.add('col-sm-3');
+          newElement = document.createElement('a');
+          newElement.href  = row.url;
+          newElement.textContent = row.title;
+          newDiv.appendChild(newElement);
+          ld.appendChild(newDiv);
+
+          newDiv = document.createElement("div");
+          newDiv.classList.add('col-sm-2');
+          newElement = document.createElement("p");
+          newElement2 = document.createTextNode(row.creationDate);
+          newElement.appendChild(newElement2);
+          newDiv.appendChild(newElement);
+          ld.appendChild(newDiv);
+          
+          newDiv = document.createElement("div");
+          newDiv.classList.add('col-sm-2');
+          newElement = document.createElement("p");
+          newElement2 = document.createTextNode(row.updateDate);
+          newElement.appendChild(newElement2);
+          newDiv.appendChild(newElement);
+          ld.appendChild(newDiv);
+        }
+        function redraw_page(url) {
+          window.location.replace(url);
+          window.location.reload();
+        }
+        function compareValues(key, order = 'asc') {
+          return function innerSort(a, b) {
+            if (!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
+              // property doesn't exist on either object
+              return 0;
+            }
+
+            const varA = (typeof a[key] === 'string')
+              ? a[key].toUpperCase() : a[key];
+            const varB = (typeof b[key] === 'string')
+              ? b[key].toUpperCase() : b[key];
+
+            let comparison = 0;
+            if (varA > varB) {
+              comparison = 1;
+            } else if (varA < varB) {
+              comparison = -1;
+            }
+            return (
+              (order === 'desc') ? (comparison * -1) : comparison
+            );
+          }
+        }
