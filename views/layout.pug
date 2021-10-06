@@ -20,11 +20,16 @@ html(lang='en')
                   option(value=subject._id) #{subject.title}
             select#topic(class='form-control selcls' type='select', name='topic' class="form-control form-control-sm" onchange="ChangeSelection(this);")
               option(value=1) &lt;search all&gt;
-              for topic in topic_list
-                if topicid
-                  option(value=topic._id selected=(topic._id.toString()===topicid.toString() ? 'selected' : false) ) #{topic.title}
-                else 
-                  option(value=topic._id) #{topic.title}
+              // do not display topic list if subject is not selected. Although topic list is populated
+              // so topics can be shown on notes list page, list of topics in this dropdown without a subject
+              // is not appropriate. Same not required for subtopics, as since they are not displayed on notes
+              // list page, the server side logic makes the subtopic list empty if topic not selected
+              if subjectid != '1'
+                for topic in topic_list
+                  if topicid
+                    option(value=topic._id selected=(topic._id.toString()===topicid.toString() ? 'selected' : false) ) #{topic.title}
+                  else 
+                    option(value=topic._id) #{topic.title}
             select#subtopic(class='form-control selcls' type='select', name='subtopic' class="form-control form-control-sm" onchange="ChangeSelection(this);")
               option(value=1) &lt;search all&gt;
               for subtopic in subtopic_list

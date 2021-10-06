@@ -16,20 +16,20 @@ block content
         if subtopic_name 
           | -&gt;!{subtopic_name}
         </p>
-  div(class="border-bottom border-secondary")
-    div(class="row gx-0" id='list_div')
+  div(class="border-bottom border-secondary" id='border')
+    div(class="row gx-0" id='title_row')
       div(class="col-sm-2")
-        a(class='text' href='#subject' onClick="redraw_page(this);") Subject
+        a(class='text' href='#s_subject' onClick="sort_page(this);") Subject
       div(class="col-sm-3")
-        a(class='text' href='#topic' onClick="redraw_page(this);") Topic
+        a(class='text' href='#s_topic' onClick="sort_page(this);") Topic
       div(class="col-sm-3")
-        a(class='text' href='#title' onClick="redraw_page(this);") Title
+        a(class='text' href='#s_title' onClick="sort_page(this);") Title
       div(class="col-sm-2")
-        a(class='text' href='#creationDate' onClick="redraw_page(this);") Creation date
+        a(class='text' href='#s_creationDate' onClick="sort_page(this);") Creation date
       div(class="col-sm-2")
-        a(class='text' href='#updateDate' onClick="redraw_page(this);") Update date
+        a(class='text' href='#s_updateDate' onClick="sort_page(this);") Update date
       script(type="text/javascript").
-        let ld = document.getElementById('list_div'); // div element to which all dynamically sorted elements will be added
+        let border = document.getElementById('border'); // div element to which all dynamically sorted elements will be added
         let nl = document.getElementById('nl'); // note_list hidden element
         let sl = document.getElementById('sl'); // subject_list hidden element
         let tl = document.getElementById('tl'); // topic_list hidden element
@@ -56,75 +56,84 @@ block content
           updated = nl_row.updateDate_formatted;
           rows.push({'subject':subject,'topic':topic,'url':url,'title':title,'creationDate':created,'updateDate':updated});
         }
-
-        // get column title from text after # in url
-        let hash = location.hash.substr(1);
-        if (hash == "") {
-          hash = "title";
-        }
-        // sort note list based on column title
-        rows.sort(compareValues(hash, 'desc'));
-        
-        // render sorted list to page
-        for (let row of Object.values(rows)) {
-          addNoteElement(2, row.subject);
-          addNoteElement(3, row.topic);
-          addNoteElement(3, row.title, row.url);
-          addNoteElement(2, row.creationDate);
-          addNoteElement(2, row.updateDate);
-        }
-        // add element to list div
-        function addNoteElement(width, text, url) {
-          let newDiv = document.createElement("div");
-          newDiv.classList.add('col-sm-' + width);
-          let newElement;
-          if (url) {
-            newElement = document.createElement('a');
-            newElement.href  = url;
-            newElement.textContent = text;
-          } else {
-            newElement = document.createElement("p");
-            let newElement2 = document.createTextNode(text);
-            newElement.appendChild(newElement2);
+        var sort_order = 'asc';
+        sort_page();
+        function sort_page(url) {
+          while (border.lastChild.id !== 'title_row')
+              border.removeChild(border.lastChild);
+          // sort note list based on column title
+          let hash = 'title';
+          if (url)
+            hash = url.hash.substr(3);
+          rows.sort(compareValues(hash, sort_order));
+          if (sort_order == 'asc')
+            sort_order = 'desc';
+          else
+            sort_order = 'asc';
+          
+          // render sorted list to page
+          let row_count = 0;
+          for (let row of Object.values(rows)) {
+            let newRowDiv = document.createElement("div");
+            newRowDiv.classList.add('row');
+            newRowDiv.classList.add('gx-0');
+            newRowDiv.id = 'data_row' + row_count;
+            row_count++;
+            border.appendChild(newRowDiv);
+            addNoteElement(2, newRowDiv, row.subject);
+            addNoteElement(3, newRowDiv, row.topic);
+            addNoteElement(3, newRowDiv, row.title, row.url);
+            addNoteElement(2, newRowDiv, row.creationDate);
+            addNoteElement(2, newRowDiv, row.updateDate);
           }
-          newDiv.appendChild(newElement);
-          ld.appendChild(newDiv);
-        }
-        // redraw page with selected column title (after #) for sorting
-        function redraw_page(url) {
-          window.location.replace(url);
-          window.location.reload();
-        }
-        // compare function used by sort
-        function compareValues(key, order = 'asc') {
-          return function innerSort(a, b) {
-            if (!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
-              // property doesn't exist on either object
-              return 0;
-            }
-
-            let varA, varB;
-
-            if ((key == 'creationDate') || (key == 'updateDate')) {
-              // parse dates to get seconds from unix time 0
-              varA = Date.parse(a[key]);
-              varB = Date.parse(b[key]);
+          // add element to list div
+          function addNoteElement(width, rowDiv, text, url) {
+            let newDiv = document.createElement("div");
+            newDiv.classList.add('col-sm-' + width);
+            let newElement;
+            if (url) {
+              newElement = document.createElement('a');
+              newElement.href  = url;
+              newElement.textContent = text;
             } else {
-              // assume text if not date
-              varA = (typeof a[key] === 'string')
-                ? a[key].toUpperCase() : a[key];
-              varB = (typeof b[key] === 'string')
-                ? b[key].toUpperCase() : b[key];
+              newElement = document.createElement("p");
+              let newElement2 = document.createTextNode(text);
+              newElement.appendChild(newElement2);
             }
+            newDiv.appendChild(newElement);
+            rowDiv.appendChild(newDiv);
+          }
+          // compare function used by sort
+          function compareValues(key, order = 'asc') {
+            return function innerSort(a, b) {
+              if (!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
+                // property doesn't exist on either object
+                return 0;
+              }
 
-            let comparison = 0;
-            if (varA > varB) {
-              comparison = 1;
-            } else if (varA < varB) {
-              comparison = -1;
+              let varA, varB;
+
+              if ((key == 'creationDate') || (key == 'updateDate')) {
+                // parse dates to get seconds from unix time 0
+                varA = Date.parse(a[key]);
+                varB = Date.parse(b[key]);
+              } else {
+                // assume text if not date
+                varA = (typeof a[key] === 'string')
+                  ? a[key].toUpperCase() : a[key];
+                varB = (typeof b[key] === 'string')
+                  ? b[key].toUpperCase() : b[key];
+              }
+
+              let comparison = 0;
+              if (varA > varB) {
+                comparison = 1;
+              } else if (varA < varB) {
+                comparison = -1;
+              }
+              return (
+                (order === 'desc') ? (comparison * -1) : comparison
+              );
             }
-            return (
-              (order === 'desc') ? (comparison * -1) : comparison
-            );
           }
         }

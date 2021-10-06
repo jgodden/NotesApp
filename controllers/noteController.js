@@ -81,6 +81,8 @@ exports.note_list = function(req, res, next) {
         topic_list: async function(callback) {
             if (subjectid == 1) {
                 // <search all> selected for subject so get all topics for display in list
+                // However, we don't want this populated in the topic dropdown, as topics
+                // without subject are headless. Handle this logic on client side topic dropdown
                 dbgNoteList('search all subjects, so full topic_list');
                 topic_list = await Topic.find({}, 'title subtopic');
             } else {
@@ -89,17 +91,19 @@ exports.note_list = function(req, res, next) {
             }
             dbgNoteList('topic_list ' + topic_list);
         },
-        // Get list of topics for this subject
+        // Get topic object
         topic_object: async function(callback) {
+            if (topicid == 0) {
+                // when subject is selected after <search all>, topicid is 0. The
+                // topic list is populated (so notes list will show topics), but want to
+                // leave topic selection dropdown as <search all> until topic is selected 
+                topicid = 1;
+            }
             if (topicid == 1) {
                 // <search all> selected for topic
                 dbgNoteList('search all topics, so no topicid');
                 topic_object = null;
                 return;
-            }
-            if (topicid == 0) {
-                topicid = topic_list[0]._id;
-                dbgNoteList('setting initial topicid of ' + topicid);
             }
             topic_object = await Topic.find({_id:topicid}, 'subtopic title');
             dbgNoteList('topic_object ' + topic_object[0]);
@@ -115,16 +119,19 @@ exports.note_list = function(req, res, next) {
             subtopic_list = await Subtopic.find({}, 'title').where('_id').in(topic_object[0].subtopic);
             dbgNoteList('subtopic_list ' + subtopic_list);
         },
+        // Get subtopic object
         subtopic_object: async function(callback) {
+            if (subtopicid == 0) {
+                // when topic is selected after <search all>, subtopicid is 0. The
+                // subtopic list is populated, but want to leave subtopic selection dropdown
+                // as <search all> until subtopic is selected 
+                subtopicid = 1;
+            }
             if (subtopicid == 1) {
                 // <search all> selected for subtopic
                 dbgNoteList('search all subtopics, so no subtopicid');
                 subtopic_object = null;
                 return;
-            }
-            if (subtopicid == 0) {
-                subtopicid = subtopic_list[0]._id;
-                dbgNoteList('setting initial subtopicid of ' + subtopicid);
             }
             subtopic_object = await Subtopic.find({_id:subtopicid}, 'title description');
             dbgNoteList('subtopic_object ' + subtopic_object[0]);
