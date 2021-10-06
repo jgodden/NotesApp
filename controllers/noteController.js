@@ -7,8 +7,8 @@ const Subtopic = require('../models/subtopic');
 const async = require('async');
 
 exports.home_page = function(req, res, next) {
-    console.log('redirect from ' + req + ' to 0/0/0');
-    res.redirect('/repo/0/0/0');
+    //console.log('redirect from ' + req.url + ' to /0/0/0');
+    res.redirect('/1/1/1');
 };
 
 // decode all html encoding to original text
@@ -111,9 +111,11 @@ exports.note_list = function(req, res, next) {
         // Get list of subtopics for this topic
         subtopic_list: async function(callback) {
             if (topicid == 1) {
-                // <search all> selected for topic
-                dbgNoteList('search all topics, so empty subtopic_list');
-                subtopic_list = [];
+                // <search all> selected for topic so get all subtopics for display in list
+                // However, we don't want this populated in the subtopic dropdown, as subtopics
+                // without topic are headless. Handle this logic on client side subtopic dropdown
+                dbgNoteList('search all topics, so full subtopic_list');
+                subtopic_list = await Subtopic.find({}, 'title');
                 return;
             }
             subtopic_list = await Subtopic.find({}, 'title').where('_id').in(topic_object[0].subtopic);
@@ -731,7 +733,7 @@ exports.note_move_post = function(req, res, next) {
                 //successful - redirect to new note record.
                 res.redirect(newnote.list_url);
                 // (or note list perhaps?)
-                //var redirect = '/repo/' + req.body.subjectid + '/' + req.body.topicid + '/' + req.body.subtopicid + '/notes';
+                //var redirect = '/' + req.body.subjectid + '/' + req.body.topicid + '/' + req.body.subtopicid + '/notes';
                 //dbgNoteMovePost('redirect to ' + redirect);
                 //res.redirect(redirect);
             });
@@ -896,7 +898,7 @@ exports.note_delete_post = function(req, res, next) {
             image_url = cl_result.secure_url;
             dbgNoteDeletePost('cloudinary returned url ' + image_url);
         })();
-        var redirect = '/repo/' + req.body.subjectid + '/' + req.body.topicid + '/' + req.body.subtopicid + '/notes';
+        var redirect = '/' + req.body.subjectid + '/' + req.body.topicid + '/' + req.body.subtopicid + '/notes';
         dbgNoteDeletePost('redirect to ' + redirect);
         res.redirect(redirect);
     });
@@ -968,7 +970,7 @@ exports.note_draw_post = function(req, res, next) {
             render_draw_page(req, res, next, [error]);
             return;
         }
-        var redirect = '/repo/' + req.body.subjectid + '/' + req.body.topicid + '/' + req.body.subtopicid + '/notes';
+        var redirect = '/' + req.body.subjectid + '/' + req.body.topicid + '/' + req.body.subtopicid + '/notes';
         dbgNoteDrawPost('redirect to ' + redirect);
         res.redirect(redirect);
     })();

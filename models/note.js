@@ -22,14 +22,14 @@ var NoteSchema = new Schema({
 NoteSchema
 .virtual('list_url')
 .get(function () {
-  return '/repo/' + this.subject_id + '/' + this.topic_id + '/' + this.subtopic_id + '/notes/';
+  return '/' + this.subject_id + '/' + this.topic_id + '/' + this.subtopic_id + '/notes/';
 });
 
 // Virtual for update note URL
 NoteSchema
 .virtual('update_url')
 .get(function () {
-  return '/repo/' + this.subject_id + '/' + this.topic_id + '/' + this.subtopic_id + '/note/' + this._id;
+  return '/' + this.subject_id + '/' + this.topic_id + '/' + this.subtopic_id + '/note/' + this._id;
 });
 
 NoteSchema

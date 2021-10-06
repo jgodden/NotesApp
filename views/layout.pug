@@ -12,31 +12,34 @@ html(lang='en')
         div(class="col-sm-2")
           form(class="form-inline my-2 my-sm-0")
             select#subject(class='form-control selcls' type='select', name='subject' class="form-control form-control-sm" onchange="ChangeSelection(this);")
-              option(value=1) &lt;search all&gt;
+              option(value=1) &lt;search all subjects&gt;
               for subject in subject_list
                 if subjectid
                   option(value=subject._id selected=(subject._id.toString()===subjectid.toString() ? 'selected' : false) ) #{subject.title}
                 else 
                   option(value=subject._id) #{subject.title}
-            select#topic(class='form-control selcls' type='select', name='topic' class="form-control form-control-sm" onchange="ChangeSelection(this);")
-              option(value=1) &lt;search all&gt;
-              // do not display topic list if subject is not selected. Although topic list is populated
-              // so topics can be shown on notes list page, list of topics in this dropdown without a subject
-              // is not appropriate. Same not required for subtopics, as since they are not displayed on notes
-              // list page, the server side logic makes the subtopic list empty if topic not selected
-              if subjectid != '1'
+            // do not display topic list if subject is not selected. Although topic list is populated
+            // so topics can be shown on notes list page, list of topics in this dropdown without a subject
+            // is not appropriate.
+            if subjectid != 1
+              select#topic(class='form-control selcls' type='select', name='topic' class="form-control form-control-sm" onchange="ChangeSelection(this);")
+                option(value=1) &lt;search all topics&gt;
                 for topic in topic_list
                   if topicid
                     option(value=topic._id selected=(topic._id.toString()===topicid.toString() ? 'selected' : false) ) #{topic.title}
                   else 
                     option(value=topic._id) #{topic.title}
-            select#subtopic(class='form-control selcls' type='select', name='subtopic' class="form-control form-control-sm" onchange="ChangeSelection(this);")
-              option(value=1) &lt;search all&gt;
-              for subtopic in subtopic_list
-                if subtopicid
-                  option(value=subtopic._id selected=(subtopic._id.toString()===subtopicid.toString() ? 'selected' : false) ) #{subtopic.title}
-                else 
-                  option(value=subtopic._id) #{subtopic.title}
+            // do not display subtopic list if topic is not selected. Although subtopic list is populated
+            // so subtopics can be shown on notes list page, list of subtopics in this dropdown without a topic
+            // is not appropriate.
+            if topicid != 1
+              select#subtopic(class='form-control selcls' type='select', name='subtopic' class="form-control form-control-sm" onchange="ChangeSelection(this);")
+                option(value=1) &lt;search all subtopics&gt;
+                for subtopic in subtopic_list
+                  if subtopicid
+                    option(value=subtopic._id selected=(subtopic._id.toString()===subtopicid.toString() ? 'selected' : false) ) #{subtopic.title}
+                  else 
+                    option(value=subtopic._id) #{subtopic.title}
           div(class="row mt-0 gx-0")
             div(class="col-sm-12")
               if (subjectid != '1' && topicid != '1' && subtopicid != '1')
@@ -80,7 +83,7 @@ html(lang='en')
                       a(class="dropdown-item" href='https://www.guildfordcounty.co.uk/603/welcome-to-the-sixth-form' target='_blank' role='button') GCS Sixth Form
           div(class="row mt-0 gx-0")
             if (note_list && (subjectid != '1' && topicid != '1' && subtopicid != '1'))
-              a(class='btn btn-primary btn-sm btn-block' href='/repo/' + subjectid + '/' + topicid + '/' + subtopicid + '/note/create' role='button') Create New Note
+              a(class='btn btn-primary btn-sm btn-block' href='/' + subjectid + '/' + topicid + '/' + subtopicid + '/note/create' role='button') Create New Note
         div(class="col-sm-10" id='form-div')
           div(class="row mt-0 gx-0")
             if errors

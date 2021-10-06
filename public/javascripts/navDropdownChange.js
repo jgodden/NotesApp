@@ -31,11 +31,15 @@ function ChangeSelection(element) {
     topic_element = document.getElementById('topic');
     subtopic_element = document.getElementById('subtopic');
     subject_selected_index = subject_element.selectedIndex;
-    topic_selected_index = topic_element.selectedIndex;
-    subtopic_selected_index = subtopic_element.selectedIndex;
     subjectid = subject_element.options[subject_selected_index].value;
-    topicid = topic_element.options[topic_selected_index].value;
-    subtopicid = subtopic_element.options[subtopic_selected_index].value
+    if (topic_element) {
+      topic_selected_index = topic_element.selectedIndex;
+      topicid = topic_element.options[topic_selected_index].value;
+    }
+    if (subtopic_element) {
+      subtopic_selected_index = subtopic_element.selectedIndex;
+      subtopicid = subtopic_element.options[subtopic_selected_index].value
+    }
     if (element.name === 'subject') {
       if (subjectid == 1) {
         // <search all> selected in subject so set
@@ -56,5 +60,5 @@ function ChangeSelection(element) {
         subtopicid = 0;
       }
     }
-    window.location.href = '/repo/' + subjectid + '/' + topicid + '/' + subtopicid + '/notes';
+    window.location.href = '/' + subjectid + '/' + topicid + '/' + subtopicid + '/notes';
   }
