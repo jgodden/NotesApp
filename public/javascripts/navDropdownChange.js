@@ -2,6 +2,7 @@ function MoveSelection(element) {
   subject_element = document.getElementById('subject');
   topic_element = document.getElementById('topic');
   subtopic_element = document.getElementById('subtopic');
+  noteid = document.getElementById('noteid').value;
   subject_selected_index = subject_element.selectedIndex;
   topic_selected_index = topic_element.selectedIndex;
   subtopic_selected_index = subtopic_element.selectedIndex;
@@ -9,6 +10,7 @@ function MoveSelection(element) {
   topicid = topic_element.options[topic_selected_index].value;
   subtopicid = subtopic_element.options[subtopic_selected_index].value
 
+  // rendered variables
   new_subject_element = document.getElementById('newsubject');
   new_topic_element = document.getElementById('newtopic');
   new_subtopic_element = document.getElementById('newsubtopic');
@@ -19,12 +21,14 @@ function MoveSelection(element) {
   new_topicid = new_topic_element.options[new_topic_selected_index].value;
   new_subtopicid = new_subtopic_element.options[new_subtopic_selected_index].value
 
+  // POST hidden elements
   newsubjectid = document.getElementById('newsubjectid');
   newtopicid = document.getElementById('newtopicid');
   newsubtopicid = document.getElementById('newsubtopicid');
   newsubjectid.value = new_subjectid;
   newtopicid.value = new_topicid;
   newsubtopicid.value = new_subtopicid;
+  window.location.href = '/' + new_subjectid + '/' + new_topicid + '/' + new_subtopicid + '/note/' + noteid + '/move';
 }
 function ChangeSelection(element) {
     subject_element = document.getElementById('subject');

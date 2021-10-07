@@ -2,47 +2,43 @@ extends layout
 
 block content
   div(class="row gx-0")
-    div(class="col-sm-3")
+    div(class="col-sm-1")
       p Title:
-    div(class="col-sm-6")
+    div(class="col-sm-11")
       p #{note.title}
   div(class="row mb-3 gx-0")
-    div(class="col-sm-3")
+    div(class="col-sm-1")
       p Creation date:
-    div(class="col-sm-6")
+    div(class="col-sm-11")
       p #{note.creationDate_formatted}
   div(class="row mb-3 gx-0")
     div(class="col-sm-3")
       p Select the new location of the note
       select#newsubject(class='form-control selcls', type='select', name='newsubject' class="form-control form-control-sm" onchange="MoveSelection(this);")
         option(value=1) &lt;search all&gt;
-        for subject in subject_list 
-          if subjectid
-            option(value=subject._id selected=(subject._id.toString()===subjectid.toString() ? 'selected' : false) ) #{subject.title}
+        for subject in new_subject_list 
+          if new_subjectid
+            option(value=subject._id selected=(subject._id.toString()===new_subjectid.toString() ? 'selected' : false) ) #{subject.title}
           else 
             option(value=subject._id) #{subject.title}
       select#newtopic(class='form-control selcls', type='select', name='newtopic' class="form-control form-control-sm" onchange="MoveSelection(this);")
         option(value=1) &lt;search all&gt;
-        for topic in topic_list
-          if topicid
-            option(value=topic._id selected=(topic._id.toString()===topicid.toString() ? 'selected' : false) ) #{topic.title}
+        for topic in new_topic_list
+          if new_topicid
+            option(value=topic._id selected=(topic._id.toString()===new_topicid.toString() ? 'selected' : false) ) #{topic.title}
           else 
             option(value=topic._id) #{topic.title}
       select#newsubtopic(class='form-control selcls', type='select', name='newsubtopic' class="form-control form-control-sm" onchange="MoveSelection(this);")
         option(value=1) &lt;search all&gt;
-        for subtopic in subtopic_list
-          if subtopicid
-            option(value=subtopic._id selected=(subtopic._id.toString()===subtopicid.toString() ? 'selected' : false) ) #{subtopic.title}
+        for subtopic in new_subtopic_list
+          if new_subtopicid
+            option(value=subtopic._id selected=(subtopic._id.toString()===new_subtopicid.toString() ? 'selected' : false) ) #{subtopic.title}
           else 
             option(value=subtopic._id) #{subtopic.title}
 
   form(method='POST' action='')
     div.form-group
       input#noteid.form-control(type='hidden',name='noteid' value=note._id )
-      input#note_image.form-control(type='hidden',name='note_image' value=note.image )
-      input#subjectid.form-control(type='hidden',name='subjectid' value=note.subject_id )
-      input#topicid.form-control(type='hidden',name='topicid' value=note.topic_id )
-      input#subtopicid.form-control(type='hidden',name='subtopicid' value=note.subtopic_id )
       input#newsubjectid.form-control(type='hidden',name='newsubjectid' value='' )
       input#newtopicid.form-control(type='hidden',name='newtopicid' value='' )
       input#newsubtopicid.form-control(type='hidden',name='newsubtopicid' value='' )

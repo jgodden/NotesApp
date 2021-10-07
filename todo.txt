@@ -1,5 +1,7 @@
 move note to different topic/subtopic
 tables (not in textarea - perhaps as image)
+* hide dropdowns if parent unselected
+* add subtopic to note list
 * toggle sort order
 * make fields not required
 * remove create note button while creating note

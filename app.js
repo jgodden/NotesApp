@@ -7,7 +7,7 @@ const repoRouter = require('./routes/repo');  //Import routes for "repo" area of
 const compression = require('compression');
 const helmet = require('helmet');
 global.usingInternet = 1;
-global.numberSymbols;
+global.supersubSymbols;
 global.fractionSymbols;
 global.shapeSymbols;
 global.symbolSymbols;
