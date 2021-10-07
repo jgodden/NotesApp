@@ -15,21 +15,18 @@ block content
     div(class="col-sm-3")
       p Select the new location of the note
       select#newsubject(class='form-control selcls', type='select', name='newsubject' class="form-control form-control-sm" onchange="MoveSelection(this);")
-        option(value=1) &lt;search all&gt;
         for subject in new_subject_list 
           if new_subjectid
             option(value=subject._id selected=(subject._id.toString()===new_subjectid.toString() ? 'selected' : false) ) #{subject.title}
           else 
             option(value=subject._id) #{subject.title}
       select#newtopic(class='form-control selcls', type='select', name='newtopic' class="form-control form-control-sm" onchange="MoveSelection(this);")
-        option(value=1) &lt;search all&gt;
         for topic in new_topic_list
           if new_topicid
             option(value=topic._id selected=(topic._id.toString()===new_topicid.toString() ? 'selected' : false) ) #{topic.title}
           else 
             option(value=topic._id) #{topic.title}
       select#newsubtopic(class='form-control selcls', type='select', name='newsubtopic' class="form-control form-control-sm" onchange="MoveSelection(this);")
-        option(value=1) &lt;search all&gt;
         for subtopic in new_subtopic_list
           if new_subtopicid
             option(value=subtopic._id selected=(subtopic._id.toString()===new_subtopicid.toString() ? 'selected' : false) ) #{subtopic.title}

@@ -366,7 +366,14 @@ function render_update_page(req, res, next, errors) {
     async.series({
         // Get the note to be updated
         note_object: async function(callback) {
-            note_object = await Note.findById(noteid).exec(callback);
+            note_object = await Note.findById(noteid, callback);
+            if (subjectId < 2)
+                subjectId = note_object.subject_id;
+            if (topicId < 2)
+                topicId = note_object.topic_id;
+            if (subtopicId < 2)
+                subtopicId = note_object.subtopic_id;
+            //render_list_page(req, res, next, errors);
             dbgNoteUpdateGet('note ' + note_object);
         },
     }, function(err, results) {
@@ -412,7 +419,7 @@ exports.note_update_post = [
     (req, res, next) => {
         (async () => {
             // Extract the validation errors from a request.
-            const errors = await validationResult(req);
+            const errors = validationResult(req);
             var now = Date.now();
             // Create a Note object with escaped/trimmed data and old id.
             var note = await new Note({
