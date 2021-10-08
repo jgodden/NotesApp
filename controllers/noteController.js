@@ -3,6 +3,7 @@ const Note = require('../models/note');
 const Subject = require('../models/subject');
 const Topic = require('../models/topic');
 const Subtopic = require('../models/subtopic');
+const Link = require('../models/link');
 
 const async = require('async');
 const note = require('../models/note');
@@ -54,7 +55,7 @@ var subtopicId;
 var subjectList;
 var topicList;
 var subtopicList;
-var subtopicDescription;
+var linkList;
 
 var dbgNoteList = require('debug')('noteList');
 
@@ -69,6 +70,9 @@ function render_list_page(req, res, next, errors) {
     subjectId = req.params.subject;
     topicId = req.params.topic;
     subtopicId = req.params.subtopic;
+    var subjectName;
+    var topicName;
+    var subtopicName;
     dbgNoteList('subjectId ' + subjectId + ' topicId ' + topicId + ' subtopicId ' + subtopicId);
     async.series({
         // Get list of subject objects (three in array)
@@ -76,23 +80,24 @@ function render_list_page(req, res, next, errors) {
             // always get full list of subjects whether subjectid is a subject or
             // a <search all> indicator (1)
             subjectList = await Subject.find({}, 'title', callback);
-            dbgNoteList('subjectList ' + subjectList);
+            dbgNoteList('subjectList', subjectList);
         },
         // Get the subject objects that match subjectid (one in array)
-        subject_object: async function(callback) {
+        subjectObject: async function(callback) {
             if (subjectId == 1) {
                 // <search all> selected for subject
                 dbgNoteList('search all subjects, so no subjectId');
-                subject_object = null;
+                subjectObject = null;
                 return;
             }
             if (subjectId == 0) {
                 // if coming from /, no subjectid set, so get first one in list
                 subjectId = subject_list[0]._id;
-                dbgNoteList('setting initial subjectId of ' + subjectId);
+                dbgNoteList('setting initial subjectId of', subjectId);
             }
-            subject_object = await Subject.find({_id:subjectId}, 'title topic', callback);
-            dbgNoteList('subject_object ' + subject_object[0]);
+            subjectObject = await Subject.find({_id:subjectId}, 'title topic link', callback);
+            subjectName = subjectObject[0].title;
+            dbgNoteList('subjectObject', subjectObject[0]);
         },
         // Get list of topics for this subject
         topicList: async function(callback) {
@@ -104,12 +109,12 @@ function render_list_page(req, res, next, errors) {
                 topicList = await Topic.find({}, 'title subtopic');
             } else {
                 // restrict to topics for this subject
-                topicList = await Topic.find({}, 'title subtopic').where('_id').in(subject_object[0].topic);
+                topicList = await Topic.find({}, 'title subtopic').where('_id').in(subjectObject[0].topic);
             }
-            dbgNoteList('topicList ' + topicList);
+            dbgNoteList('topicList', topicList);
         },
         // Get topic object
-        topic_object: async function(callback) {
+        topicObject: async function(callback) {
             if (topicId == 0) {
                 // when subject is selected after <search all>, topicid is 0. The
                 // topic list is populated (so notes list will show topics), but want to
@@ -119,11 +124,12 @@ function render_list_page(req, res, next, errors) {
             if (topicId == 1) {
                 // <search all> selected for topic
                 dbgNoteList('search all topics, so no topicid');
-                topic_object = null;
+                topicObject = null;
                 return;
             }
-            topic_object = await Topic.find({_id:topicId}, 'subtopic title');
-            dbgNoteList('topic_object ' + topic_object[0]);
+            topicObject = await Topic.find({_id:topicId}, 'subtopic title');
+            topicName = topicObject[0].title;
+            dbgNoteList('topicObject', topicObject[0]);
         },
         // Get list of subtopics for this topic
         subtopicList: async function(callback) {
@@ -132,14 +138,14 @@ function render_list_page(req, res, next, errors) {
                 // However, we don't want this populated in the subtopic dropdown, as subtopics
                 // without topic are headless. Handle this logic on client side subtopic dropdown
                 dbgNoteList('search all topics, so full subtopicList');
-                subtopicList = await Subtopic.find({}, 'title');
+                subtopicList = await Subtopic.find({}, 'title description');
                 return;
             }
-            subtopicList = await Subtopic.find({}, 'title').where('_id').in(topic_object[0].subtopic);
-            dbgNoteList('subtopicList ' + subtopicList);
+            subtopicList = await Subtopic.find({}, 'title description').where('_id').in(topicObject[0].subtopic);
+            dbgNoteList('subtopicList', subtopicList);
         },
         // Get subtopic object
-        subtopic_object: async function(callback) {
+        subtopicObject: async function(callback) {
             if (subtopicId == 0) {
                 // when topic is selected after <search all>, subtopicid is 0. The
                 // subtopic list is populated, but want to leave subtopic selection dropdown
@@ -149,87 +155,85 @@ function render_list_page(req, res, next, errors) {
             if (subtopicId == 1) {
                 // <search all> selected for subtopic
                 dbgNoteList('search all subtopics, so no subtopicId');
-                subtopic_object = null;
+                subtopicObject = null;
                 return;
             }
-            subtopic_object = await Subtopic.find({_id:subtopicId}, 'title description');
-            dbgNoteList('subtopic_object ' + subtopic_object[0]);
+            subtopicObject = await Subtopic.find({_id:subtopicId}, 'title');
+            subtopicName = subtopicObject[0].title;
+            dbgNoteList('subtopicObject', subtopicObject[0]);
+        },
+        linkList: async function(callback) {
+            if (subjectId == 1) {
+                dbgNoteList('search all subjects, so no linkList');
+                linkList = null;
+            } else {
+                // restrict to topics for this subject
+                dbgNoteList('so.link:', subjectObject[0].link);
+                linkList = await Link.find({}, 'title href category').where('_id').in(subjectObject[0].link);
+            }
+            dbgNoteList('linkList', linkList);
         },
         // Get list of notes for this subject, topic and subtopic. Retrieve title and dates for list and ids for urls.
-        note_list: async function (callback) {
+        noteList: async function (callback) {
             if (subtopicId == 1) {
                 if (topicId == 1) {
                     if (subjectId == 1) {
                         dbgNoteList('subject, topic and subtopic <search all>');
-                        note_list = await Note.find({}, 'title subject_id topic_id subtopic_id creationDate updateDate', callback);
+                        noteList = await Note.find({}, 'title subject_id topic_id subtopic_id creationDate updateDate', callback);
                     } else {
                         dbgNoteList('topic and subtopic <search all>');
-                        note_list = await Note.find({subject_id:subjectId}, 'title subject_id topic_id subtopic_id creationDate updateDate', callback);
+                        noteList = await Note.find({subject_id:subjectId}, 'title subject_id topic_id subtopic_id creationDate updateDate', callback);
                     }
                 } else {
                     dbgNoteList('subtopic <search all> ' + subjectId + ':' + topicId);
-                    note_list = await Note.find({subject_id:subjectId, topic_id:topicId}, 'title subject_id topic_id subtopic_id creationDate updateDate', callback);
+                    noteList = await Note.find({subject_id:subjectId, topic_id:topicId}, 'title subject_id topic_id subtopic_id creationDate updateDate', callback);
                 }
             } else {
                 dbgNoteList('no <search all>');
-                note_list = await Note.find({subject_id:subjectId, topic_id:topicId, subtopic_id:subtopicId}, 'title subject_id topic_id subtopic_id creationDate updateDate', callback);
+                noteList = await Note.find({subject_id:subjectId, topic_id:topicId, subtopic_id:subtopicId}, 'title subject_id topic_id subtopic_id creationDate updateDate', callback);
             }
-            dbgNoteList('note_list ' + note_list);
+            //dbgNoteList('noteList', noteList);
         },
         // Get number of notes with matching subjectid
-        note_count: async function(callback) {
+        noteCount: async function(callback) {
             if (subtopicId == 1) {
                 if (topicId == 1) {
                     if (subjectId == 1) {
-                        note_count = Note.countDocuments({}).exec(callback);
+                        noteCount = await Note.countDocuments({}, callback);
                     } else {
-                        note_count = Note.countDocuments({subject_id:subjectId}).exec(callback);
+                        noteCount = await Note.countDocuments({subject_id:subjectId}, callback);
                     }
                 } else {
-                    note_count = Note.countDocuments({subject_id:subjectId, topic_id:topicId}).exec(callback);
+                    noteCount = await Note.countDocuments({subject_id:subjectId, topic_id:topicId}, callback);
                 }
             } else {
-                note_count = Note.countDocuments({subject_id:subjectId, topic_id:topicId, subtopic_id:subtopicId}).exec(callback);
+                noteCount = await Note.countDocuments({subject_id:subjectId, topic_id:topicId, subtopic_id:subtopicId}, callback);
             }
-            dbgNoteList('note_count ' + note_count);
+            dbgNoteList('noteCount', noteCount);
         },
     }, function(err, results) {
         if (err) {
             console.error('Error processing note list: ' + err);
             return next(err);
         }
-
-        note_list.forEach(function (item, index) {
+        noteList.forEach(function (item, index) {
             item.title = decodeEntities(item.title);
         });
-        var subject_name = null;
-        if (subject_object !== null) {
-            subject_name = subject_object[0].title;
-        }
-        var topic_name = null;
-        if (topic_object !== null) {
-            topic_name = topic_object[0].title;
-        }
-        var subtopic_name = null;
-        if (subtopic_object !== null) {
-            subtopic_name = subtopic_object[0].title;
-            subtopicDescription = subtopic_object[0].description;
-        }
 
         res.render('note_list', {
             title: 'List',
-            note_count: note_count,
-            note_list: note_list,
+            note_count: noteCount,
+            note_list: noteList,
             subjectid: subjectId,
             subject_list: subjectList,
             topicid: topicId,
             topic_list: topicList,
             subtopicid: subtopicId,
             subtopic_list: subtopicList,
-            subject_name: subject_name,
-            topic_name: topic_name,
-            subtopic_name: subtopic_name,
-            subtopic_description: subtopicDescription,
+            link_list: linkList,
+            subject_name: subjectName,
+            topic_name: topicName,
+            subtopic_name: subtopicName,
             errors: errors
         } );
     });
@@ -256,10 +260,7 @@ function render_create_page(req, res, next, errors) {
         topic_list: topicList,
         subtopicid: subtopicId,
         subtopic_list: subtopicList,
-        subject_name: subject_object[0].title,
-        topic_name: topic_object[0].title,
-        subtopic_name: subtopic_object[0].title,
-        subtopic_description: subtopic_object[0].description,
+        link_list: linkList,
         supersub_symbol_list: supersubSymbols,
         fraction_symbol_list: fractionSymbols,
         shape_symbol_list: shapeSymbols,
@@ -280,9 +281,6 @@ exports.note_create_post = [
     // Process request after validation and sanitization.
     (req, res, next) => {
         (async () => {
-            var subjectid = req.body.subjectid;
-            var topicid = req.body.topicid;
-            var subtopicid = req.body.subtopicid;
             // Extract the validation errors from a request.
             const errors = await validationResult(req);
             var now = Date.now();
@@ -296,9 +294,9 @@ exports.note_create_post = [
                 questions: req.body.questions,
                 comments: req.body.comments,
                 summary: req.body.summary,
-                subject_id: subjectid,
-                topic_id: topicid,
-                subtopic_id: subtopicid,
+                subject_id: subjectId,
+                topic_id: topicId,
+                subtopic_id: subtopicId,
                 image: image_url
             });
             if (!errors.isEmpty()) {
@@ -316,7 +314,7 @@ exports.note_create_post = [
                 var folder = req.body.subjectid + '/' + req.body.topicid + '/' + req.body.subtopicid + '/' + note._id;
                 // Save a blank drawing to cloudinary, just to create the folder for subsequent
                 // storage of drawing and images
-                dbgNoteCreatePost('sending image to cloudinary at ' + folder);
+                dbgNoteCreatePost('sending image to cloudinary at', folder);
                 var blankPng = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/1+yHgAHtAKYD9BncgAAAABJRU5ErkJggg==';
                 await cloudinary.uploader.upload(blankPng,
                 {
@@ -330,13 +328,12 @@ exports.note_create_post = [
                 .catch(error => cl_error = error);
                 // update note with image url
                 if (cl_error) {
-                    dbgNoteCreatePost('cl_error message: ' + cl_error.error.message);
                     var error = handle_cloudinary_error(cl_error);
                     render_create_page(req, res, next, [error]);
                     return;
                 }
                 image_url = cl_result.secure_url;
-                dbgNoteCreatePost('cloudinary returned url ' + image_url);
+                dbgNoteCreatePost('cloudinary returned url', image_url);
                 
                 // Data from form is valid. Save note.
                 note.image = image_url;
@@ -367,14 +364,22 @@ function render_update_page(req, res, next, errors) {
         // Get the note to be updated
         note_object: async function(callback) {
             note_object = await Note.findById(noteid, callback);
-            if (subjectId < 2)
+            dbgNoteUpdateGet('note', note_object);
+            if (subjectId < 2) {
                 subjectId = note_object.subject_id;
-            if (topicId < 2)
+                // and update the link list
+                subjectObject = await Subject.find({_id:subjectId}, 'title topic link', callback);
+                linkList = await Link.find({}, 'title href category').where('_id').in(subjectObject[0].link);
+                dbgNoteUpdateGet("set subjectId to", subjectId);
+            }
+            if (topicId < 2) {
                 topicId = note_object.topic_id;
-            if (subtopicId < 2)
+                dbgNoteUpdateGet('set topicId to', topicId);
+            }
+            if (subtopicId < 2) {
                 subtopicId = note_object.subtopic_id;
-            //render_list_page(req, res, next, errors);
-            dbgNoteUpdateGet('note ' + note_object);
+                dbgNoteUpdateGet("set subtopicId to", subtopicId);
+            }            
         },
     }, function(err, results) {
         if (err) { return next(err); }
@@ -396,7 +401,7 @@ function render_update_page(req, res, next, errors) {
             topic_list: topicList,
             subtopicid: subtopicId,
             subtopic_list: subtopicList,
-            subtopic_description: subtopicDescription,
+            link_list: linkList,
             supersub_symbol_list: supersubSymbols,
             fraction_symbol_list: fractionSymbols,
             shape_symbol_list: shapeSymbols,
@@ -464,13 +469,24 @@ exports.note_move_get = function(req, res, next) {
     render_move_page(req, res, next, null);
 };
 
+var newSubjectId = 1;
+var newTopicId = 1;
+var newSubtopicId = 1;
 function render_move_page(req, res, next, errors) {
-    var newSubjectId = req.params.subject;
-    var newTopicId = req.params.topic;
-    var newSubtopicId = req.params.subtopic;
+    let subjectChanged = false;
+    if (newSubjectId != req.params.subject) {
+        newSubjectId = req.params.subject;
+        subjectChanged = true;
+    }
+    let topicChanged = false;
+    if (newTopicId != req.params.topic) {
+        newTopicId = req.params.topic;
+        topicChanged = true;
+    }
+    newSubtopicId = req.params.subtopic;
     var noteid = req.params.note;
     note_list = null;   // force to null, otherwise still existing from note list get
-    dbgNoteMoveGet('move newSubjectId', newSubjectId);
+    dbgNoteMoveGet('move newSubjectId', newSubjectId + ' newTopicId ' + newTopicId + ' newSubtopicId ' + newSubtopicId);
     async.series({
         // Get list of subject objects (three in array)
         newSubjectList: async function(callback) {
@@ -481,68 +497,29 @@ function render_move_page(req, res, next, errors) {
         },
         // Get the subject objects that match subjectid (one in array)
         newSubjectObject: async function(callback) {
-            if (newSubjectId == 1) {
-                // <search all> selected for subject
-                dbgNoteMoveGet('search all subjects, so no subjectid');
-                newSubjectObject = null;
-                return;
-            }
-            if (newSubjectId == 0) {
-                // if coming from /, no subjectid set, so get first one in list
-                newSubjectId = newSubjectList[0]._id;
-                dbgNoteMoveGet('setting initial newSubjectId of', newSubjectId);
-            }
             newSubjectObject = await Subject.find({_id:newSubjectId}, 'title topic', callback);
             dbgNoteMoveGet('newSubjectObject', newSubjectObject[0]);
         },
         // Get list of topics for this subject
         newTopicList: async function(callback) {
-            if (newSubjectId == 1) {
-                // <search all> selected for subject
-                dbgNoteMoveGet('search all subjects, so empty topic_list');
-                newTopicList = [];
-                return;
-            }
             newTopicList = await Topic.find({}, 'title subtopic').where('_id').in(newSubjectObject[0].topic);
+            if (subjectChanged)
+                newTopicId = newTopicList[0]._id;
             dbgNoteMoveGet('newTopicList', newTopicList);
         },
         // Get list of topics for this subject
         newTopicObject: async function(callback) {
-            if (newTopicId == 1) {
-                // <search all> selected for topic
-                dbgNoteMoveGet('search all topics, so no topicid');
-                newTopicObject = null;
-                return;
-            }
-            if (newTopicId == 0) {
-                newTopicId = new_topic_list[0]._id;
-                dbgNoteMoveGet('setting initial newTopicId of', newTopicId);
-            }
             newTopicObject = await Topic.find({_id:newTopicId}, 'subtopic title');
             dbgNoteMoveGet('newTopicObject', newTopicObject[0]);
         },
         // Get list of subtopics for this topic
         newSubtopicList: async function(callback) {
-            if (newTopicId == 1) {
-                // <search all> selected for topic
-                dbgNoteMoveGet('search all topics, so empty newSubtopicList');
-                newSubtopicList = [];
-                return;
-            }
             newSubtopicList = await Subtopic.find({}, 'title').where('_id').in(newTopicObject[0].subtopic);
+            if (topicChanged)
+                newSubtopicId = newSubtopicList[0]._id;
             dbgNoteMoveGet('newSubtopicList', newSubtopicList);
         },
         newSubtopicObject: async function(callback) {
-            if (newSubtopicId == 1) {
-                // <search all> selected for subtopic
-                dbgNoteMoveGet('search all subtopics, so no newSubtopicId');
-                newSubtopicObject = null;
-                return;
-            }
-            if (newSubtopicId == 0) {
-                newSubtopicId = newSubtopicList[0]._id;
-                dbgNoteMoveGet('setting initial newSubtopicId of', newSubtopicId);
-            }
             newSubtopicObject = await Subtopic.find({_id:newSubtopicId}, 'title description');
             dbgNoteMoveGet('newSubtopicObject ' + newSubtopicObject[0]);
         },
@@ -571,6 +548,7 @@ function render_move_page(req, res, next, errors) {
             topic_list: topicList,
             subtopicid: subtopicId,
             subtopic_list: subtopicList,
+            link_list: linkList,
             new_subjectid: newSubjectId,
             new_subject_list: newSubjectList,
             new_topicid: newTopicId,
@@ -586,7 +564,6 @@ var dbgNoteMovePost = require('debug')('noteMovePost');
 
 // handle note move on POST
 exports.note_move_post = function(req, res, next) {
-    var destDir = req.body.newsubjectid + '/' + req.body.newtopicid + '/' + req.body.newsubtopicid;
     // Move note and redirect to the list of notes.
     async.series({
         // Get note
@@ -617,6 +594,7 @@ exports.note_move_post = function(req, res, next) {
             var cl_error;
             var cl_result;
             var srcFilePath = srcNote.subject_id + '/' + srcNote.topic_id + '/' + srcNote.subtopic_id + '/' + srcNote._id;
+            var destDir = req.body.newsubjectid + '/' + req.body.newtopicid + '/' + req.body.newsubtopicid;
             var destFilePath = destDir + '/' + destNote._id;
 
             dbgNoteMovePost('move contents of cloudinary folder from', srcFilePath + ' to ' + destFilePath);
@@ -669,25 +647,26 @@ exports.note_move_post = function(req, res, next) {
             }
             dbgNoteMovePost('cloudinary response', cl_result);
             // save note
-            destNote.save(function (err) {
+            await destNote.save(function (err) {
                 if (err) {
                     console.error('Move note: error saving new note:', err);
                     return next(err);
                 }
-                    // Now delete src note
-                Note.findByIdAndRemove(srcId, function deleteNote(err) {
-                    if (err) {
-                        console.error('Move note: error removing old note:', err);
-                        return next(err);
-                    }
-                });
             });
+            // Now delete src note
+            dbgNoteMovePost('delete original note from database');
+            Note.findByIdAndRemove(srcId, function deleteNote(err) {
+                if (err) {
+                    console.error('Move note: error removing old note:', err);
+                    return next(err);
+                }
+            });
+            // redirect to list of notes for new subject, topic and subtopic
+            var redirect = '/' + destDir + '/notes';
+            dbgNoteMovePost('redirect to', redirect);
+            res.redirect(redirect);
         }
     });
-    // redirect to list of notes for new subject, topic and subtopic
-    var redirect = destDir + '/notes';
-    dbgNoteMovePost('redirect to', redirect);
-    res.redirect(redirect);
 };
 
 var dbgNoteDeleteGet = require('debug')('noteDeleteGet');
@@ -699,107 +678,21 @@ exports.note_delete_get = function(req, res, next) {
 
 function render_delete_page(req, res, next, errors) {
     var noteid = req.params.note;
-    var subjectid = req.params.subject;
-    var topicid = req.params.topic;
-    var subtopicid = req.params.subtopic;
     note_list = null;   // force to null, otherwise still existing from note list get
-    dbgNoteDeleteGet('delete subjectid ' + subjectid + ' topicid ' + topicid + ' subtopicid ' + subtopicid + ' noteid ' + noteid);
+    dbgNoteDeleteGet('delete subjectid ' + subjectId + ' topicid ' + topicId + ' subtopicid ' + subtopicId + ' noteid ' + noteid);
     async.series({
-        // Get list of subject objects (three in array)
-        subject_list: async function(callback) {
-            // always get full list of subjects whether subjectid is a subject or
-            // a <search all> indicator (1)
-            subject_list = await Subject.find({}, 'title', callback);
-            dbgNoteDeleteGet('subject_list ' + subject_list);
-        },
-        // Get the subject objects that match subjectid (one in array)
-        subject_object: async function(callback) {
-            if (subjectid == 1) {
-                // <search all> selected for subject
-                dbgNoteDeleteGet('search all subjects, so no subjectid');
-                subject_object = null;
-                return;
-            }
-            if (subjectid == 0) {
-                // if coming from /, no subjectid set, so get first one in list
-                subjectid = subject_list[0]._id;
-                dbgNoteDeleteGet('setting initial subjectid of ' + subjectid);
-            }
-            subject_object = await Subject.find({_id:subjectid}, 'title topic', callback);
-            dbgNoteDeleteGet('subject_object ' + subject_object[0]);
-        },
-        // Get list of topics for this subject
-        topic_list: async function(callback) {
-            if (subjectid == 1) {
-                // <search all> selected for subject
-                dbgNoteDeleteGet('search all subjects, so empty topic_list');
-                topic_list = [];
-                return;
-            }
-            topic_list = await Topic.find({}, 'title subtopic').where('_id').in(subject_object[0].topic);
-            dbgNoteDeleteGet('topic_list ' + topic_list);
-        },
-        // Get list of topics for this subject
-        topic_object: async function(callback) {
-            if (topicid == 1) {
-                // <search all> selected for topic
-                dbgNoteDeleteGet('search all topics, so no topicid');
-                topic_object = null;
-                return;
-            }
-            if (topicid == 0) {
-                topicid = topic_list[0]._id;
-                dbgNoteDeleteGet('setting initial topicid of ' + topicid);
-            }
-            topic_object = await Topic.find({_id:topicid}, 'subtopic title');
-            dbgNoteDeleteGet('topic_object ' + topic_object[0]);
-        },
-        // Get list of subtopics for this topic
-        subtopic_list: async function(callback) {
-            if (topicid == 1) {
-                // <search all> selected for topic
-                dbgNoteDeleteGet('search all topics, so empty subtopic_list');
-                subtopic_list = [];
-                return;
-            }
-            subtopic_list = await Subtopic.find({}, 'title').where('_id').in(topic_object[0].subtopic);
-            dbgNoteDeleteGet('subtopic_list ' + subtopic_list);
-        },
-        subtopic_object: async function(callback) {
-            if (subtopicid == 1) {
-                // <search all> selected for subtopic
-                dbgNoteDeleteGet('search all subtopics, so no subtopicid');
-                subtopic_object = null;
-                return;
-            }
-            if (subtopicid == 0) {
-                subtopicid = subtopic_list[0]._id;
-                dbgNoteDeleteGet('setting initial subtopicid of ' + subtopicid);
-            }
-            subtopic_object = await Subtopic.find({_id:subtopicid}, 'title description');
-            dbgNoteDeleteGet('subtopic_object ' + subtopic_object[0]);
-        },
-        // Get note
         note_object: async function (callback) {
             note_object = await Note.findById(noteid, 'title subject_id topic_id subtopic_id creationDate updateDate image', callback);
-            dbgNoteDeleteGet('note_object ' + note_object);
+            dbgNoteDeleteGet('note_object', note_object);
         },
     }, function(err, results) {
         if (err) {
-            console.error('Error processing note list: ' + err);
+            console.error('Error getting note for delete:', err);
             return next(err);
         }
 
         note_object.title = decodeEntities(note_object.title);
-        var subject_name = null;
-        if (subject_object !== null) {
-            subject_name = subject_object[0].title;
-        }
-        var topic_name = null;
-        if (topic_object !== null) {
-            topic_name = topic_object[0].title;
-        }
-        dbgNoteDeleteGet('note_object._id ' + note_object._id);
+        dbgNoteDeleteGet('note_object._id', note_object._id);
         res.render('note_delete', {
             title: 'Delete',
             note: note_object,
@@ -809,7 +702,7 @@ function render_delete_page(req, res, next, errors) {
             topic_list: topicList,
             subtopicid: subtopicId,
             subtopic_list: subtopicList,
-            subtopic_description: subtopicDescription,
+            link_list: linkList,
             errors: errors
         } );
     });

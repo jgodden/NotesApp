@@ -42,47 +42,29 @@ html(lang='en')
                     option(value=subtopic._id) #{subtopic.title}
           div(class="row mt-0 gx-0")
             div(class="col-sm-12")
-              if (subjectid != '1' && topicid != '1' && subtopicid != '1')
-                div(class="navbar-nav mr-auto")
-                  div(class="dropdown")
-                    a(class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false") Description
-                    div(class="dropdown-menu" aria-labelledby="navbarDropdown")
-                      p #{subtopic_description}
+              div(class="navbar-nav mr-auto")
+                if (subjectid != '1')
                   div(class="dropdown")
                     a(class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false") Subject Material
                     div(class="dropdown-menu" aria-labelledby="navbarDropdown")
-                      if subject_name === 'Biology'
-                        a(class="dropdown-item" href='https://www.aqa.org.uk/subjects/science/as-and-a-level/biology-7401-7402/changes-for-2021' target='_blank' role='button') A-level Specification
-                        a(class="dropdown-item" href='https://guildfordcounty.s3.amazonaws.com/uploads/document/Biology-Handbook.pdf?t=1630671756?ts=1630671756' target='_blank' role='button') Handbook
-                        a(class="dropdown-item" href='https://www.khanacademy.org/science' target='_blank' role='button') Khan Academy Science
-                      if subject_name === 'Chemistry'
-                        a(class="dropdown-item" href='https://www.aqa.org.uk/subjects/science/as-and-a-level/chemistry-7404-7405/changes-for-2021' target='_blank' role='button') A-level Specification
-                        a(class="dropdown-item" href='https://guildfordcounty.s3.amazonaws.com/uploads/document/Chemistry-handbook.pdf?t=1630671756?ts=1630671756' target='_blank' role='button') Handbook
-                        a(class="dropdown-item" href='https://chem.libretexts.org/' target='_blank' role='button') LibreText library
-                        a(class="dropdown-item" href='https://www.khanacademy.org/science' target='_blank' role='button') Khan Academy Science
-                        a(class="dropdown-item" href='https://courses.lumenlearning.com/introchem/' target='_blank' role='button') Lumen Learning
-                        a(class="dropdown-item" href='https://www.scienceskool.co.uk/' target='_blank' role='button') Science Skool
-                        a(class="dropdown-item" href='https://www.chemtube3d.com/' target='_blank' role='button') ChemTube3D
-                        a(class="dropdown-item" href='https://socratic.org/chemistry' target='_blank' role='button') Socratic Q&amp;A
-                        a(class="dropdown-item" href='https://www.technologyuk.net/science/matter/' target='_blank' role='button') TechnologyUK Science Matter
-                        a(class="dropdown-item" href='https://www.thegeoexchange.org/chemistry/naming/resources/common_ion_table.php' target='_blank' role='button') Common ion table
-                        a(class="dropdown-item" href='https://www.technologyuk.net/science/matter/electron-shells-and-orbitals.shtml' target='_blank' role='button') Electron shells and orbitals
-                        a(class="dropdown-item" href='https://www.eiu.edu/eiuchem/forms/tutorial2.pdf' target='_blank' role='button') Formulas
-                        a(class="dropdown-item" href='https://chemed.chem.purdue.edu/genchem/topicreview/bp/ch2/names.html' target='_blank' role='button') Nomenclature
-                      if subject_name === 'Geography'
-                        a(class="dropdown-item" href='https://www.aqa.org.uk/subjects/geography/as-and-a-level/geography-7037/specification-at-a-glance' target='_blank' role='button') A-level Specification
-                        a(class="dropdown-item" href='https://guildfordcounty.s3.amazonaws.com/uploads/document/A-Level-Handbook-Geography-2021.pdf?t=1630671756?ts=1630671756' target='_blank' role='button') Handbook
-                      div(class="dropdown-divider")
-                      p
-                        b Maths
-                      a(class="dropdown-item" href='https://www.rapidtables.com/math/symbols/Basic_Math_Symbols.html' target='_blank' role='button') Maths Symbols
-                      a(class="dropdown-item" href='https://mathworld.wolfram.com/' target='_blank' role='button') Wolfram
-                      div(class="dropdown-divider")
-                      p
-                        b General
-                      a(class="dropdown-item" href='https://www.guildfordcounty.co.uk/603/welcome-to-the-sixth-form' target='_blank' role='button') GCS Sixth Form
-          div(class="row mt-0 gx-0")
-            if (note_list && (subjectid != '1' && topicid != '1' && subtopicid != '1'))
+                      - var prev_link_category = 0;
+                      for link in link_list
+                        if link.category != prev_link_category
+                          if prev_link_category != 0
+                            div(class="dropdown-divider")
+                          p
+                            b !{link.category}
+                          - prev_link_category = link.category
+                        a(class="dropdown-item" href=link.href target='_blank' role='button') !{link.title}
+                if (subjectid != '1' && topicid != '1' && subtopicid != '1')
+                  div(class="dropdown")
+                    a(class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false") Description
+                    div(class="dropdown-menu" aria-labelledby="navbarDropdown")
+                      for subtopic in subtopic_list
+                        if subtopic._id.toString()===subtopicid.toString()
+                          p !{subtopic.description}                       
+          if (note_list && (subjectid != '1' && topicid != '1' && subtopicid != '1'))
+            div(class="row mt-0 gx-0")
               a(class='btn btn-primary btn-sm btn-block' href='/' + subjectid + '/' + topicid + '/' + subtopicid + '/note/create' role='button') Create New Note
         div(class="col-sm-10" id='form-div')
           div(class="row mt-0 gx-0")

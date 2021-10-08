@@ -1,5 +1,7 @@
-move note to different topic/subtopic
 tables (not in textarea - perhaps as image)
+* move note to different topic/subtopic
+* update dropdowns when selecting note from list
+* move links to database
 * hide dropdowns if parent unselected
 * add subtopic to note list
 * toggle sort order

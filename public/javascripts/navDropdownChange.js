@@ -1,16 +1,6 @@
 function MoveSelection(element) {
-  subject_element = document.getElementById('subject');
-  topic_element = document.getElementById('topic');
-  subtopic_element = document.getElementById('subtopic');
-  noteid = document.getElementById('noteid').value;
-  subject_selected_index = subject_element.selectedIndex;
-  topic_selected_index = topic_element.selectedIndex;
-  subtopic_selected_index = subtopic_element.selectedIndex;
-  subjectid = subject_element.options[subject_selected_index].value;
-  topicid = topic_element.options[topic_selected_index].value;
-  subtopicid = subtopic_element.options[subtopic_selected_index].value
-
   // rendered variables
+  noteid = document.getElementById('noteid').value;
   new_subject_element = document.getElementById('newsubject');
   new_topic_element = document.getElementById('newtopic');
   new_subtopic_element = document.getElementById('newsubtopic');
