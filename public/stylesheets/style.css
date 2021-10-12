@@ -2,38 +2,47 @@ body {
   background: white;
   color: black;
   overscroll-behavior: contain;
-}
-
-p, a, select {
-  font-size: 10px;
-  padding: 3px 5px;
-  text-indent: 2px;
-  display: block;
-  margin-top: 0;
-  margin-bottom: 0;
-  margin-left: 0;
-  margin-right: 0;
-}
-
-h1 {
-  display: inline-block;
-  font-size: 1.5em;
-  margin-top: 0.67em;
-  margin-bottom: 0.67em;
-  margin-left: 0;
-  margin-right: 0;
-  font-weight: bold;
-  color: red;
+  font-size: 100%;
 }
 
 .selcls {
-  font-size: 10px;
-  padding: 2px; 
+  font-size: 0.7em;
+  text-indent: 3px;
+  width: 100%;
+  padding: 3px; 
   border: solid 1px #517B97; 
-  outline: 0; 
-  background: -webkit-gradient(linear, left top, left 25, from(#FFFFFF), color-stop(4%, #CAD9E3), to(#FFFFFF)); 
-  background: -moz-linear-gradient(top, #FFFFFF, #CAD9E3 1px, #FFFFFF 25px); 
-  box-shadow: rgba(0,0,0, 0.1) 0px 0px 8px; 
-  -moz-box-shadow: rgba(0,0,0, 0.1) 0px 0px 8px; 
-  -webkit-box-shadow: rgba(0,0,0, 0.1) 0px 0px 8px; 
+  outline: none; 
+  background: -webkit-gradient(linear, left top, left 25, from(#FFFFFF), color-stop(4%, #CAD9E3), to(#FFFFFF));  
+}
+textarea {
+  font-family: "handwriting", cursive, sans-serif;
+}
+input, button, p, a, select {
+  font-family: "handwriting", cursive, sans-serif;
+}
+
+input, textarea {
+  width: 80%;
+  box-sizing: border-box;
+  background : content-box radial-gradient(white, #CAD9E3);
+}
+button {
+  width: 80%;
+  box-sizing: border-box;
+  border: 2px dotted;
+}
+p.small {
+  line-height: 0.8;
+}
+p.big {
+  line-height: 1.8;
+}
+p, a {
+  font-size: 0.7em;
+  padding: 0px 0px;
+  text-indent: 1px;
+  display: block grid;
+}
+div {
+  display: block;
 }

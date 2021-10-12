@@ -1,0 +1,19 @@
+doctype html
+html(lang='en')
+  head
+    meta(charset='utf-8')
+    meta(name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no')
+    link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous")
+    link(rel='stylesheet' href='/stylesheets/style.css')
+  body
+    a(href="/") Home
+    br
+    a(href="/logout") Log Out
+    br
+    p Welcome #{user.nickname}
+    img(src=user.picture)
+    p User profile
+    p This is the content of <code>req.user</code>.
+    p Note: <code>_raw</code> and <code>_json</code> properties have been ommited.
+    pre
+      code #{userProfile}

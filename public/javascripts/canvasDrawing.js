@@ -82,9 +82,12 @@ window.addEventListener("DOMContentLoaded", function () {
         }
     }
     confirmCancel = function confirmCancel(e) {
+        uri = e.baseURI;
         if (changesMade) {
-            return confirm('You have made changes to this drawing which will be lost if you cancel\nOk to discard these changes?');
+            if (!confirm('You have made changes to this drawing which will be lost if you cancel\nOk to discard these changes?'))
+                return;
         }
+        location.href = uri.substring(0, uri.lastIndexOf('/'));
     }
 
     // Buttons and other controls

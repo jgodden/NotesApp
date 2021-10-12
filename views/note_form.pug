@@ -56,15 +56,15 @@ block content
         div(class="border-end border-secondary")
           div(class="row")
             div(class="col-12")
-              textarea#keywords.form-control(type='textarea', placeholder='Keywords' name='keywords' rows='7' class="form-control form-control-sm") #{undefined===note ? '' : note.keywords}
+              textarea#keywords.form-control(type='textarea', placeholder='Keywords' name='keywords' rows='8' class="form-control form-control-sm") #{undefined===note ? '' : note.keywords}
           div(class="row")
             div(class="col-12")
-              textarea#questions.form-control(type='textarea', placeholder='Questions' name='questions' rows='7' class="form-control form-control-sm") #{undefined===note ? '' : note.questions}
+              textarea#questions.form-control(type='textarea', placeholder='Questions' name='questions' rows='8' class="form-control form-control-sm") #{undefined===note ? '' : note.questions}
           div(class="row")
             div(class="col-12")
-              textarea#comments.form-control(type='textarea', placeholder='Comments' name='comments' rows='7' class="form-control form-control-sm") #{undefined===note ? '' : note.comments}
+              textarea#comments.form-control(type='textarea', placeholder='Comments' name='comments' rows='8' class="form-control form-control-sm") #{undefined===note ? '' : note.comments}
       div(class="col-8")
-        textarea#lectureNote.form-control(type='textarea', placeholder='Lecture Notes' name='lectureNote' rows='22' class="form-control form-control-sm") #{undefined===note ? '' : note.lectureNote}
+        textarea#lectureNote.form-control(type='textarea', placeholder='Lecture Notes' name='lectureNote' rows='25' class="form-control form-control-sm") #{undefined===note ? '' : note.lectureNote}
     div(class="border-top border-secondary")
       div(class="row gx-0")
         div(class="col-12")
@@ -74,14 +74,14 @@ block content
         div(class="col-2")
           button.btn.btn-primary.btn-sm(type='submit' id='save_button') Save
         div(class="col-2")
-          a(class='btn btn-secondary btn-sm' href='/' + subjectid + '/' + topicid + '/' + subtopicid + '/notes' role='button' onclick="return confirmCancel();") Cancel
+          button.btn.btn-secondary.btn-sm(type='button' id='cancel_button' role='button') Cancel
         if note
           div(class="col-2")
-            a(class='btn btn-warning btn-sm' href='/' + subjectid + '/' + topicid + '/' + subtopicid + '/note/' + note._id + '/move' role='button') Move
+            button.btn.btn-warning.btn-sm(type='button' id='move_button' role='button') Move
           div(class="col-2")
-            a(class='btn btn-danger btn-sm' href='/' + subjectid + '/' + topicid + '/' + subtopicid + '/note/' + note._id + '/delete' role='button') Delete
+            button.btn.btn-danger.btn-sm(type='button' id='delete_button' role='button') Delete
           div(class="col-2")
-            a(class='btn btn-dark btn-sm' href='/' + subjectid + '/' + topicid + '/' + subtopicid + '/note/' + note._id + '/draw' role='button') Draw
+            button.btn.btn-dark.btn-sm(type='button' id='draw_button' role='button') Draw
           div(class="col-2")
             button.btn.btn-success.btn-sm(type='button' id='image_button' role='button') Images
 block append foot

@@ -1,3 +1,9 @@
+user authentication (Auth0)
+look and feel, themes
+language support
+migrate to Progressive Web Application
+make note frames resizable
+allow editing of links (add/remove/category)
 tables (not in textarea - perhaps as image)
 * move note to different topic/subtopic
 * update dropdowns when selecting note from list

@@ -1,0 +1,38 @@
+{
+    "short_name": "NotesApp",
+    "name": "NotesApp",
+    "icons": [
+      {
+        "src": "/images/favicon.ico",
+        "type": "image/ico",
+        "sizes": "192x192"
+      },
+      {
+        "src": "/images/pencil.png",
+        "type": "image/png",
+        "sizes": "32x32"
+      }
+    ],
+    "start_url": "/?source=pwa",
+    "background_color": "#3367D6",
+    "display": "standalone",
+    "scope": "/",
+    "theme_color": "#3367D6",
+    "shortcuts": [
+      {
+        "name": "NotesApp",
+        "short_name": "notes",
+        "description": "App to record a-level lecture notes",
+        "url": "/1/1/1?source=pwa",
+        "icons": [{ "src": "/images/pencil.png", "sizes": "32x32" }]
+      }
+    ],
+    "description": "App to record a-level lecture notes",
+    "screenshots": [
+      {
+        "src": "/images/screenshot.png",
+        "type": "image/png",
+        "sizes": "1461x689"
+      }
+    ]
+  }

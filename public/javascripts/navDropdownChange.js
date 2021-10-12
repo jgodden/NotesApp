@@ -56,3 +56,7 @@ function ChangeSelection(element) {
     }
     window.location.href = '/' + subjectid + '/' + topicid + '/' + subtopicid + '/notes';
   }
+  function confirmCancel(e) {
+    uri = e.baseURI;
+    location.href = uri.substring(0, uri.lastIndexOf('/'));
+  }

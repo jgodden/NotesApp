@@ -6,46 +6,46 @@
 
 var app = require('../app');
 var debug = require('debug')('notesapp:server');
-var http = require('http');
+const path = require('path');
+const https = require('https');
+const fs = require('fs');
+const port = 3000;
+var key = fs.readFileSync(path.join(__dirname, '../certs/selfsigned-key.pem'));
+var cert = fs.readFileSync(path.join(__dirname, '../certs/selfsigned-cert.pem'));
+var options = {
+  key: key,
+  cert: cert
+};
+
+var server = https.createServer(options, app);
+server.listen(port, () => {
+  console.log("server starting on port : " + port)
+});
 
 /**
  * Get port from environment and store in Express.
  */
-
-var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
-
-/**
- * Create HTTP server.
- */
-
-var server = http.createServer(app);
 
 /**
  * Listen on provided port, on all network interfaces.
  */
-
-server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
 
 /**
  * Normalize a port into a number, string, or false.
  */
-
 function normalizePort(val) {
   var port = parseInt(val, 10);
-
   if (isNaN(port)) {
     // named pipe
     return val;
   }
-
   if (port >= 0) {
     // port number
     return port;
   }
-
   return false;
 }
 

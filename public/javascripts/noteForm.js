@@ -1,5 +1,32 @@
 var changesMade = false;
+window.addEventListener("resize", function () {
+	resize_text_input();
+});
+function resize_text_input() {
+	var ih = window.innerHeight;
+	var rmax = 11;
+	var rmin = 1;
+	var row_range = rmax - rmin;
+	var wmax = 975;
+	var wmin = 280;
+	var win_range = wmax - wmin;
+	var row = Math.floor((((ih - wmin) + 1) * row_range) / win_range) + 1;
+	if (row < 1)
+		row = 1;
+	//alert('ih ' + ih + ' row ' + row);
+	var summary_rows = row / 2;
+	summary_rows = Math.floor(summary_rows);
+	if (summary_rows < 1)
+		summary_rows = 1;
+	document.getElementById('keywords').rows = row;
+	document.getElementById('questions').rows = row;
+	document.getElementById('comments').rows = row;
+	document.getElementById('lectureNote').rows = (row * 3) + 1;
+	document.getElementById('summary').rows = summary_rows;
+}
+
 window.addEventListener("DOMContentLoaded", function () {
+	resize_text_input();
 	let script = document.createElement('script');
 	script.src = "https://media-library.cloudinary.com/global/all.js"
 	document.head.appendChild(script);
@@ -13,7 +40,11 @@ window.addEventListener("DOMContentLoaded", function () {
 		var topicid = document.getElementById('topicid').value;
 		var subtopicid = document.getElementById('subtopicid').value;
 		var noteid = document.getElementById('noteid').value;
-		var folder = subjectid + '/' + topicid + '/' + subtopicid + '/' + noteid;
+		// base folder with leading / for urls
+		var baseFolder = '/' + subjectid + '/' + topicid + '/' + subtopicid;
+		// image folder without leading / for cloudinary media library
+		var imageFolder = subjectid + '/' + topicid + '/' + subtopicid + '/' + noteid;
+		var actionFolder = baseFolder + '/note/' + noteid;
 
 		try {
 			var mediaLibraryWidget = cloudinary.createMediaLibrary({
@@ -26,8 +57,17 @@ window.addEventListener("DOMContentLoaded", function () {
 				button_caption: 'Select Image or Video',
 			});
 
+			var cancelButton = document.getElementById('cancel_button');
+			cancelButton.onclick = function() { confirmCancel(baseFolder + '/notes') };
+			var moveButton = document.getElementById('move_button');
+			moveButton.onclick = function() { relocate(actionFolder + '/move') };
+			var deleteButton = document.getElementById('delete_button');
+			deleteButton.onclick = function() { relocate(actionFolder + '/delete') };
+			var drawButton = document.getElementById('draw_button');
+			drawButton.onclick = function() { relocate(actionFolder + '/draw')};
 			var imageBtn = document.getElementById('image_button');
-			imageBtn.onclick = function() {mediaLibraryWidget.show({folder: {path: folder}})};
+			imageBtn.onclick = function() { mediaLibraryWidget.show({folder: {path: imageFolder}}) };
+
 		} catch(err) {
 			// disable image button
 			image_button = document.getElementById('image_button');
@@ -47,13 +87,18 @@ window.addEventListener("DOMContentLoaded", function () {
 	var note_form = document.getElementById('note_form');
 	note_form.addEventListener('keypress', formKeyPressed);
 });
+function relocate(url) {
+	window.location.href = url;
+}
 function formKeyPressed(e) {
 	changesMade = true;
 }
-confirmCancel = function confirmCancel(e) {
+confirmCancel = function confirmCancel(url) {
 	if (changesMade) {
-		return confirm('You have made changes to this note which will be lost if you cancel\nOk to discard these changes?');
+		if (!confirm('You have made changes to this note which will be lost if you cancel\nOk to discard these changes?'))
+			return;
 	}
+	relocate(url);
 }
 function insertThisInThere(HTMLSelectElement) {
     let collection = HTMLSelectElement.selectedOptions;

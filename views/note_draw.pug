@@ -92,4 +92,4 @@ html(lang='en')
             div(class="col-2")
               button.btn.btn-primary.btn-sm(type='submit' id='save_button') Save
             div(class="col-2")
-              a(class='btn btn-secondary btn-sm' href='/' + subjectid + '/' + topicid + '/' + subtopicid + '/note/' + note._id, role='button' onclick="return confirmCancel();")  Cancel
+              button.btn.btn-secondary.btn-sm(type='button' onclick="return confirmCancel(this);" id='cancel_button') Cancel

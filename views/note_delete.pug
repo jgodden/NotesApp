@@ -25,6 +25,6 @@ block content
 
       div(class="row gx-0")
         div(class="col-6")
-          a(class='btn btn-secondary btn-sm' href='/' + subjectid + '/' + topicid + '/' + subtopicid + '/note/' + note._id role='button')  Cancel
+          button.btn.btn-secondary.btn-sm(type='button' onclick="return confirmCancel(this);" id='cancel_button') Cancel
         div(class="col-6")
           button.btn.btn-danger.btn-sm(type='submit') Delete

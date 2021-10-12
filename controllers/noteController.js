@@ -6,11 +6,10 @@ const Subtopic = require('../models/subtopic');
 const Link = require('../models/link');
 
 const async = require('async');
-const note = require('../models/note');
 
 exports.home_page = function(req, res, next) {
     //console.log('redirect from ' + req.url + ' to /0/0/0');
-    res.redirect('/1/1/1');
+    //res.redirect('/1/1/1');
 };
 
 // decode all html encoding to original text
@@ -220,6 +219,7 @@ function render_list_page(req, res, next, errors) {
             item.title = decodeEntities(item.title);
         });
 
+        const { _raw, _json, ...userProfile } = req.user;
         res.render('note_list', {
             title: 'List',
             note_count: noteCount,
@@ -234,6 +234,7 @@ function render_list_page(req, res, next, errors) {
             subject_name: subjectName,
             topic_name: topicName,
             subtopic_name: subtopicName,
+            userProfile: JSON.stringify(userProfile, null, 2),
             errors: errors
         } );
     });
