@@ -1,4 +1,5 @@
 const createError = require('http-errors');
+const config = require('./config.js');
 const express = require('express');
 const path = require('path');
 const logger = require('morgan');
@@ -63,9 +64,7 @@ app.use(compression()); //Compress all routes
 
 //Set up mongoose connection
 const mongoose = require('mongoose');
-const atlas_db_url = 'mongodb+srv://Admin:M4rmoset52@cluster0.j8m3g.mongodb.net/NotesApp?retryWrites=true';
-const local_db_url = 'mongodb://127.0.0.1:27017/local';
-const mongoDB = process.env.MONGODB_URI || atlas_db_url;
+const mongoDB = config.MONGODB_URI;
 mongoose.connect(mongoDB, { useNewUrlParser: true , useUnifiedTopology: true});
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:')); 
@@ -115,8 +114,7 @@ if (app.get('env') === 'production') {
 }
 app.use(session(sess));
 
-var dotenv = require('dotenv');
-dotenv.config();
+console.log('NODE_ENV', config.NODE_ENV);
 // Load Passport
 var passport = require('passport');
 var Auth0Strategy = require('passport-auth0');
