@@ -34,7 +34,8 @@ router.get('/logout', (req, res) => {
   
     var returnTo = req.protocol + '://' + req.hostname;
     var port = req.connection.localPort;
-    if (port !== undefined && port !== 80 && port !== 443) {
+    // Only add port in dev
+    if (process.env.NODE_ENV === 'development' && (port !== undefined && port !== 80 && port !== 443)) {
       returnTo += ':' + port;
     }
     var logoutURL = new url.URL(
