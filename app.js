@@ -95,7 +95,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-var session = require('express-session');
+//var session = require('express-session');
+var session = require('cookie-session');
+
 // config express-session
 var sess = {
   secret: '0Kv7k_3ldeHI1tlj96jsLq103jSxbArw2',
@@ -164,7 +166,6 @@ app.use(function(req, res, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
-  console.log('called app.use');
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
