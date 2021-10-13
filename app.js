@@ -122,7 +122,7 @@ console.log('BASE_DOMAIN', process.env.BASE_DOMAIN);
 console.log('PORT', process.env.PORT);
 var port = process.env.PORT;
 var callback = 'http://' + process.env.BASE_DOMAIN;
-if (port) {
+if (process.env.NODE_ENV === 'development' && port) {
   callback += ':' + port;
 }
 callback += '/callback';
