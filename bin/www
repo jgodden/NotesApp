@@ -7,7 +7,7 @@
 var app = require('../app');
 var debug = require('debug')('notesapp:server');
 const path = require('path');
-const https = require('https');
+const http = require('http');
 const fs = require('fs');
 const port = normalizePort(process.env.PORT || '3000');
 var key = fs.readFileSync(path.join(__dirname, '../certs/selfsigned-key.pem'));
@@ -17,7 +17,7 @@ var options = {
   cert: cert
 };
 
-var server = https.createServer(options, app);
+var server = http.createServer(app);
 server.listen(port, () => {
   console.log("server starting on port : " + port)
 });
