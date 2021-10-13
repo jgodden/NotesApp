@@ -114,7 +114,11 @@ if (app.get('env') === 'production') {
 }
 app.use(session(sess));
 
-console.log('NODE_ENV', config.NODE_ENV);
+console.log('NODE_ENV', process.env.NODE_ENV);
+console.log('AUTH0_CLIENT_ID', process.env.AUTH0_CLIENT_ID);
+console.log('AUTH0_DOMAIN', process.env.AUTH0_DOMAIN);
+console.log('MONGODB_URI', process.env.MONGODB_URI);
+console.log('CLOUDINARY_URL', process.env.CLOUDINARY_URL);
 // Load Passport
 var passport = require('passport');
 var Auth0Strategy = require('passport-auth0');
