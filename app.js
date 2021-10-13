@@ -118,6 +118,7 @@ console.log('NODE_ENV', process.env.NODE_ENV);
 console.log('AUTH0_CLIENT_ID', process.env.AUTH0_CLIENT_ID);
 console.log('AUTH0_DOMAIN', process.env.AUTH0_DOMAIN);
 console.log('MONGODB_URI', process.env.MONGODB_URI);
+console.log('BASE_DOMAIN', process.env.BASE_DOMAIN);
 // Load Passport
 var passport = require('passport');
 var Auth0Strategy = require('passport-auth0');
@@ -128,7 +129,7 @@ var strategy = new Auth0Strategy(
     clientID: process.env.AUTH0_CLIENT_ID,
     clientSecret: process.env.AUTH0_CLIENT_SECRET,
     callbackURL:
-      process.env.AUTH0_CALLBACK_URL || 'http://' + process.env.AUTH0_DOMAIN + '/callback'
+      process.env.AUTH0_CALLBACK_URL || 'http://' + process.env.BASE_DOMAIN + '/callback'
   },
   function (accessToken, refreshToken, extraParams, profile, done) {
     // accessToken is the token to call Auth0 API (not needed in the most cases)
