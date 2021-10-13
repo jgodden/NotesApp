@@ -1,7 +1,11 @@
 var dotenv = require('dotenv');
 const path = require('path');
+const env = process.env.NODE_ENV;
+if ((env != 'development') && (env != 'staging')) {
+  env = 'staging';
+}
 dotenv.config({
-  path: path.resolve(__dirname, `${process.env.NODE_ENV}.env`)
+  path: path.resolve(__dirname, `${env}.env`)
 });
 
 module.exports = {

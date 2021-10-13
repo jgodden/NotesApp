@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "set NODE_ENV=staging&& node ./bin/www",
-    "devstart": "set NODE_ENV=development&& nodemon ./bin/www",
+    "start": "node ./bin/www",
+    "devstart": "nodemon ./bin/www",
     "dev": "set NODE_ENV=development&& npm run devstart",
     "staging": "set NODE_ENV=staging&& npm run start"
   },
