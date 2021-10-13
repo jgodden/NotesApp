@@ -1,8 +1,8 @@
 var dotenv = require('dotenv');
 const path = require('path');
 var env = process.env.NODE_ENV;
-if ((env != 'development') && (env != 'staging')) {
-  env = 'staging';
+if ((env != 'development') && (env != 'production')) {
+  env = 'production';
 }
 dotenv.config({
   path: path.resolve(__dirname, `${env}.env`)
