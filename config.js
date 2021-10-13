@@ -1,6 +1,6 @@
 var dotenv = require('dotenv');
 const path = require('path');
-const env = process.env.NODE_ENV;
+var env = process.env.NODE_ENV;
 if ((env != 'development') && (env != 'staging')) {
   env = 'staging';
 }
