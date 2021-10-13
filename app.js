@@ -1,5 +1,4 @@
 const createError = require('http-errors');
-const config = require('./config.js');
 const express = require('express');
 const path = require('path');
 const logger = require('morgan');
@@ -14,6 +13,7 @@ global.operatorSymbols;
 global.arrowSymbols;
 
 const app = express();
+const config = require('dotenv').config();
 
 app.use(
   helmet({
@@ -64,7 +64,7 @@ app.use(compression()); //Compress all routes
 
 //Set up mongoose connection
 const mongoose = require('mongoose');
-const mongoDB = config.MONGODB_URI;
+const mongoDB = process.env.MONGODB_URI;
 mongoose.connect(mongoDB, { useNewUrlParser: true , useUnifiedTopology: true});
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:')); 
@@ -118,7 +118,6 @@ console.log('NODE_ENV', process.env.NODE_ENV);
 console.log('AUTH0_CLIENT_ID', process.env.AUTH0_CLIENT_ID);
 console.log('AUTH0_DOMAIN', process.env.AUTH0_DOMAIN);
 console.log('MONGODB_URI', process.env.MONGODB_URI);
-console.log('CLOUDINARY_URL', process.env.CLOUDINARY_URL);
 // Load Passport
 var passport = require('passport');
 var Auth0Strategy = require('passport-auth0');
