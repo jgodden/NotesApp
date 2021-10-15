@@ -19,9 +19,9 @@ block content
     div.form-group
       input#noteid.form-control(type='hidden',name='noteid' value=note._id )
       input#note_image.form-control(type='hidden',name='note_image' value=note.image )
-      input#subjectid.form-control(type='hidden',name='subjectid' value=note.subject_id )
-      input#topicid.form-control(type='hidden',name='topicid' value=note.topic_id )
-      input#subtopicid.form-control(type='hidden',name='subtopicid' value=note.subtopic_id )
+      input#subjectid.form-control(type='hidden',name='subjectid' value=note.subject._id )
+      input#topicid.form-control(type='hidden',name='topicid' value=note.topic._id )
+      input#subtopicid.form-control(type='hidden',name='subtopicid' value=note.subtopic._id )
 
       div(class="row gx-0")
         div(class="col-6")

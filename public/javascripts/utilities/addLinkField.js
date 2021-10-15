@@ -7,11 +7,11 @@ const { DateTime } = require("luxon");
 var userArgs = process.argv.slice(2);
 
 var async = require('async')
-var Note = require('./models/note')
-var Subject = require('./models/subject')
-var Topic = require('./models/topic')
-var Subtopic = require('./models/subtopic')
-var Section = require('./models/section')
+var Note = require('../../../models/note')
+var Subject = require('../../../models/subject')
+var Topic = require('../../../models/topic')
+var Subtopic = require('../../../models/subtopic')
+var Section = require('../../../models/section')
 
 var mongoose = require('mongoose');
 var mongoDB = userArgs[0];

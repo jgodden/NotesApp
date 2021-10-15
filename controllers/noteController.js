@@ -4,13 +4,9 @@ const Subject = require('../models/subject');
 const Topic = require('../models/topic');
 const Subtopic = require('../models/subtopic');
 const Link = require('../models/link');
+const ObjectId = require('mongodb').ObjectId;
 
 const async = require('async');
-
-exports.home_page = function(req, res, next) {
-    //console.log('redirect from ' + req.url + ' to /0/0/0');
-    //res.redirect('/1/1/1');
-};
 
 // decode all html encoding to original text
 function decodeEntities(encodedString) {
@@ -56,11 +52,24 @@ var topicList;
 var subtopicList;
 var linkList;
 
+// display note list page on GET /.
+exports.home_page = function(req, res, next) {
+    if (res.locals.user) {
+        if (!req.params.subject)
+        req.params.subject = 1;
+        if (!req.params.topic)
+            req.params.topic = 1;
+        if (!req.params.subtopic)
+            req.params.subtopic = 1;
+        render_list_page(req, res, next, null);
+    }
+    else
+        res.render('index', { title: 'notes' });
+};
+
 var dbgNoteList = require('debug')('noteList');
 
 // display note list page on GET.
-
-// display drawing page on GET.
 exports.note_list = function(req, res, next) {
     render_list_page(req, res, next, null);
 };
@@ -178,20 +187,20 @@ function render_list_page(req, res, next, errors) {
                 if (topicId == 1) {
                     if (subjectId == 1) {
                         dbgNoteList('subject, topic and subtopic <search all>');
-                        noteList = await Note.find({}, 'title subject_id topic_id subtopic_id creationDate updateDate', callback);
+                        noteList = await Note.find({}, 'title subject topic subtopic creationDate updateDate', callback);
                     } else {
                         dbgNoteList('topic and subtopic <search all>');
-                        noteList = await Note.find({subject_id:subjectId}, 'title subject_id topic_id subtopic_id creationDate updateDate', callback);
+                        noteList = await Note.find({subject:ObjectId(subjectId)}, 'title subject topic subtopic creationDate updateDate', callback);
                     }
                 } else {
                     dbgNoteList('subtopic <search all> ' + subjectId + ':' + topicId);
-                    noteList = await Note.find({subject_id:subjectId, topic_id:topicId}, 'title subject_id topic_id subtopic_id creationDate updateDate', callback);
+                    noteList = await Note.find({subject:ObjectId(subjectId), topic:ObjectId(topicId)}, 'title subject topic subtopic creationDate updateDate', callback);
                 }
             } else {
                 dbgNoteList('no <search all>');
-                noteList = await Note.find({subject_id:subjectId, topic_id:topicId, subtopic_id:subtopicId}, 'title subject_id topic_id subtopic_id creationDate updateDate', callback);
+                noteList = await Note.find({subject:ObjectId(subjectId), topic:ObjectId(topicId), subtopic:ObjectId(subtopicId)}, 'title subject topic subtopic creationDate updateDate', callback);
             }
-            //dbgNoteList('noteList', noteList);
+            dbgNoteList('noteList', noteList);
         },
         // Get number of notes with matching subjectid
         noteCount: async function(callback) {
@@ -200,13 +209,13 @@ function render_list_page(req, res, next, errors) {
                     if (subjectId == 1) {
                         noteCount = await Note.countDocuments({}, callback);
                     } else {
-                        noteCount = await Note.countDocuments({subject_id:subjectId}, callback);
+                        noteCount = await Note.countDocuments({subject:ObjectId(subjectId)}, callback);
                     }
                 } else {
-                    noteCount = await Note.countDocuments({subject_id:subjectId, topic_id:topicId}, callback);
+                    noteCount = await Note.countDocuments({subject:subjectId, topic:topicId}, callback);
                 }
             } else {
-                noteCount = await Note.countDocuments({subject_id:subjectId, topic_id:topicId, subtopic_id:subtopicId}, callback);
+                noteCount = await Note.countDocuments({subject:ObjectId(subjectId), topic:ObjectId(topicId), subtopic:ObjectId(subtopicId)}, callback);
             }
             dbgNoteList('noteCount', noteCount);
         },
@@ -238,7 +247,7 @@ function render_list_page(req, res, next, errors) {
             errors: errors
         } );
     });
-};
+}
 
 var dbgNoteCreateGet = require('debug')('noteCreateGet');
 
@@ -295,9 +304,9 @@ exports.note_create_post = [
                 questions: req.body.questions,
                 comments: req.body.comments,
                 summary: req.body.summary,
-                subject_id: subjectId,
-                topic_id: topicId,
-                subtopic_id: subtopicId,
+                subject: ObjectId(subjectId),
+                topic: ObjectId(topicId),
+                subtopic: ObjectId(subtopicId),
                 image: image_url
             });
             if (!errors.isEmpty()) {
@@ -367,18 +376,18 @@ function render_update_page(req, res, next, errors) {
             note_object = await Note.findById(noteid, callback);
             dbgNoteUpdateGet('note', note_object);
             if (subjectId < 2) {
-                subjectId = note_object.subject_id;
+                subjectId = note_object.subject._id;
                 // and update the link list
                 subjectObject = await Subject.find({_id:subjectId}, 'title topic link', callback);
                 linkList = await Link.find({}, 'title href category').where('_id').in(subjectObject[0].link);
                 dbgNoteUpdateGet("set subjectId to", subjectId);
             }
             if (topicId < 2) {
-                topicId = note_object.topic_id;
+                topicId = note_object.topic._id;
                 dbgNoteUpdateGet('set topicId to', topicId);
             }
             if (subtopicId < 2) {
-                subtopicId = note_object.subtopic_id;
+                subtopicId = note_object.subtopic._id;
                 dbgNoteUpdateGet("set subtopicId to", subtopicId);
             }            
         },
@@ -437,9 +446,9 @@ exports.note_update_post = [
                 questions: req.body.questions,
                 comments: req.body.comments,
                 summary: req.body.summary,
-                subject_id: req.body.subjectid,
-                topic_id: req.body.topicid,
-                subtopic_id: req.body.subtopicid,
+                subject: ObjectId(req.body.subjectid),
+                topic: ObjectId(req.body.topicid),
+                subtopic: ObjectId(req.body.subtopicid),
                 image: req.body.image,   // use the cloud url instead of the image data
                 _id:req.params.note // This is required, or a new ID will be assigned!
             });
@@ -526,7 +535,7 @@ function render_move_page(req, res, next, errors) {
         },
         // Get note
         note_object: async function (callback) {
-            note_object = await Note.findById(noteid, 'title subject_id topic_id subtopic_id creationDate updateDate image', callback);
+            note_object = await Note.findById(noteid, 'title subject topic subtopic creationDate updateDate image', callback);
             dbgNoteMoveGet('note_object ' + note_object);
         },
     }, function(err, results) {
@@ -584,9 +593,9 @@ exports.note_move_post = function(req, res, next) {
                 comments: srcNote.comments,
                 summary: srcNote.summary,
                 image: srcNote.image,  // to be updated later
-                subject_id: req.body.newsubjectid,
-                topic_id: req.body.newtopicid,
-                subtopic_id: req.body.newsubtopicid,
+                subject: ObjectId(req.body.newsubjectid),
+                topic: ObjectId(req.body.newtopicid),
+                subtopic: ObjectId(req.body.newsubtopicid),
             });
             require('dotenv').config();
             const cloudinary = require('cloudinary').v2;
@@ -594,7 +603,7 @@ exports.note_move_post = function(req, res, next) {
             var image_url;
             var cl_error;
             var cl_result;
-            var srcFilePath = srcNote.subject_id + '/' + srcNote.topic_id + '/' + srcNote.subtopic_id + '/' + srcNote._id;
+            var srcFilePath = srcNote.subject._id + '/' + srcNote.topic._id + '/' + srcNote.subtopic._id + '/' + srcNote._id;
             var destDir = req.body.newsubjectid + '/' + req.body.newtopicid + '/' + req.body.newsubtopicid;
             var destFilePath = destDir + '/' + destNote._id;
 
@@ -683,7 +692,7 @@ function render_delete_page(req, res, next, errors) {
     dbgNoteDeleteGet('delete subjectid ' + subjectId + ' topicid ' + topicId + ' subtopicid ' + subtopicId + ' noteid ' + noteid);
     async.series({
         note_object: async function (callback) {
-            note_object = await Note.findById(noteid, 'title subject_id topic_id subtopic_id creationDate updateDate image', callback);
+            note_object = await Note.findById(noteid, 'title subject topic subtopic creationDate updateDate image', callback);
             dbgNoteDeleteGet('note_object', note_object);
         },
     }, function(err, results) {
@@ -774,15 +783,12 @@ exports.note_draw_get = function(req, res, next) {
 
 function render_draw_page(req, res, next, errors) {
     var noteid = req.params.note;
-    var subjectid = req.params.subject;
-    var topicid = req.params.topic;
-    var subtopicid = req.params.subtopic;
     note_list = null;   // force to null, otherwise still existing from note list get
     dbgNoteDrawGet('draw noteid', noteid);
     async.series({
         // Get note
         note_object: async function (callback) {
-            note_object = await Note.findById(noteid, 'title subject_id topic_id subtopic_id image', callback);
+            note_object = await Note.findById(noteid, 'title image', callback);
             dbgNoteDrawGet('note_object', note_object);
         },
     }, function(err, results) {

@@ -2,7 +2,7 @@
 
 var mongoDB = 'mongodb+srv://Admin:M4rmoset52@cluster0.j8m3g.mongodb.net/NotesApp?retryWrites=true&w=majority';
 var async = require('async')
-var Symbol = require('./models/symbol')
+var Symbol = require('../../../models/symbol')
 
 console.log('in populateSymbolSelect');
 var mongoose = require('mongoose');

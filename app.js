@@ -13,7 +13,7 @@ global.operatorSymbols;
 global.arrowSymbols;
 
 const app = express();
-const config = require('dotenv').config();
+require('dotenv').config();
 
 app.use(
   helmet({
@@ -159,12 +159,10 @@ passport.deserializeUser(function (user, done) {
 
 const userInViews = require('./middleware/userInViews');
 const authRouter = require('./routes/auth');
-const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const repoRouter = require('./routes/repo');
 app.use(userInViews());
 app.use('/', authRouter);
-app.use('/', indexRouter);
 app.use('/', usersRouter);
 app.use('/', repoRouter);
 

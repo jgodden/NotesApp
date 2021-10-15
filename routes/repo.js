@@ -6,9 +6,7 @@ var router = express.Router();
 var note_controller = require('../controllers/noteController');
 
 /// NOTE ROUTES ///
-
-/* GET home page. */
-//router.get('/', note_controller.home_page);
+router.get( '/', note_controller.home_page);
 
 router.get( '/:subject/:topic/:subtopic', secured(), note_controller.note_list);
 router.get( '/:subject/:topic/:subtopic/notes', secured(), note_controller.note_list);

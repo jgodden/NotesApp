@@ -49,17 +49,17 @@ block content
         let subject, topic, title, url, created, updated;
         for (let nl_row of Object.values(nl_val)) {
           for (let sl_row of Object.values(sl_val)) { 
-            if (sl_row._id === nl_row.subject_id) {
+            if (sl_row._id === nl_row.subject) {
               subject = sl_row.title;
             }
           }
           for (let tl_row of Object.values(tl_val)) { 
-            if (tl_row._id === nl_row.topic_id) {
+            if (tl_row._id === nl_row.topic) {
               topic = tl_row.title;
             }
           }
           for (let stl_row of Object.values(stl_val)) { 
-            if (stl_row._id === nl_row.subtopic_id) {
+            if (stl_row._id === nl_row.subtopic) {
               subtopic = stl_row.title;
             }
           }
