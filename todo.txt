@@ -5,6 +5,9 @@ migrate to Progressive Web Application
 make note frames resizable
 allow editing of links (add/remove/category)
 tables (not in textarea - perhaps as image)
+link Auth0 with user model
+* add user, login, membership and account models to organise users
+* change subject, topic and subtopic to use ObjectIds instead of string ids
 * user authentication (Auth0)
 * move note to different topic/subtopic
 * update dropdowns when selecting note from list

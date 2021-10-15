@@ -31,6 +31,10 @@ window.addEventListener("DOMContentLoaded", function () {
 	script.src = "https://media-library.cloudinary.com/global/all.js"
 	document.head.appendChild(script);
 	script.onload = function() {
+		var noteid = document.getElementById('noteid').value;
+		if (!noteid) {
+			return;	// we are in create form
+		}
 		var cloud_name = 'ddpa7qntq';
 		var api_key = '127533828577153';
 		var username = 'jgodden@hotmail.com';
@@ -39,7 +43,7 @@ window.addEventListener("DOMContentLoaded", function () {
 		var subjectid = document.getElementById('subjectid').value;
 		var topicid = document.getElementById('topicid').value;
 		var subtopicid = document.getElementById('subtopicid').value;
-		var noteid = document.getElementById('noteid').value;
+
 		// base folder with leading / for urls
 		var baseFolder = '/' + subjectid + '/' + topicid + '/' + subtopicid;
 		// image folder without leading / for cloudinary media library
