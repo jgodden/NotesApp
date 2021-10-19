@@ -14,32 +14,26 @@ body {
   outline: none; 
   background: -webkit-gradient(linear, left top, left 25, from(#FFFFFF), color-stop(4%, #CAD9E3), to(#FFFFFF));  
 }
-textarea {
-  /* font-family: "handwriting", cursive, sans-serif; */
-  font-family: "Courier New", Courier, serif;
-}
 input, button, p, a, select {
-  font-family: "handwriting", cursive, sans-serif;
+  font-family: "Calibri, sans-serif";
+  /* font-family: "handwriting", cursive, sans-serif; */
 }
-
 input, textarea {
-  width: 80%;
+  display : block;
+  width: 100%;
+  height: 100%;
   box-sizing: border-box;
-  background : content-box radial-gradient(white, #CAD9E3);
+  /* background : content-box radial-gradient(white, #CAD9E3); */
+  /* font-family: "handwriting", cursive, sans-serif; */
+  font-family: "Calibri, sans-serif";
+  /* font-family: "Courier New", Courier, serif; */
 }
 button {
   width: 80%;
-  box-sizing: border-box;
-  border: 2px dotted;
-}
-p.small {
-  line-height: 0.8;
-}
-p.big {
-  line-height: 1.8;
 }
 p, a {
-  font-size: 0.7em;
+  line-height: 1.0;
+  font-size: 1.0em;
   padding: 0px 0px;
   text-indent: 1px;
   display: block grid;

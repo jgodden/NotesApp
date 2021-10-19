@@ -13,7 +13,6 @@ function resize_text_input() {
 	var row = Math.floor((((ih - wmin) + 1) * row_range) / win_range) + 1;
 	if (row < 1)
 		row = 1;
-	//alert('ih ' + ih + ' row ' + row);
 	var summary_rows = row / 2;
 	summary_rows = Math.floor(summary_rows);
 	if (summary_rows < 1)
@@ -21,7 +20,8 @@ function resize_text_input() {
 	document.getElementById('keywords').rows = row;
 	document.getElementById('questions').rows = row;
 	document.getElementById('comments').rows = row;
-	document.getElementById('lectureNote').rows = (row * 3) + 1;
+	var ln = document.getElementById('lectureNote');
+	ln.rows = (row * 3) + 1;
 	document.getElementById('summary').rows = summary_rows;
 }
 
@@ -180,3 +180,17 @@ function insertThisInThere(HTMLSelectElement) {
 	htmlElement.setSelectionRange(pos.start + 1, pos.start + 1)
 	htmlElement.focus();
 }
+tinymce.init(
+	{
+		selector: '#lectureNote',
+		width  : '100%',
+		height : '100%',
+		plugins: [
+			'advlist autolink link image lists charmap print preview hr anchor pagebreak',
+			'searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking',
+			'table emoticons template paste help'
+		  ],
+		content_css: '/stylesheets/style.css',
+	}
+);
+

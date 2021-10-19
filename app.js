@@ -4,13 +4,6 @@ const path = require('path');
 const logger = require('morgan');
 const compression = require('compression');
 const helmet = require('helmet');
-global.usingInternet = 1;
-global.supersubSymbols;
-global.fractionSymbols;
-global.shapeSymbols;
-global.symbolSymbols;
-global.operatorSymbols;
-global.arrowSymbols;
 
 const app = express();
 require('dotenv').config();
@@ -28,6 +21,7 @@ app.use(
                 "'self'",
                 "https://res.cloudinary.com/",
                 "https://lh3.googleusercontent.com",
+                "https://sp.tinymce.com",
                 "data:"],
               scriptSrc:[
                 "'self'",
@@ -37,17 +31,21 @@ app.use(
                 "https://code.jquery.com",
                 "https://maxcdn.bootstrapcdn.com",
                 "https://cdn.jsdelivr.net",
+                "https://cdn.tiny.cloud",
                 "'unsafe-inline'"],
               styleSrc:[
                 "'self'",
                 "https://cdnjs.cloudflare.com/",
                 "https://maxcdn.bootstrapcdn.com",
                 "https://cdn.jsdelivr.net",
+                "https://cdn.tiny.cloud",
                 "'unsafe-inline'"],
               fontSrc:[
                 "'self'","https://cdnjs.cloudflare.com/"],
               frameSrc:[
+                "'self'",
                 "https://upload-widget.cloudinary.com",
+                "http://upload-widget.cloudinary.com",
                 "https://cloudinary.com/"]
           },
       },
@@ -57,7 +55,8 @@ app.use(
   })
 );
 app.use(helmet.noSniff());
-app.use(helmet.frameguard({ action: "deny", }));
+//app.use(helmet.frameguard({ action: "deny", }));
+app.use(helmet.frameguard({ action: 'SAMEORIGIN' })); // see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
 app.use(helmet.hidePoweredBy());
 app.use(helmet.xssFilter());
 app.use(compression()); //Compress all routes
@@ -68,18 +67,6 @@ const mongoDB = process.env.MONGODB_URI;
 mongoose.connect(mongoDB, { useNewUrlParser: true , useUnifiedTopology: true});
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:')); 
-
-var _Symbol = require('./models/symbol');
-
-// Get Symbols
-(async () => {
-  supersubSymbols = await _Symbol.find({type:"supersub"}).sort({index: "ascending"});
-  fractionSymbols = await _Symbol.find({type:"fraction"}).sort({index: "ascending"});
-  shapeSymbols = await _Symbol.find({type:"shape"}).sort({index: "ascending"});
-  symbolSymbols = await _Symbol.find({type:"symbol"}).sort({index: "ascending"});
-  operatorSymbols = await _Symbol.find({type:"operator"}).sort({index: "ascending"});
-  arrowSymbols = await _Symbol.find({type:"arrow"}).sort({index: "ascending"});
-})();
  
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -112,21 +99,21 @@ if (app.get('env') === 'production') {
   // "Unable to verify authorization request state"
   // app.set('trust proxy', 1);
 }
+
 app.use(session(sess));
 
-console.log('NODE_ENV', process.env.NODE_ENV);
-console.log('AUTH0_CLIENT_ID', process.env.AUTH0_CLIENT_ID);
-console.log('AUTH0_DOMAIN', process.env.AUTH0_DOMAIN);
-console.log('MONGODB_URI', process.env.MONGODB_URI);
-console.log('BASE_DOMAIN', process.env.BASE_DOMAIN);
-console.log('PORT', process.env.PORT);
+//console.log('NODE_ENV', process.env.NODE_ENV);
+//console.log('AUTH0_CLIENT_ID', process.env.AUTH0_CLIENT_ID);
+//console.log('AUTH0_DOMAIN', process.env.AUTH0_DOMAIN);
+//console.log('MONGODB_URI', process.env.MONGODB_URI);
+//console.log('BASE_DOMAIN', process.env.BASE_DOMAIN);
+//console.log('PORT', process.env.PORT);
 var port = process.env.PORT;
 var callback = 'http://' + process.env.BASE_DOMAIN;
 if (process.env.NODE_ENV === 'development' && port) {
   callback += ':' + port;
 }
 callback += '/callback';
-console.log('CALLBACK', process.env.AUTH0_CALLBACK_URL || callback);
 /// Load Passport
 var passport = require('passport');
 var Auth0Strategy = require('passport-auth0');

@@ -21,7 +21,7 @@ block content
           | -&gt;!{subtopic_name}
         </p>
   div(class="border-bottom border-secondary" id='border')
-    div(class="row gx-0" id='title_row')
+    div(class="row gx-0 mb-1" id='title_row')
       div(class="col-sm-1")
         a(class='text' href='#s_subject' onClick="sort_page(this);") Subject
       div(class="col-sm-3")
@@ -88,8 +88,7 @@ block content
           let row_count = 0;
           for (let row of Object.values(rows)) {
             let newRowDiv = document.createElement("div");
-            newRowDiv.classList.add('row');
-            newRowDiv.classList.add('gx-0');
+            newRowDiv.classList.add('row', 'gx-0');
             newRowDiv.id = 'data_row' + row_count;
             row_count++;
             border.appendChild(newRowDiv);

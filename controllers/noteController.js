@@ -271,12 +271,6 @@ function render_create_page(req, res, next, errors) {
         subtopicid: subtopicId,
         subtopic_list: subtopicList,
         link_list: linkList,
-        supersub_symbol_list: supersubSymbols,
-        fraction_symbol_list: fractionSymbols,
-        shape_symbol_list: shapeSymbols,
-        symbol_symbol_list: symbolSymbols,
-        operator_symbol_list: operatorSymbols,
-        arrow_symbol_list: arrowSymbols,
         enc_sig: enc_sig,
         errors: errors
     });
@@ -412,12 +406,6 @@ function render_update_page(req, res, next, errors) {
             subtopicid: subtopicId,
             subtopic_list: subtopicList,
             link_list: linkList,
-            supersub_symbol_list: supersubSymbols,
-            fraction_symbol_list: fractionSymbols,
-            shape_symbol_list: shapeSymbols,
-            symbol_symbol_list: symbolSymbols,
-            operator_symbol_list: operatorSymbols,
-            arrow_symbol_list: arrowSymbols,
             enc_sig: enc_sig,
             errors: errors
         });

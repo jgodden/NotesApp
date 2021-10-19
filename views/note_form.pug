@@ -3,40 +3,10 @@ extends layout
 block content
   form(method='POST' action='' id='note_form')
     div(class="row gx-0")
-      div(class="col-3")
+      div(class="col-6")
         if note
           p Creation date:  #{note.creationDate_formatted}
-      div(class="col-1")
-        select#supersubSymbolSelect(class='form-control selcls', type='select', name='supersubSymbolSelect' class="form-control form-control-sm" onchange="insertThisInThere(this);")
-          option(value=-1) &lt;supersub&gt;
-          for symbol in supersub_symbol_list 
-            option(value=symbol.index) #{symbol.char} (#{symbol.description})
-      div(class="col-1")
-        select#fractionSymbolSelect(class='form-control selcls', type='select', name='fractionSymbolSelect' class="form-control form-control-sm" onchange="insertThisInThere(this);")
-          option(value=-1) &lt;fractions&gt;
-          for symbol in fraction_symbol_list 
-            option(value=symbol.index) #{symbol.char} (#{symbol.description})
-      div(class="col-1")
-        select#shapeSymbolSelect(class='form-control selcls', type='select', name='shapeSymbolSelect' class="form-control form-control-sm" onchange="insertThisInThere(this);")
-          option(value=-1) &lt;shapes&gt;
-          for symbol in shape_symbol_list 
-            option(value=symbol.index) #{symbol.char} (#{symbol.description})
-      div(class="col-1")
-        select#symbolSymbolSelect(class='form-control selcls', type='select', name='symbolSymbolSelect' class="form-control form-control-sm" onchange="insertThisInThere(this);")
-          option(value=-1) &lt;symbols&gt;
-          for symbol in symbol_symbol_list 
-            option(value=symbol.index) #{symbol.char} (#{symbol.description})
-      div(class="col-1")
-        select#operatorSymbolSelect(class='form-control selcls', type='select', name='operatorSymbolSelect' class="form-control form-control-sm" onchange="insertThisInThere(this);")
-          option(value=-1) &lt;operators&gt;
-          for symbol in operator_symbol_list 
-            option(value=symbol.index) #{symbol.char} (#{symbol.description})
-      div(class="col-1")
-        select#arrowSymbolSelect(class='form-control selcls', type='select', name='arrowSymbolSelect' class="form-control form-control-sm" onchange="insertThisInThere(this);")
-          option(value=-1) &lt;arrows&gt;
-          for symbol in arrow_symbol_list 
-            option(value=symbol.index) #{symbol.char} (#{symbol.description})
-      div(class="col-3 text-end")
+      div(class="col-6 text-end")
         if note
           p Last updated: #{note.updateDate_formatted}
     div(class="row gx-0")
