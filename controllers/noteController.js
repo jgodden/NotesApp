@@ -7,6 +7,7 @@ const Link = require('../models/link');
 const ObjectId = require('mongodb').ObjectId;
 
 const async = require('async');
+const user = require('../models/user');
 
 // decode all html encoding to original text
 function decodeEntities(encodedString) {
@@ -52,19 +53,9 @@ var topicList;
 var subtopicList;
 var linkList;
 
-// display note list page on GET /.
-exports.home_page = function(req, res, next) {
-    if (res.locals.user) {
-        if (!req.params.subject)
-        req.params.subject = 1;
-        if (!req.params.topic)
-            req.params.topic = 1;
-        if (!req.params.subtopic)
-            req.params.subtopic = 1;
-        render_list_page(req, res, next, null);
-    }
-    else
-        res.render('index', { title: 'notes' });
+// display logout page on GET /.
+exports.logout_page = function(req, res, next) {
+    res.render('index', { title: 'notes' });
 };
 
 var dbgNoteList = require('debug')('noteList');
@@ -200,7 +191,7 @@ function render_list_page(req, res, next, errors) {
                 dbgNoteList('no <search all>');
                 noteList = await Note.find({subject:ObjectId(subjectId), topic:ObjectId(topicId), subtopic:ObjectId(subtopicId)}, 'title subject topic subtopic creationDate updateDate', callback);
             }
-            dbgNoteList('noteList', noteList);
+            //dbgNoteList('noteList', noteList);
         },
         // Get number of notes with matching subjectid
         noteCount: async function(callback) {
@@ -227,8 +218,7 @@ function render_list_page(req, res, next, errors) {
         noteList.forEach(function (item, index) {
             item.title = decodeEntities(item.title);
         });
-
-        const { _raw, _json, ...userProfile } = req.user;
+        dbgNoteList('user', theUser);
         res.render('note_list', {
             title: 'List',
             note_count: noteCount,
@@ -243,7 +233,7 @@ function render_list_page(req, res, next, errors) {
             subject_name: subjectName,
             topic_name: topicName,
             subtopic_name: subtopicName,
-            userProfile: JSON.stringify(userProfile, null, 2),
+            user: theUser,
             errors: errors
         } );
     });

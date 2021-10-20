@@ -1,42 +1,49 @@
 body {
-  background: white;
-  color: black;
+  /* Default scroll overflow behavior is observed inside the element
+  this value is set on (e.g. "bounce" effects or refreshes), but no
+  scroll chaining occurs to neighboring scrolling areas, e.g. underlying
+  elements will not scroll. */
   overscroll-behavior: contain;
-  font-size: 100%;
-}
-
-.selcls {
-  font-size: 0.9em;
-  text-indent: 3px;
-  width: 100%;
-  padding: 3px; 
-  border: solid 1px #517B97; 
-  outline: none; 
-  background: -webkit-gradient(linear, left top, left 25, from(#FFFFFF), color-stop(4%, #CAD9E3), to(#FFFFFF));  
-}
-input, button, p, a, select {
-  font-family: "Calibri, sans-serif";
-  /* font-family: "handwriting", cursive, sans-serif; */
 }
 input, textarea {
-  display : block;
   width: 100%;
   height: 100%;
-  box-sizing: border-box;
-  /* background : content-box radial-gradient(white, #CAD9E3); */
+}
+button {
+  width: 90%;
+  height: 100%;
+}
+form, input, select, label, textarea, button, fieldset, legend, datalist, output, option, optgroup,
+p, a, li,
+table, tbody, td, tr,
+body, div {
+  /*line-height: 1.0;*/
+  font-size: 0.98em;
+  padding: 0px 0px;
+  color: black;
+  display: block grid;
   /* font-family: "handwriting", cursive, sans-serif; */
   font-family: "Calibri, sans-serif";
   /* font-family: "Courier New", Courier, serif; */
+
 }
-button {
-  width: 80%;
-}
-p, a, li {
-  /*line-height: 1.0;*/
-  font-size: 0.9em;
+p.indent {
   padding: 0px 5px;
-  display: block grid;
 }
-div {
-  display: block;
+.selcls {
+  font-size: 0.8em;
+  text-indent: 3px;
+  width: 100%;
+  padding: 0px; 
+  border: solid 1px #517B97;
+  outline: none; 
+  background: -webkit-gradient(linear, left top, left 25, from(#FFFFFF), color-stop(4%, #d2dce2), to(#FFFFFF));  
+}
+.rounded-circle {
+  opacity: 1.0;
+  transition: .5s ease;
+  backface-visibility: hidden;
+}
+.logout-image:hover .rounded-circle {
+  opacity: 0.4;
 }

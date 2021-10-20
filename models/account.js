@@ -2,8 +2,8 @@ const { DateTime } = require("luxon");
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var AccountSchema = new Schema({
-    name: { type: String },
-    plan: { type: String }
+    _name: { type: String },
+    _plan: { type: String }
   }
 );
 

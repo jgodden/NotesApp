@@ -21,12 +21,13 @@ var logins = []
 var memberships = []
 var accounts = []
 
-function userCreate(firstname, lastname, username, email, cb) {
+function userCreate(firstname, lastname, username, email, imageUrl, cb) {
   userdetail = {
-    firstname: firstname,
-    lastname: lastname,
-    username: username,
-    email: email
+    _firstname: firstname,
+    _lastname: lastname,
+    _username: username,
+    _email: email,
+    _imageUrl: imageUrl
     }
     
   var user = new User(userdetail);    
@@ -43,15 +44,15 @@ function userCreate(firstname, lastname, username, email, cb) {
 
 function createUsers(cb) {
   async.parallel([
-    function(callback) { userCreate("Sam", "Godden", "sam.godden", "samjgodden@gmail.com", callback); },
-    function(callback) { userCreate("Jon", "Godden", "jon.godden", "jongodden@gmail.com", callback); },  ],
+    function(callback) { userCreate("Sam", "Godden", "sam.godden", "samjgodden@gmail.com", "", callback); },
+    function(callback) { userCreate("Jon", "Godden", "jon.godden", "jongodden@gmail.com", "", callback); },  ],
   cb);
 }
 
 function loginCreate(username, user, cb) {
   logindetail = {
-    username: username,
-    user: user
+    _username: username,
+    _user: user
     }
     
   var login = new Login(logindetail);    
@@ -68,19 +69,19 @@ function loginCreate(username, user, cb) {
 
 function createLogins(cb) {
   async.parallel([
-    function(callback) { loginCreate("sam.godden", ObjectId(users[0]._id), callback); },
-    function(callback) { loginCreate("jon.godden", ObjectId(users[1]._id), callback); },  ],
+    function(callback) { loginCreate("samjgodden", ObjectId(users[0]._id), callback); },
+    function(callback) { loginCreate("jongodden", ObjectId(users[1]._id), callback); },  ],
   cb);
 }
 
 
 function membershipCreate(user, account, role, accountemail, accountphone, cb) {
   membershipdetail = {
-    user: user,
-    account: account,
-    role: role,
-    accountemail: accountemail,
-    accountphone: accountphone
+    _user: user,
+    _account: account,
+    _role: role,
+    _accountemail: accountemail,
+    _accountphone: accountphone
     }
     
   var membership = new Membership(membershipdetail);    
@@ -97,15 +98,15 @@ function membershipCreate(user, account, role, accountemail, accountphone, cb) {
 
 function createMemberships(cb) {
   async.parallel([
-    function(callback) { membershipCreate(ObjectId(users[0]._id), ObjectId(accounts[0]._id), 'user', "16sgodden@guildfordcounty.co.uk", "123", callback); },
-    function(callback) { membershipCreate(ObjectId(users[1]._id), ObjectId(accounts[1]._id), 'admin', "jon.godden@sita.aero", "123", callback); },  ],
+    function(callback) { membershipCreate(ObjectId(users[0]._id), ObjectId(accounts[0]._id), 'user', "samjgodden@gmail.com", "123", callback); },
+    function(callback) { membershipCreate(ObjectId(users[1]._id), ObjectId(accounts[1]._id), 'admin', "jongodden@gmail.com", "123", callback); },  ],
   cb);
 }
 
 function accountCreate(name, plan, cb) {
   accountdetail = {
-    name: name,
-    plan: plan
+    _name: name,
+    _plan: plan
     }
     
   var account = new Account(accountdetail);    

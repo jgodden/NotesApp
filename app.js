@@ -5,6 +5,9 @@ const logger = require('morgan');
 const compression = require('compression');
 const helmet = require('helmet');
 
+// The logged-in user
+global.theUser = null;
+
 const app = express();
 require('dotenv').config();
 

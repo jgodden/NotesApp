@@ -53,7 +53,7 @@ html(lang='en')
                         if link.category != prev_link_category
                           if prev_link_category != 0
                             div(class="dropdown-divider")
-                          p
+                          p.indent
                             b !{link.category}
                           - prev_link_category = link.category
                         a(class="dropdown-item" href=link.href target='_blank' role='button') !{link.title}
@@ -63,17 +63,16 @@ html(lang='en')
                     div(class="dropdown-menu" aria-labelledby="navbarDropdown")
                       for subtopic in subtopic_list
                         if subtopic._id.toString()===subtopicid.toString()
-                          p !{subtopic.description}                       
+                          p.indent !{subtopic.description}                       
           if (note_list && (subjectid != '1' && topicid != '1' && subtopicid != '1'))
             div(class="row mt-0 gx-0")
               a(class='btn btn-primary btn-sm btn-block' href='/' + subjectid + '/' + topicid + '/' + subtopicid + '/note/create' role='button') Create New Note
           div(class="row mt-3")
             div(class="col-sm-12")
               div(class="text-center")
-                img(src=user.picture class="rounded-circle")
-            div(class="col-sm-12")
-              div(class="text-center")
-                a(href="/logout") Log Out
+                a(href="/logout" data-toggle="tooltip" title="Logout" class="logout-image")
+                  img(src=user._imageUrl class="rounded-circle" style="width:26px;height:26px;")
+                    
         div(class="col-sm-10" id='form-div')
           div(class="row mt-0 gx-0")
             if errors
