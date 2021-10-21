@@ -1,12 +1,10 @@
 const createError = require('http-errors');
 const express = require('express');
+var session = require('express-session');
 const path = require('path');
 const logger = require('morgan');
 const compression = require('compression');
 const helmet = require('helmet');
-
-// The logged-in user
-global.theUser = null;
 
 const app = express();
 require('dotenv').config();
@@ -85,7 +83,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 //var session = require('express-session');
-var session = require('cookie-session');
+//var session = require('cookie-session');
 
 // config express-session
 var sess = {

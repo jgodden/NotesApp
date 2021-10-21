@@ -53,13 +53,8 @@ router.get('/callback', function (req, res, next) {
             if (!found) return 1;
         },
         // Get corresponding user from users table
-        userList: async function(callback) {
-          theUser = await User.findById(ObjectId(_userid), '_username _firstname _lastname', callback);
-          if (!theUser) {
-            if (!found) return 1;
-          }
-          theUser._imageUrl = userProfile.picture;
-          dbgUserList('user', theUser);
+        internalUser: async function(callback) {
+          internalUser = await User.findById(ObjectId(_userid), '_username _firstname _lastname', callback);
         }
     }, function(err, results) {
         if (err) {
@@ -74,6 +69,8 @@ router.get('/callback', function (req, res, next) {
           } else {
             const returnTo = req.session.returnTo;
             delete req.session.returnTo;
+            req.session.internalUser = internalUser;
+            internalUser._imageUrl = req.user.picture;
             res.redirect(returnTo || '/1/1/1');
           }
         });

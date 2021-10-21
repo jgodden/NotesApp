@@ -26,20 +26,11 @@ function resize_text_input() {
 }
 
 window.addEventListener("DOMContentLoaded", function () {
-	resize_text_input();
+	//resize_text_input();
 	let script = document.createElement('script');
 	script.src = "https://media-library.cloudinary.com/global/all.js"
 	document.head.appendChild(script);
 	script.onload = function() {
-		var noteid = document.getElementById('noteid').value;
-		if (!noteid) {
-			return;	// we are in create form
-		}
-		var cloud_name = 'ddpa7qntq';
-		var api_key = '127533828577153';
-		var username = 'jgodden@hotmail.com';
-		var unixTimestamp = Math.floor(Date.now() / 1000);
-		var enc_sig = document.getElementById('enc_sig').value;
 		var subjectid = document.getElementById('subjectid').value;
 		var topicid = document.getElementById('topicid').value;
 		var subtopicid = document.getElementById('subtopicid').value;
@@ -48,44 +39,55 @@ window.addEventListener("DOMContentLoaded", function () {
 		var baseFolder = '/' + subjectid + '/' + topicid + '/' + subtopicid;
 		// image folder without leading / for cloudinary media library
 		var imageFolder = subjectid + '/' + topicid + '/' + subtopicid + '/' + noteid;
-		var actionFolder = baseFolder + '/note/' + noteid;
+		const cancelButton = document.getElementById('cancel_button');
+		if (cancelButton) cancelButton.onclick = function() { confirmCancel(baseFolder + '/notes') };	
 
-		try {
-			var mediaLibraryWidget = cloudinary.createMediaLibrary({
-				cloud_name: cloud_name,
-				signature: enc_sig,
-				api_key: api_key,
-				username: username,
-				timestamp: unixTimestamp,
-				button_class: 'btn',
-				button_caption: 'Select Image or Video',
-			});
+		var noteid = document.getElementById('noteid').value;
+		if (noteid) {
+			var cloud_name = 'ddpa7qntq';
+			var api_key = '127533828577153';
+			var username = 'jgodden@hotmail.com';
+			var unixTimestamp = Math.floor(Date.now() / 1000);
+			var enc_sig = document.getElementById('enc_sig').value;
+			var actionFolder = baseFolder + '/note/' + noteid;
 
-			var cancelButton = document.getElementById('cancel_button');
-			cancelButton.onclick = function() { confirmCancel(baseFolder + '/notes') };
-			var moveButton = document.getElementById('move_button');
-			moveButton.onclick = function() { relocate(actionFolder + '/move') };
-			var deleteButton = document.getElementById('delete_button');
-			deleteButton.onclick = function() { relocate(actionFolder + '/delete') };
-			var drawButton = document.getElementById('draw_button');
-			drawButton.onclick = function() { relocate(actionFolder + '/draw')};
-			var imageBtn = document.getElementById('image_button');
-			imageBtn.onclick = function() { mediaLibraryWidget.show({folder: {path: imageFolder}}) };
-
-		} catch(err) {
-			// disable image button
-			image_button = document.getElementById('image_button');
-			image_button.disabled = true;
-			image_button.ariaDisabled = true;
-			alert('Images button disabled as unable to run cloudinary\n\nMore detailed error: Cannot load ' + err);
+			try {
+				var mediaLibraryWidget = cloudinary.createMediaLibrary({
+					cloud_name: cloud_name,
+					signature: enc_sig,
+					api_key: api_key,
+					username: username,
+					timestamp: unixTimestamp,
+					button_class: 'btn',
+					button_caption: 'Select Image or Video',
+				});
+				const moveButton = document.getElementById('move_button');
+				if (moveButton) moveButton.onclick = function() { relocate(actionFolder + '/move') };
+				const deleteButton = document.getElementById('delete_button');
+				if (deleteButton) deleteButton.onclick = function() { relocate(actionFolder + '/delete') };
+				const drawButton = document.getElementById('draw_button');
+				if (drawButton) drawButton.onclick = function() { relocate(actionFolder + '/draw')};
+				const imageButton = document.getElementById('image_button');
+				if (imageButton) imageButton.onclick = function() { mediaLibraryWidget.show({folder: {path: imageFolder}}) };
+			} catch(err) {
+				// disable image button
+				const imageButton = document.getElementById('image_button');
+				if (imageButton) {
+					imageButton.disabled = true;
+					imageButton.ariaDisabled = true;
+					alert('Images button disabled as unable to run cloudinary\n\nMore detailed error: Cannot load ' + err);
+				}
+			}
 		}
 	};
 	script.onerror = function() {
 		// disable image button
 		image_button = document.getElementById('image_button');
-		image_button.disabled = true;
-		image_button.ariaDisabled = true;
-		alert('Images button disabled as unable to load required code from cloudinary to make Images function work\n\nMore detailed error: Cannot load ' + this.src);
+		if (imageButton) {
+			image_button.disabled = true;
+			image_button.ariaDisabled = true;
+			alert('Images button disabled as unable to load required code from cloudinary to make Images function work\n\nMore detailed error: Cannot load ' + this.src);
+		}
 	};
 
 	var note_form = document.getElementById('note_form');

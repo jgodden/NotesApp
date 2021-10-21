@@ -5,6 +5,7 @@ var NoteSchema = new Schema({
     subject: { type: Schema.ObjectId, ref: 'Subject' },
     topic: { type: Schema.ObjectId, ref: 'Topic' },
     subtopic: {  type: Schema.ObjectId, ref: 'Subtopic'  },
+    user: {  type: Schema.ObjectId, ref: 'User'  },
     creationDate: { type: Date, required: true },
     updateDate: { type: Date, required: true },
     title: { type: String, required: true },

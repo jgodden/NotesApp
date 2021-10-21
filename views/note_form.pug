@@ -41,8 +41,12 @@ block content
           textarea#summary.form-control(type='textarea', placeholder='Summary' name='summary' rows='4' class="form-control form-control-sm") #{undefined===note ? '' : note.summary}
     div(class="keys")
       div(class="row mt-3 gx-0")
-        div(class="col-2")
-          button.btn.btn-primary.btn-sm(type='submit' id='save_button') Save
+        if note
+          div(class="col-2")
+            button.btn.btn-primary.btn-sm(type='submit' id='save_button') Update          
+        else
+          div(class="col-2")
+            button.btn.btn-primary.btn-sm(type='submit' id='save_button') Save
         div(class="col-2")
           button.btn.btn-secondary.btn-sm(type='button' id='cancel_button' role='button') Cancel
         if note
