@@ -1,6 +1,5 @@
 const createError = require('http-errors');
 const express = require('express');
-var session = require('express-session');
 const path = require('path');
 const logger = require('morgan');
 const compression = require('compression');
@@ -82,9 +81,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-//var session = require('express-session');
-//var session = require('cookie-session');
-
+//const session = require('cookie-session');
+const session = require('express-session');
 // config express-session
 var sess = {
   secret: '0Kv7k_3ldeHI1tlj96jsLq103jSxbArw2',
@@ -98,9 +96,8 @@ if (app.get('env') === 'production') {
   // Uncomment the line below if your application is behind a proxy (like on Heroku)
   // or if you're encountering the error message:
   // "Unable to verify authorization request state"
-  // app.set('trust proxy', 1);
+  app.set('trust proxy', 1);
 }
-
 app.use(session(sess));
 
 //console.log('NODE_ENV', process.env.NODE_ENV);
