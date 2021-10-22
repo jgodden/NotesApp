@@ -35,9 +35,9 @@ function decodeEntities(encodedString) {
 
 // Generate SHA256 hash of security info for Media Library access
 function getSHA256Hash() {
-    var cloud_name = 'ddpa7qntq';
-    var api_secret = '9WTx-0O2jnv2hvn5zglC7RrGlYk';
-    var username = 'jgodden@hotmail.com';
+    var cloud_name = process.env.CLOUD_NAME;
+    var api_secret = process.env.CLOUD_API_SECRET;
+    var username = process.env.CLOUD_USERNAME;
     var unixTimestamp = Math.floor(Date.now() / 1000);
     var sig = "cloud_name=" + cloud_name + '&timestamp=' + unixTimestamp + '&username=' + username + api_secret;
     return(require('js-sha256')(sig));
