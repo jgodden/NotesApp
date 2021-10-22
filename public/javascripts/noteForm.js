@@ -26,7 +26,7 @@ function resize_text_input() {
 }
 
 window.addEventListener("DOMContentLoaded", function () {
-	//resize_text_input();
+	resize_text_input();
 	var subjectid = document.getElementById('subjectid').value;
 	var topicid = document.getElementById('topicid').value;
 	var subtopicid = document.getElementById('subtopicid').value;

@@ -222,7 +222,6 @@ function render_list_page(req, res, next, errors) {
         });
         dbgNoteList('user', user);
         res.render('note_list', {
-            title: 'List',
             note_count: noteCount,
             note_list: noteList,
             subjectid: subjectId,
@@ -300,7 +299,6 @@ function render_create_page(req, res, next, errors) {
         var enc_sig = getSHA256Hash();
         res.render('note_form', {
             formType: 'create',
-            title: '',
             creationDate: note.creationDate_formatted,
             updateDate: note.updateDate_formatted,
             subjectid: subjectId,
@@ -551,7 +549,6 @@ function render_move_page(req, res, next, errors) {
         // as source. Seems more likely that destination will have one or more of these in common with the
         // source. Lists also passed in for dropdowns, and subtopic description for display on nav window
         res.render('note_move', {
-            title: 'Move',
             note: note_object,
             subjectid: subjectId,
             subject_list: subjectList,
@@ -695,7 +692,7 @@ function render_delete_page(req, res, next, errors) {
     dbgNoteDeleteGet('delete subjectid ' + subjectId + ' topicid ' + topicId + ' subtopicid ' + subtopicId + ' noteid ' + noteid);
     async.series({
         note_object: async function (callback) {
-            note_object = await Note.findById(noteid, 'title subject topic subtopic creationDate updateDate image', callback);
+            note_object = await Note.findById(noteid, 'title subject topic subtopic creationDate image', callback);
             dbgNoteDeleteGet('note_object', note_object);
         },
     }, function(err, results) {
@@ -707,7 +704,6 @@ function render_delete_page(req, res, next, errors) {
         note_object.title = decodeEntities(note_object.title);
         dbgNoteDeleteGet('note_object._id', note_object._id);
         res.render('note_delete', {
-            title: 'Delete',
             note: note_object,
             subjectid: subjectId,
             subject_list: subjectList,
@@ -792,7 +788,7 @@ function render_draw_page(req, res, next, errors) {
     async.series({
         // Get note
         note_object: async function (callback) {
-            note_object = await Note.findById(noteid, 'title image', callback);
+            note_object = await Note.findById(noteid, 'subject topic subtopic image', callback);
             dbgNoteDrawGet('note_object', note_object);
         },
     }, function(err, results) {
@@ -803,9 +799,6 @@ function render_draw_page(req, res, next, errors) {
         res.setHeader('Cache-Control', 'no-cache');
         res.render('note_draw', {
             note: note_object,
-            subjectid: subjectId,
-            topicid: topicId,
-            subtopicid: subtopicId,
             errors: errors
         } );
     });
