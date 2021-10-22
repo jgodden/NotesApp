@@ -9,7 +9,11 @@ block content
     div(class="row gx-0")
       div(class="col-sm-12")
         <p>
-        | !{user._firstname} has !{note_count} notes 
+        | !{user._firstname} has !{note_count} 
+        if note_count == 1
+          | note 
+        else
+          | notes 
         if subject_name
           | under !{subject_name}
         if topic_name 

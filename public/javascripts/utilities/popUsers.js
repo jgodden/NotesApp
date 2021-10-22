@@ -44,8 +44,8 @@ function userCreate(firstname, lastname, username, email, imageUrl, cb) {
 
 function createUsers(cb) {
   async.parallel([
-    function(callback) { userCreate("Sam", "Godden", "sam.godden", "samjgodden@gmail.com", "", callback); },
-    function(callback) { userCreate("Jon", "Godden", "jon.godden", "jongodden@gmail.com", "", callback); },  ],
+    function(callback) { userCreate("Selina", "Godden", "selina.godden", "sjgodden@googlemail.com", "", callback); },
+    function(callback) { userCreate("Marjorie", "Godden", "marjorie.godden", "mjgodden5@gmail.com", "", callback); },  ],
   cb);
 }
 
@@ -69,8 +69,8 @@ function loginCreate(username, user, cb) {
 
 function createLogins(cb) {
   async.parallel([
-    function(callback) { loginCreate("samjgodden", ObjectId(users[0]._id), callback); },
-    function(callback) { loginCreate("jongodden", ObjectId(users[1]._id), callback); },  ],
+    function(callback) { loginCreate("sjgodden", ObjectId(users[0]._id), callback); },
+    function(callback) { loginCreate("mjgodden5", ObjectId(users[1]._id), callback); },  ],
   cb);
 }
 
@@ -98,8 +98,8 @@ function membershipCreate(user, account, role, accountemail, accountphone, cb) {
 
 function createMemberships(cb) {
   async.parallel([
-    function(callback) { membershipCreate(ObjectId(users[0]._id), ObjectId(accounts[0]._id), 'user', "samjgodden@gmail.com", "123", callback); },
-    function(callback) { membershipCreate(ObjectId(users[1]._id), ObjectId(accounts[1]._id), 'admin', "jongodden@gmail.com", "123", callback); },  ],
+    function(callback) { membershipCreate(ObjectId(users[0]._id), ObjectId(accounts[0]._id), 'user', "sjgodden@googlemail.com", "123", callback); },
+    function(callback) { membershipCreate(ObjectId(users[1]._id), ObjectId(accounts[1]._id), 'user', "mjgodden5@gmail.com", "123", callback); },  ],
   cb);
 }
 
@@ -123,8 +123,8 @@ function accountCreate(name, plan, cb) {
 
 function createAccounts(cb) {
   async.parallel([
-    function(callback) { accountCreate("Sam Godden", 1, callback); },
-    function(callback) { accountCreate("Jon Godden", 2, callback); },  ],
+    function(callback) { accountCreate("Selina Godden", 1, callback); },
+    function(callback) { accountCreate("Marjorie Godden", 2, callback); },  ],
   cb);
 }
 
