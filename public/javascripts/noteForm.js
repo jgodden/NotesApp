@@ -27,71 +27,28 @@ function resize_text_input() {
 
 window.addEventListener("DOMContentLoaded", function () {
 	//resize_text_input();
-	let script = document.createElement('script');
-	script.src = "https://media-library.cloudinary.com/global/all.js"
-	document.head.appendChild(script);
-	script.onload = function() {
-		var subjectid = document.getElementById('subjectid').value;
-		var topicid = document.getElementById('topicid').value;
-		var subtopicid = document.getElementById('subtopicid').value;
+	var subjectid = document.getElementById('subjectid').value;
+	var topicid = document.getElementById('topicid').value;
+	var subtopicid = document.getElementById('subtopicid').value;
+	var noteid = document.getElementById('noteid').value;
 
-		// base folder with leading / for urls
-		var baseFolder = '/' + subjectid + '/' + topicid + '/' + subtopicid;
-		// image folder without leading / for cloudinary media library
-		var imageFolder = subjectid + '/' + topicid + '/' + subtopicid + '/' + noteid;
-		const cancelButton = document.getElementById('cancel_button');
-		if (cancelButton) cancelButton.onclick = function() { confirmCancel(baseFolder + '/notes') };	
+	// base folder with leading / for urls
+	var baseFolder = '/' + subjectid + '/' + topicid + '/' + subtopicid;
+	// image folder without leading / for cloudinary media library
+	var imageFolder = subjectid + '/' + topicid + '/' + subtopicid + '/' + noteid;
+	var actionFolder = baseFolder + '/note/' + noteid;
 
-		var noteid = document.getElementById('noteid').value;
-		if (noteid) {
-			var cloud_name = 'ddpa7qntq';
-			var api_key = '127533828577153';
-			var username = 'jgodden@hotmail.com';
-			var unixTimestamp = Math.floor(Date.now() / 1000);
-			var enc_sig = document.getElementById('enc_sig').value;
-			var actionFolder = baseFolder + '/note/' + noteid;
-
-			try {
-				var mediaLibraryWidget = cloudinary.createMediaLibrary({
-					cloud_name: cloud_name,
-					signature: enc_sig,
-					api_key: api_key,
-					username: username,
-					timestamp: unixTimestamp,
-					button_class: 'btn',
-					button_caption: 'Select Image or Video',
-				});
-				const moveButton = document.getElementById('move_button');
-				if (moveButton) moveButton.onclick = function() { relocate(actionFolder + '/move') };
-				const deleteButton = document.getElementById('delete_button');
-				if (deleteButton) deleteButton.onclick = function() { relocate(actionFolder + '/delete') };
-				const drawButton = document.getElementById('draw_button');
-				if (drawButton) drawButton.onclick = function() { relocate(actionFolder + '/draw')};
-				const imageButton = document.getElementById('image_button');
-				if (imageButton) imageButton.onclick = function() { mediaLibraryWidget.show({folder: {path: imageFolder}}) };
-			} catch(err) {
-				// disable image button
-				const imageButton = document.getElementById('image_button');
-				if (imageButton) {
-					imageButton.disabled = true;
-					imageButton.ariaDisabled = true;
-					alert('Images button disabled as unable to run cloudinary\n\nMore detailed error: Cannot load ' + err);
-				}
-			}
-		}
-	};
-	script.onerror = function() {
-		// disable image button
-		image_button = document.getElementById('image_button');
-		if (imageButton) {
-			image_button.disabled = true;
-			image_button.ariaDisabled = true;
-			alert('Images button disabled as unable to load required code from cloudinary to make Images function work\n\nMore detailed error: Cannot load ' + this.src);
-		}
-	};
-
-	var note_form = document.getElementById('note_form');
-	note_form.addEventListener('keypress', formKeyPressed);
+	const cancelButton = document.getElementById('cancel_button');
+	if (cancelButton) cancelButton.onclick = function() { confirmCancel(baseFolder) };
+	const moveButton = document.getElementById('move_button');
+	if (moveButton) moveButton.onclick = function() { relocate(actionFolder + '/move') };
+	const deleteButton = document.getElementById('delete_button');
+	if (deleteButton) deleteButton.onclick = function() { relocate(actionFolder + '/delete') };
+	const drawButton = document.getElementById('draw_button');
+	if (drawButton) drawButton.onclick = function() { relocate(actionFolder + '/draw')};
+	const imageButton = document.getElementById('image_button');
+	if (imageButton) imageButton.onclick = function() { mediaLibraryWidget.show({folder: {path: imageFolder}}) };
+	document.getElementById('note_form').addEventListener('keypress', formKeyPressed);
 });
 function relocate(url) {
 	window.location.href = url;
@@ -99,13 +56,14 @@ function relocate(url) {
 function formKeyPressed(e) {
 	changesMade = true;
 }
-confirmCancel = function confirmCancel(url) {
+confirmCancel = function confirmCancel(folder) {
 	if (changesMade) {
 		if (!confirm('You have made changes to this note which will be lost if you cancel\nOk to discard these changes?'))
 			return;
 	}
-	relocate(url);
+	relocate(folder + '/notes');
 }
+
 function insertThisInThere(HTMLSelectElement) {
     let collection = HTMLSelectElement.selectedOptions;
     let theChar = "";
@@ -182,9 +140,39 @@ function insertThisInThere(HTMLSelectElement) {
 	htmlElement.setSelectionRange(pos.start + 1, pos.start + 1)
 	htmlElement.focus();
 }
+function image_upload_handler (blobInfo, success, failure, progress) {
+	var subjectid = document.getElementById('subjectid').value;
+	var topicid = document.getElementById('topicid').value;
+	var subtopicid = document.getElementById('subtopicid').value;
+	var noteid = document.getElementById('noteid').value;
+	// image folder without leading / for cloudinary folder
+	var imageFolder = subjectid + '/' + topicid + '/' + subtopicid + '/' + noteid;
+
+	var xhr, formData;
+	xhr = new XMLHttpRequest();
+	xhr.withCredentials = false;
+	//restricted it to image only using resource_type = image in url,
+	// you can set it to auto for all types 
+	xhr.open('POST', 'https://api.cloudinary.com/v1_1/ddpa7qntq/image/upload');
+	xhr.onload = function () {
+		if (xhr.readyState == 4 && xhr.status == 200) {
+			var response = JSON.parse(xhr.responseText);
+			var url = response.secure_url; //get the url 
+			var json = {location: url}; //set it in the format tinyMCE wants it
+			success(json.location);
+		}
+	};
+	formData = new FormData();
+	formData.append('file', blobInfo.blob(), blobInfo.filename());
+	formData.append('folder', imageFolder);
+	formData.append('upload_preset', 'ik272aj0');
+	xhr.send(formData);
+};
+
 tinymce.init(
 	{
 		selector: '#lectureNote',
+		images_upload_handler: image_upload_handler,
 		width  : '100%',
 		height : '100%',
 		plugins: [
@@ -193,13 +181,62 @@ tinymce.init(
 			'table emoticons template paste help'
 		  ],
 		toolbar: 'undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | ' +
-		'bullist numlist outdent indent | link image | print preview media fullscreen | ' +
+		'bullist numlist outdent indent | link image | code | print preview media fullscreen | ' +
 		'forecolor backcolor emoticons | help',
 		menu: {
 		  favs: {title: 'My Favorites', items: 'code visualaid | searchreplace | emoticons'}
 		},
 		menubar: 'favs file edit view insert format tools table help',
 		content_css: '/stylesheets/style.css',
-	}
-);
+		
+		/* enable title field in the Image dialog*/
+		image_title: true,
+		/* enable automatic uploads of images represented by blob or data URIs*/
+		automatic_uploads: true,
+		/*
+		URL of our upload handler (for more details check: https://www.tiny.cloud/docs/configure/file-image-upload/#images_upload_url)
+		images_upload_url: 'postAcceptor.php',
+		here we add custom filepicker only to Image dialog
+		*/
+		file_picker_types: 'image',
+		/* and here's our custom image picker*/
+		file_picker_callback: function (cb, value, meta) {
+		var input = document.createElement('input');
+		input.setAttribute('type', 'file');
+		input.setAttribute('accept', 'image/*');
+	
+		/*
+			Note: In modern browsers input[type="file"] is functional without
+			even adding it to the DOM, but that might not be the case in some older
+			or quirky browsers like IE, so you might want to add it to the DOM
+			just in case, and visually hide it. And do not forget do remove it
+			once you do not need it anymore.
+		*/
+	
+		input.onchange = function () {
+			var file = this.files[0];
+	
+			var reader = new FileReader();
+			reader.onload = function () {
+				/*
+					Note: Now we need to register the blob in TinyMCEs image blob
+					registry. In the next release this part hopefully won't be
+					necessary, as we are looking to handle it internally.
+				*/
+				var id = 'blobid' + (new Date()).getTime();
+				var blobCache =  tinymce.activeEditor.editorUpload.blobCache;
+				var base64 = reader.result.split(',')[1];
+				var blobInfo = blobCache.create(id, file, base64);
+				blobCache.add(blobInfo);
+		
+				/* call the callback and populate the Title field with the file name */
+				cb(blobInfo.blobUri(), { title: file.name });	
+			};
+			reader.readAsDataURL(file);
+		};
+	
+		input.click();
+		},
+		content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+	});
 

@@ -16,12 +16,14 @@ app.use(
                 "'self'"],
               connectSrc: [
                 "'self'",
+                "https://api.cloudinary.com",
                 "mongodb+srv://cluster0.j8m3g.mongodb.net"],
               imgSrc: [
                 "'self'",
                 "https://res.cloudinary.com/",
                 "https://lh3.googleusercontent.com",
                 "https://sp.tinymce.com",
+                "blob:",
                 "data:"],
               scriptSrc:[
                 "'self'",

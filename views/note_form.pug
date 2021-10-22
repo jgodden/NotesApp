@@ -4,59 +4,56 @@ block content
   form(method='POST' action='' id='note_form')
     div(class="row gx-0")
       div(class="col-6")
-        if note
-          p Creation date:  #{note.creationDate_formatted}
+        p Creation date:  #{creationDate}
       div(class="col-6 text-end")
-        if note
-          p Last updated: #{note.updateDate_formatted}
+        p Last updated: #{updateDate}
     div(class="row gx-0")
-      input#enc_sig.form-control(type='hidden', name='enc_sig', value=(enc_sig))
-      input#noteid.form-control(type='hidden', name='noteid', value=(undefined===note ? '' : note._id))
+      input#creationDate.form-control(type='hidden', name='creationDate', value=creationDate)
+      input#updateDate.form-control(type='hidden', name='updateDate', value=updateDate)
+      input#enc_sig.form-control(type='hidden', name='enc_sig', value=enc_sig)
+      input#noteid.form-control(type='hidden', name='noteid', value=noteid)
       input#subjectid.form-control(type='hidden', name='subjectid', value=subjectid)
       input#topicid.form-control(type='hidden', name='topicid', value=topicid)
       input#subtopicid.form-control(type='hidden', name='subtopicid', value=subtopicid)
-      input#imageUrl.form-control(type='hidden', name='imageUrl', value=(undefined===note ? '' : note.image))
+      input#imageUrl.form-control(type='hidden', name='imageUrl', value=imageUrl)
       input#imageData.form-control(type='hidden', name='imageData', value='initial')
     div(class="border-bottom border-secondary")
       div(class="row gx-0")
         div(class="col-12")
-          input#title.form-control(type='text', placeholder='Title' name='title' required='true' class="form-control form-control-sm" value=(undefined===note ? '' : note.title) )
+          input#title.form-control(type='text', placeholder='Title' name='title' required='true' class="form-control form-control-sm" value=(undefined===title ? '' : title))
     div(class="row gx-0")
       div(class="col-4 align-self-center")
         div(class="border-end border-secondary")
           div(class="row")
             div(class="col-12")
-              textarea#keywords.form-control(type='textarea', placeholder='Keywords' name='keywords' rows='8' class="form-control form-control-sm") #{undefined===note ? '' : note.keywords}
+              textarea#keywords.form-control(type='textarea', placeholder='Keywords' name='keywords' rows='8' class="form-control form-control-sm") !{undefined===keywords ? '' : keywords}
           div(class="row")
             div(class="col-12")
-              textarea#questions.form-control(type='textarea', placeholder='Questions' name='questions' rows='8' class="form-control form-control-sm") #{undefined===note ? '' : note.questions}
+              textarea#questions.form-control(type='textarea', placeholder='Questions' name='questions' rows='8' class="form-control form-control-sm") !{undefined===questions ? '' : questions}
           div(class="row")
             div(class="col-12")
-              textarea#comments.form-control(type='textarea', placeholder='Comments' name='comments' rows='8' class="form-control form-control-sm") #{undefined===note ? '' : note.comments}
+              textarea#comments.form-control(type='textarea', placeholder='Comments' name='comments' rows='8' class="form-control form-control-sm") !{undefined===comments ? '' : comments}
       div(class="col-8")
-        textarea#lectureNote.form-control(type='textarea', placeholder='Lecture Notes' name='lectureNote' rows='25' class="form-control form-control-sm") #{undefined===note ? '' : note.lectureNote}
+        textarea#lectureNote.form-control(type='textarea', placeholder='Lecture Notes' name='lectureNote' rows='25' class="form-control form-control-sm") !{undefined===lectureNote ? '' : lectureNote}
     div(class="border-top border-secondary")
       div(class="row gx-0")
         div(class="col-12")
-          textarea#summary.form-control(type='textarea', placeholder='Summary' name='summary' rows='4' class="form-control form-control-sm") #{undefined===note ? '' : note.summary}
+          textarea#summary.form-control(type='textarea', placeholder='Summary' name='summary' rows='4' class="form-control form-control-sm") !{undefined===summary ? '' : summary}
     div(class="keys")
       div(class="row mt-3 gx-0")
-        if note
-          div(class="col-2")
-            button.btn.btn-primary.btn-sm(type='submit' id='save_button') Update          
-        else
-          div(class="col-2")
-            button.btn.btn-primary.btn-sm(type='submit' id='save_button') Save
+        div(class="col-2")
+          if (formType == 'update')
+            button.btn.btn-primary.btn-sm(type='submit' id='save_button') Update
+          else       
+            button.btn.btn-primary.btn-sm(type='submit' id='save_button') Save          
         div(class="col-2")
           button.btn.btn-secondary.btn-sm(type='button' id='cancel_button' role='button') Cancel
-        if note
+        if (formType == 'update')
           div(class="col-2")
             button.btn.btn-warning.btn-sm(type='button' id='move_button' role='button') Move
           div(class="col-2")
             button.btn.btn-danger.btn-sm(type='button' id='delete_button' role='button') Delete
-          div(class="col-2")
-            button.btn.btn-dark.btn-sm(type='button' id='draw_button' role='button') Draw
-          div(class="col-2")
-            button.btn.btn-success.btn-sm(type='button' id='image_button' role='button') Images
+        div(class="col-2")
+          button.btn.btn-dark.btn-sm(type='button' id='draw_button' role='button') Draw
 block append foot
   script(src="/javascripts/noteForm.js" type="text/javascript")

@@ -249,24 +249,74 @@ exports.note_create_get = function(req, res, next) {
 };
 
 function render_create_page(req, res, next, errors) {
-    note_list = null;
+    subjectId = req.params.subject;
+    topicId = req.params.topic;
+    subtopicId = req.params.subtopic;
     dbgNoteCreateGet('create');
     // Need to clear note otherwise it is persisted after viewing another note
     res.locals.note = '';
-    var enc_sig = getSHA256Hash();
-    res.render('note_form', {
-        title: 'Create',
-        subjectid: subjectId,
-        subject_list: subjectList,
-        topicid: topicId,
-        topic_list: topicList,
-        subtopicid: subtopicId,
-        subtopic_list: subtopicList,
-        link_list: linkList,
-        enc_sig: enc_sig,
-        errors: errors,
-        user: req.session.internalUser
-    });
+    (async () => {
+        var now = Date.now();
+        // Create a Note object with escaped and trimmed data.
+        var note = await new Note({
+            creationDate: now,
+            updateDate: now,
+            subject: ObjectId(subjectId),
+            topic: ObjectId(topicId),
+            subtopic: ObjectId(subtopicId),
+        });
+        require('dotenv').config();
+        const cloudinary = require('cloudinary').v2;
+        var image_url;
+        var cl_error;
+        var cl_result;
+        var folder = subjectId + '/' + topicId + '/' + subtopicId + '/' + note._id;
+        // Save a blank drawing to cloudinary, just to create the folder for subsequent
+        // storage of drawing and images
+        dbgNoteCreateGet('sending image to cloudinary at', folder);
+        var blankPng = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/1+yHgAHtAKYD9BncgAAAABJRU5ErkJggg==';
+        await cloudinary.uploader.upload(blankPng,
+        {
+            overwrite: true,
+            invalidate: true,
+            folder: folder,
+            public_id: "drawing"
+        })
+        .then(result => cl_result = result)
+        .catch(error => cl_error = error);
+        // update note with image url
+        if (cl_error) {
+            var error = handle_cloudinary_error(cl_error);
+            render_create_page(req, res, next, [error]);
+            return;
+        }
+        image_url = cl_result.secure_url;
+        dbgNoteCreateGet('cloudinary returned url', image_url);
+        
+        // Update image in note
+        note.image = image_url;
+        // Add user to note
+        note.user = req.session.internalUser;
+        var enc_sig = getSHA256Hash();
+        res.render('note_form', {
+            formType: 'create',
+            title: '',
+            creationDate: note.creationDate_formatted,
+            updateDate: note.updateDate_formatted,
+            subjectid: subjectId,
+            subject_list: subjectList,
+            topicid: topicId,
+            topic_list: topicList,
+            subtopicid: subtopicId,
+            subtopic_list: subtopicList,
+            noteid: note._id,
+            link_list: linkList,
+            imageUrl: note.image,
+            enc_sig: enc_sig,
+            errors: errors,
+            user: req.session.internalUser
+        });
+    })();
 }
 
 var dbgNoteCreatePost = require('debug')('noteCreatePost');
@@ -278,72 +328,30 @@ exports.note_create_post = [
     // Process request after validation and sanitization.
     (req, res, next) => {
         (async () => {
-            // Extract the validation errors from a request.
-            const errors = await validationResult(req);
-            var now = Date.now();
-            // Create a Note object with escaped and trimmed data.
             var note = await new Note({
+                creationDate: req.body.creationDate,
+                updateDate: req.body.updateDate,
                 title: req.body.title,
-                lectureNote: req.body.lectureNote,
-                creationDate: now,
-                updateDate: now,
                 keywords: req.body.keywords,
                 questions: req.body.questions,
                 comments: req.body.comments,
+                lectureNote: req.body.lectureNote,
                 summary: req.body.summary,
-                subject: ObjectId(subjectId),
-                topic: ObjectId(topicId),
-                subtopic: ObjectId(subtopicId),
-                image: image_url
+                subject: ObjectId(req.body.subjectid),
+                topic: ObjectId(req.body.topicid),
+                subtopic: ObjectId(req.body.subtopicid),
+                image: req.body.imageUrl,
+                user: req.session.internalUser,
+                enc_sig: req.body.enc_sig,
+                _id: req.body.noteid
             });
-            if (!errors.isEmpty()) {
-                // There are errors. Render form again with sanitized values/error messages.
-                render_create_page(req, res, next, errors.array);
-                return;
-            }
-            else {
-                var tags = req.body.keywords.split(" ");
-                require('dotenv').config();
-                const cloudinary = require('cloudinary').v2;
-                var image_url;
-                var cl_error;
-                var cl_result;
-                var folder = req.body.subjectid + '/' + req.body.topicid + '/' + req.body.subtopicid + '/' + note._id;
-                // Save a blank drawing to cloudinary, just to create the folder for subsequent
-                // storage of drawing and images
-                dbgNoteCreatePost('sending image to cloudinary at', folder);
-                var blankPng = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/1+yHgAHtAKYD9BncgAAAABJRU5ErkJggg==';
-                await cloudinary.uploader.upload(blankPng,
-                {
-                    overwrite: true,
-                    invalidate: true,
-                    folder: folder,
-                    tags: tags,
-                    public_id: "drawing"
-                })
-                .then(result => cl_result = result)
-                .catch(error => cl_error = error);
-                // update note with image url
-                if (cl_error) {
-                    var error = handle_cloudinary_error(cl_error);
-                    render_create_page(req, res, next, [error]);
-                    return;
+            note.save(function (err) {
+                if (err) {
+                    return next(err);
                 }
-                image_url = cl_result.secure_url;
-                dbgNoteCreatePost('cloudinary returned url', image_url);
-                
-                // Update image in note
-                note.image = image_url;
-                // Add user to note
-                note.user = req.session.internalUser;
-                note.save(function (err) {
-                    if (err) {
-                        return next(err);
-                    }
-                    //successful - redirect to new note record.
-                    res.redirect(note.list_url);
-                });
-            }
+                //successful - redirect to new note record.
+                res.redirect(note.list_url);
+            });
         })();
     }
 ];
@@ -392,8 +400,11 @@ function render_update_page(req, res, next, errors) {
         note_object.summary = decodeEntities(note_object.summary);
         var enc_sig = getSHA256Hash();
         res.render('note_form', {
-            title: 'Update',
-            note: note_object,
+            formType: 'update',
+            title: note_object.title,
+            creationDate: note_object.creationDate_formatted,
+            updateDate: note_object.updateDate_formatted,
+            noteid: noteid,
             subjectid: subjectId,
             subject_list: subjectList,
             topicid: topicId,
@@ -401,6 +412,11 @@ function render_update_page(req, res, next, errors) {
             subtopicid: subtopicId,
             subtopic_list: subtopicList,
             link_list: linkList,
+            keywords: note_object.keywords,
+            questions: note_object.questions,
+            comments: note_object.comments,
+            lectureNote: note_object.lectureNote,
+            summary: note_object.summary,
             enc_sig: enc_sig,
             errors: errors,
             user: req.session.internalUser
@@ -434,6 +450,7 @@ exports.note_update_post = [
                 topic: ObjectId(req.body.topicid),
                 subtopic: ObjectId(req.body.subtopicid),
                 image: req.body.image,   // use the cloud url instead of the image data
+                user: req.session.internalUser,
                 _id:req.params.note // This is required, or a new ID will be assigned!
             });
 
@@ -581,6 +598,7 @@ exports.note_move_post = function(req, res, next) {
                 subject: ObjectId(req.body.newsubjectid),
                 topic: ObjectId(req.body.newtopicid),
                 subtopic: ObjectId(req.body.newsubtopicid),
+                user: req.session.internalUser
             });
             require('dotenv').config();
             const cloudinary = require('cloudinary').v2;

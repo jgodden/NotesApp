@@ -26,7 +26,10 @@ Otherwise return to login page */
 router.get('/callback', function (req, res, next) {
   var found = false;
   passport.authenticate('auth0', function (err, user, info) {
-    if (err) { return next(err); }
+    if (err) {
+      console.log('Check you are not connected to a VPN and therefore behind a corporate proxy');
+      return next(err);
+    }
     if (!user) {
       return res.redirect('/login');
     } else {
