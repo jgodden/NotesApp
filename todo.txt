@@ -3,8 +3,9 @@ look and feel, themes
 language support
 make note frames resizable
 allow editing of links (add/remove/category)
-link Auth0 with user model
-* inline tables and images (using tinyMCE)
+user management
+* link Auth0 with user model
+* inline tables and images (using tinyMCE) linked to cloudinary
 * add user, login, membership and account models to organise users
 * change subject, topic and subtopic to use ObjectIds instead of string ids
 * user authentication (Auth0)
