@@ -43,15 +43,11 @@ function getSHA256Hash() {
     return(require('js-sha256')(sig));
 }
 
-// ids and lists for subject, topic and subtopic set by note_list and stored for use in all pages
-// so they can be passed to common layout pug. Also subtopic description
-var subjectId;
-var topicId;
-var subtopicId;
+// lists for subject, topic and subtopic set by note_list and stored for use in all pages
+// so they can be passed to common layout pug.
 var subjectList;
 var topicList;
 var subtopicList;
-var linkList;
 
 // display logout page on GET /.
 exports.logout_page = function(req, res, next) {
@@ -66,9 +62,10 @@ exports.note_list = function(req, res, next) {
 };
 
 function render_list_page(req, res, next, errors) {
-    subjectId = req.params.subject;
-    topicId = req.params.topic;
-    subtopicId = req.params.subtopic;
+    var subjectId = req.params.subject;
+    var topicId = req.params.topic;
+    var subtopicId = req.params.subtopic;
+    var linkList;
     var subjectName;
     var topicName;
     var subtopicName;
@@ -220,6 +217,7 @@ function render_list_page(req, res, next, errors) {
         noteList.forEach(function (item, index) {
             item.title = decodeEntities(item.title);
         });
+        req.session.linkList = linkList;
         dbgNoteList('user', user);
         res.render('note_list', {
             note_count: noteCount,
@@ -248,9 +246,10 @@ exports.note_create_get = function(req, res, next) {
 };
 
 function render_create_page(req, res, next, errors) {
-    subjectId = req.params.subject;
-    topicId = req.params.topic;
-    subtopicId = req.params.subtopic;
+    var subjectId = req.params.subject;
+    var topicId = req.params.topic;
+    var subtopicId = req.params.subtopic;
+    var linkList = req.session.linkList;
     dbgNoteCreateGet('create');
     // Need to clear note otherwise it is persisted after viewing another note
     res.locals.note = '';
@@ -362,7 +361,11 @@ exports.note_update_get = function(req, res, next) {
 };
 
 function render_update_page(req, res, next, errors) {
+    var subjectId = req.params.subject;
+    var topicId = req.params.topic;
+    var subtopicId = req.params.subtopic;
     var noteid = req.params.note;
+    var linkList = req.session.linkList;
     note_list = null;   // force to null, otherwise still existing from note list get
     dbgNoteUpdateGet('update');
     async.series({
@@ -482,18 +485,22 @@ var newSubjectId = 1;
 var newTopicId = 1;
 var newSubtopicId = 1;
 function render_move_page(req, res, next, errors) {
+    var subjectId = req.params.subject;
+    var topicId = req.params.topic;
+    var subtopicId = req.params.subtopic;
+    var noteid = req.params.note;
+    var linkList = req.session.linkList;
     let subjectChanged = false;
-    if (newSubjectId != req.params.subject) {
-        newSubjectId = req.params.subject;
+    if (newSubjectId != subjectId) {
+        newSubjectId = subjectId;
         subjectChanged = true;
     }
     let topicChanged = false;
-    if (newTopicId != req.params.topic) {
-        newTopicId = req.params.topic;
+    if (newTopicId != topicId) {
+        newTopicId = topicId;
         topicChanged = true;
     }
-    newSubtopicId = req.params.subtopic;
-    var noteid = req.params.note;
+    newSubtopicId = subtopicId;
     note_list = null;   // force to null, otherwise still existing from note list get
     dbgNoteMoveGet('move newSubjectId', newSubjectId + ' newTopicId ' + newTopicId + ' newSubtopicId ' + newSubtopicId);
     async.series({
@@ -687,7 +694,11 @@ exports.note_delete_get = function(req, res, next) {
 };
 
 function render_delete_page(req, res, next, errors) {
+    var subjectId = req.params.subject;
+    var topicId = req.params.topic;
+    var subtopicId = req.params.subtopic;
     var noteid = req.params.note;
+    var linkList = req.session.linkList;
     note_list = null;   // force to null, otherwise still existing from note list get
     dbgNoteDeleteGet('delete subjectid ' + subjectId + ' topicid ' + topicId + ' subtopicid ' + subtopicId + ' noteid ' + noteid);
     async.series({
