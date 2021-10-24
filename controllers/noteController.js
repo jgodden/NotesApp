@@ -51,7 +51,6 @@ var subtopicId;
 var subjectList;
 var topicList;
 var subtopicList;
-var linkList;
 
 // display logout page on GET /.
 exports.logout_page = function(req, res, next) {
