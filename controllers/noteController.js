@@ -401,7 +401,7 @@ function render_update_page(req, res, next, errors) {
                 subtopicId = note_object.subtopic._id;
                 dbgNoteUpdateGet("set subtopicId to", subtopicId);
             }            
-            subtopicList = await Subtopic.find({}, 'title').where('_id').in(topicObject[0].subtopic);
+            subtopicList = await Subtopic.find({}, 'title description').where('_id').in(topicObject[0].subtopic);
             req.session.subtopicList = subtopicList;
         },
     }, function(err, results) {
