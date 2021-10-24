@@ -64,7 +64,7 @@ html(lang='en')
                       for subtopic in subtopic_list
                         if subtopic._id.toString()===subtopicid.toString()
                           p.indent !{subtopic.description}                       
-          if (note_list && (subjectid != '1' && topicid != '1' && subtopicid != '1'))
+          if (notelist && (subjectid != '1' && topicid != '1' && subtopicid != '1'))
             div(class="row mt-0 gx-0")
               a(class='btn btn-primary btn-sm btn-block' href='/' + subjectid + '/' + topicid + '/' + subtopicid + '/note/create' role='button') Create New Note
           div(class="row mt-3")

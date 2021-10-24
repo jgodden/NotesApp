@@ -43,12 +43,6 @@ function getSHA256Hash() {
     return(require('js-sha256')(sig));
 }
 
-// lists for subject, topic and subtopic set by note_list and stored for use in all pages
-// so they can be passed to common layout pug.
-var subjectList;
-var topicList;
-var subtopicList;
-
 // display logout page on GET /.
 exports.logout_page = function(req, res, next) {
     res.render('index', { title: 'notes' });
@@ -76,6 +70,7 @@ function render_list_page(req, res, next, errors) {
             // always get full list of subjects whether subjectid is a subject or
             // a <search all> indicator (1)
             subjectList = await Subject.find({}, 'title', callback);
+            req.session.subjectList = subjectList;
             dbgNoteList('subjectList', subjectList);
         },
         // Get the subject objects that match subjectid (one in array)
@@ -107,6 +102,7 @@ function render_list_page(req, res, next, errors) {
                 // restrict to topics for this subject
                 topicList = await Topic.find({}, 'title subtopic').where('_id').in(subjectObject[0].topic);
             }
+            req.session.topicList = topicList;
             dbgNoteList('topicList', topicList);
         },
         // Get topic object
@@ -138,6 +134,7 @@ function render_list_page(req, res, next, errors) {
                 return;
             }
             subtopicList = await Subtopic.find({}, 'title description').where('_id').in(topicObject[0].subtopic);
+            req.session.subtopicList = subtopicList;
             dbgNoteList('subtopicList', subtopicList);
         },
         // Get subtopic object
@@ -221,7 +218,7 @@ function render_list_page(req, res, next, errors) {
         dbgNoteList('user', user);
         res.render('note_list', {
             note_count: noteCount,
-            note_list: noteList,
+            notelist: noteList,
             subjectid: subjectId,
             subject_list: subjectList,
             topicid: topicId,
@@ -249,6 +246,9 @@ function render_create_page(req, res, next, errors) {
     var subjectId = req.params.subject;
     var topicId = req.params.topic;
     var subtopicId = req.params.subtopic;
+    var subjectList = req.session.subjectList;
+    var topicList = req.session.topicList;
+    var subtopicList = req.session.subtopicList;
     var linkList = req.session.linkList;
     dbgNoteCreateGet('create');
     // Need to clear note otherwise it is persisted after viewing another note
@@ -365,8 +365,10 @@ function render_update_page(req, res, next, errors) {
     var topicId = req.params.topic;
     var subtopicId = req.params.subtopic;
     var noteid = req.params.note;
+    var subjectList = req.session.subjectList;
+    var topicList = req.session.topicList;
+    var subtopicList = req.session.subtopicList;
     var linkList = req.session.linkList;
-    note_list = null;   // force to null, otherwise still existing from note list get
     dbgNoteUpdateGet('update');
     async.series({
         // Get the note to be updated
@@ -375,19 +377,32 @@ function render_update_page(req, res, next, errors) {
             dbgNoteUpdateGet('note', note_object);
             if (subjectId < 2) {
                 subjectId = note_object.subject._id;
-                // and update the link list
                 subjectObject = await Subject.find({_id:subjectId}, 'title topic link', callback);
-                linkList = await Link.find({}, 'title href category').where('_id').in(subjectObject[0].link);
                 dbgNoteUpdateGet("set subjectId to", subjectId);
+            }
+            subjectList = await Subject.find({}, 'title', callback);
+            req.session.subjectList = subjectList;
+            // Get subject here as we know the subjectid
+            subjectObject = await Subject.find({_id:subjectId}, 'title topic link', callback);
+            if (linkList == null) {
+                // if no subject selected from dropdown, but note selected from
+                // list, linkedList will be null, so set it here
+                linkList = await Link.find({}, 'title href category').where('_id').in(subjectObject[0].link);
+                req.session.linkList = linkList;
             }
             if (topicId < 2) {
                 topicId = note_object.topic._id;
                 dbgNoteUpdateGet('set topicId to', topicId);
             }
+            topicList = await Topic.find({}, 'title').where('_id').in(subjectObject[0].topic);
+            req.session.topicList = topicList;
+            topicObject = await Topic.find({_id:topicId}, 'title subtopic');
             if (subtopicId < 2) {
                 subtopicId = note_object.subtopic._id;
                 dbgNoteUpdateGet("set subtopicId to", subtopicId);
             }            
+            subtopicList = await Subtopic.find({}, 'title').where('_id').in(topicObject[0].subtopic);
+            req.session.subtopicList = subtopicList;
         },
     }, function(err, results) {
         if (err) { return next(err); }
@@ -489,6 +504,9 @@ function render_move_page(req, res, next, errors) {
     var topicId = req.params.topic;
     var subtopicId = req.params.subtopic;
     var noteid = req.params.note;
+    var subjectList = req.session.subjectList;
+    var topicList = req.session.topicList;
+    var subtopicList = req.session.subtopicList;
     var linkList = req.session.linkList;
     let subjectChanged = false;
     if (newSubjectId != subjectId) {
@@ -501,7 +519,6 @@ function render_move_page(req, res, next, errors) {
         topicChanged = true;
     }
     newSubtopicId = subtopicId;
-    note_list = null;   // force to null, otherwise still existing from note list get
     dbgNoteMoveGet('move newSubjectId', newSubjectId + ' newTopicId ' + newTopicId + ' newSubtopicId ' + newSubtopicId);
     async.series({
         // Get list of subject objects (three in array)
@@ -698,8 +715,10 @@ function render_delete_page(req, res, next, errors) {
     var topicId = req.params.topic;
     var subtopicId = req.params.subtopic;
     var noteid = req.params.note;
+    var subjectList = req.session.subjectList;
+    var topicList = req.session.topicList;
+    var subtopicList = req.session.subtopicList;
     var linkList = req.session.linkList;
-    note_list = null;   // force to null, otherwise still existing from note list get
     dbgNoteDeleteGet('delete subjectid ' + subjectId + ' topicid ' + topicId + ' subtopicid ' + subtopicId + ' noteid ' + noteid);
     async.series({
         note_object: async function (callback) {
@@ -794,7 +813,6 @@ exports.note_draw_get = function(req, res, next) {
 
 function render_draw_page(req, res, next, errors) {
     var noteid = req.params.note;
-    note_list = null;   // force to null, otherwise still existing from note list get
     dbgNoteDrawGet('draw noteid', noteid);
     async.series({
         // Get note

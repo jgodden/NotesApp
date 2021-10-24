@@ -1,7 +1,7 @@
 extends layout
 
 block content
-  input#nl.form-control(type='hidden', name='note_list', value=(note_list))
+  input#nl.form-control(type='hidden', name='notelist', value=(notelist))
   input#sl.form-control(type='hidden', name='subject_list', value=(subject_list))
   input#tl.form-control(type='hidden', name='topic_list', value=(topic_list))
   input#stl.form-control(type='hidden', name='subtopic_list', value=(subtopic_list))
@@ -37,11 +37,11 @@ block content
         a(class='text' href='#s_updateDate' onClick="sort_page(this);") Update date
       script(type="text/javascript").
         let border = document.getElementById('border'); // div element to which all dynamically sorted elements will be added
-        let nl = document.getElementById('nl'); // note_list hidden element
+        let nl = document.getElementById('nl'); // notelist hidden element
         let sl = document.getElementById('sl'); // subject_list hidden element
         let tl = document.getElementById('tl'); // topic_list hidden element
         let stl = document.getElementById('stl'); // subtopic_list hidden element
-        let nl_val = JSON.parse(nl.value);      // parse json in mongodb generated note_list to get array of key value pairs
+        let nl_val = JSON.parse(nl.value);      // parse json in mongodb generated notelist to get array of key value pairs
         let sl_val = JSON.parse(sl.value);      // parse json in mongodb generated subject_list to get array of key value pairs
         let tl_val = JSON.parse(tl.value);      // parse json in mongodb generated topic_list to get array of key value pairs
         let stl_val = JSON.parse(stl.value);      // parse json in mongodb generated subtopic_list to get array of key value pairs
