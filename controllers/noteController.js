@@ -43,8 +43,31 @@ function getSHA256Hash() {
     return(require('js-sha256')(sig));
 }
 
+var dbgNoteAuth = require('debug')('noteAuth');
+
+// display logout page on GET /.
+exports.index_page = function(req, res, next) {
+    var subjectId = '1';
+    var topicId = '1';
+    var subtopicId = '1';
+    if (req.session.internalUser) {
+        dbgNoteAuth("logged in");
+        if (req.session.subject)
+            subjectId = req.session.subjectId;
+        if (req.session.topic)
+            topicId = req.session.topicId;
+        if (req.session.subtopic)
+            subtopicId = req.session.subtopicId;
+        res.redirect(subjectId + '/' + topicId + '/' + subtopicId);
+    } else {
+        dbgNoteAuth("not logged in - render index");
+        res.render('index', { title: 'notes' });
+    }
+};
+
 // display logout page on GET /.
 exports.logout_page = function(req, res, next) {
+    dbgNoteAuth("logout");
     res.render('index', { title: 'notes' });
 };
 
@@ -88,6 +111,8 @@ function render_list_page(req, res, next, errors) {
             }
             subjectObject = await Subject.find({_id:subjectId}, 'title topic link', callback);
             subjectName = subjectObject[0].title;
+            req.session.subjectId = subjectId;
+            req.session.newSubjectId = subjectId;
             dbgNoteList('subjectObject', subjectObject[0]);
         },
         // Get list of topics for this subject
@@ -121,6 +146,8 @@ function render_list_page(req, res, next, errors) {
             }
             topicObject = await Topic.find({_id:topicId}, 'subtopic title');
             topicName = topicObject[0].title;
+            req.session.topicId = topicId;
+            req.session.newTopicId = topicId;
             dbgNoteList('topicObject', topicObject[0]);
         },
         // Get list of subtopics for this topic
@@ -153,6 +180,8 @@ function render_list_page(req, res, next, errors) {
             }
             subtopicObject = await Subtopic.find({_id:subtopicId}, 'title');
             subtopicName = subtopicObject[0].title;
+            req.session.subtopicId = subtopicId;
+            req.session.newSubtopicId = subtopicId;
             dbgNoteList('subtopicObject', subtopicObject[0]);
         },
         linkList: async function(callback) {
@@ -362,8 +391,11 @@ exports.note_update_get = function(req, res, next) {
 
 function render_update_page(req, res, next, errors) {
     var subjectId = req.params.subject;
+    req.session.subjectId = subjectId;
     var topicId = req.params.topic;
+    req.session.topicId = topicId;
     var subtopicId = req.params.subtopic;
+    req.session.subtopicId = subtopicId;
     var noteid = req.params.note;
     var subjectList = req.session.subjectList;
     var topicList = req.session.topicList;
@@ -481,9 +513,44 @@ exports.note_update_post = [
                     if (err) {
                         return next(err);
                     }
-                    // Successful - redirect to note list page.
-                    res.redirect(thenote.list_url);
                 });
+                // Compare list of tiny images returned from client against cloudinary
+                // images and delete any that are not in the list
+                var tinyImages = [req.body.tinyImages];
+                var folder = note.subject._id + '/' + note.topic._id + '/' + note.subtopic._id + '/' + note._id;
+    
+                dbgNoteUpdatePost('clean contents of cloudinary folder', folder);
+                var result = await cloudinary_action('search', folder);
+                if (result.errors.length > 0) {
+                    render_update_page(req, res, next, [result.errors]);
+                    return;
+                }
+                var cloudinaryImages = result.filenames;
+                for (let i = 0; i < cloudinaryImages.length; i++) {
+                    let found = false;
+                    for (let j = 0; j < tinyImages.length; j++) {
+                        if (tinyImages[j] == cloudinaryImages[i]) {
+                            // found tiny image in cloudinary - leave it there
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        // don't delete the 'drawing' file
+                        if (cloudinaryImages[i] == 'drawing') {
+                            continue;
+                        }
+                        // this cloudinary image is not mentioned in tiny list, so
+                        // delete it
+                        var result = await cloudinary_action('delete_file', folder, cloudinaryImages[i]);
+                        if (result.errors.length > 0) {
+                            render_update_page(req, res, next, [result.errors]);
+                            return;
+                        }
+                    }
+                }
+                // Successful - redirect to note list page.
+                res.redirect(note.list_url);
             }
         })();
     }
@@ -496,29 +563,36 @@ exports.note_move_get = function(req, res, next) {
     render_move_page(req, res, next, null);
 };
 
-var newSubjectId = 1;
-var newTopicId = 1;
-var newSubtopicId = 1;
 function render_move_page(req, res, next, errors) {
-    var subjectId = req.params.subject;
-    var topicId = req.params.topic;
-    var subtopicId = req.params.subtopic;
+    // get new location subject, topic and subtopic from url
+    var newSubjectId = req.params.subject;
+    var newTopicId = req.params.topic;
+    var newSubtopicId = req.params.subtopic;
+    // get nav subject, topic and subtopic from session
+    var subjectId = req.session.subjectId;
+    var topicId = req.session.topicId;
+    var subtopicId = req.session.subtopicId;
+    // note id is in the url unchanged
     var noteid = req.params.note;
+    // get 
     var subjectList = req.session.subjectList;
     var topicList = req.session.topicList;
     var subtopicList = req.session.subtopicList;
     var linkList = req.session.linkList;
+    // Check if new location subject, topic or subtopic have changed since last time
     let subjectChanged = false;
-    if (newSubjectId != subjectId) {
-        newSubjectId = subjectId;
+    if (newSubjectId != req.session.newSubjectId) {
+        req.session.newSubjectId = newSubjectId;
         subjectChanged = true;
     }
     let topicChanged = false;
-    if (newTopicId != topicId) {
-        newTopicId = topicId;
+    if (newTopicId != req.session.newTopicId) {
+        req.session.newTopicId = newTopicId;
         topicChanged = true;
     }
-    newSubtopicId = subtopicId;
+    if (newSubtopicId != req.session.newSubtopicId) {
+        req.session.newSubtopicId = newSubtopicId;
+    }
     dbgNoteMoveGet('move newSubjectId', newSubjectId + ' newTopicId ' + newTopicId + ' newSubtopicId ' + newSubtopicId);
     async.series({
         // Get list of subject objects (three in array)
@@ -536,8 +610,10 @@ function render_move_page(req, res, next, errors) {
         // Get list of topics for this subject
         newTopicList: async function(callback) {
             newTopicList = await Topic.find({}, 'title subtopic').where('_id').in(newSubjectObject[0].topic);
-            if (subjectChanged)
+            if (subjectChanged) {
+                req.session.newTopicId = newTopicList[0]._id;
                 newTopicId = newTopicList[0]._id;
+            }
             dbgNoteMoveGet('newTopicList', newTopicList);
         },
         // Get list of topics for this subject
@@ -548,8 +624,10 @@ function render_move_page(req, res, next, errors) {
         // Get list of subtopics for this topic
         newSubtopicList: async function(callback) {
             newSubtopicList = await Subtopic.find({}, 'title').where('_id').in(newTopicObject[0].subtopic);
-            if (topicChanged)
+            if (topicChanged) {
+                req.session.newSubtopicId = newSubtopicList[0]._id;
                 newSubtopicId = newSubtopicList[0]._id;
+            }
             dbgNoteMoveGet('newSubtopicList', newSubtopicList);
         },
         newSubtopicObject: async function(callback) {
@@ -621,65 +699,19 @@ exports.note_move_post = function(req, res, next) {
                 subtopic: ObjectId(req.body.newsubtopicid),
                 user: req.session.internalUser
             });
-            require('dotenv').config();
-            const cloudinary = require('cloudinary').v2;
 
-            var image_url;
-            var cl_error;
-            var cl_result;
             var srcFilePath = srcNote.subject._id + '/' + srcNote.topic._id + '/' + srcNote.subtopic._id + '/' + srcNote._id;
             var destDir = req.body.newsubjectid + '/' + req.body.newtopicid + '/' + req.body.newsubtopicid;
             var destFilePath = destDir + '/' + destNote._id;
 
             dbgNoteMovePost('move contents of cloudinary folder from', srcFilePath + ' to ' + destFilePath);
-            // First, search source location for images. This is required as Cloudinary does not currently
-            // provide a mechanism for bulk rename of a folder and all contents. Therefore, we get a list of
-            // existing image resources and rename each one. Limit to 30 resources.
-            await cloudinary.search
-            .expression('resource_type:image AND folder:' + srcFilePath)
-            .max_results(30)
-            .execute().then(result=>cl_result = result)
-            .catch(error => cl_error = error);
-
-            var r =  cl_result.resources;
-            // for each resource (usually image), rename with new folder
-            for (let i = 0; i < r.length; i++) {
-                let filename = r[i]['filename'];
-                //let format = r[i]['format'];
-                //let file = '/' + filename + '.' + format;
-                // now create destination folder in cloudinary
-                dbgNoteMovePost('rename', filename);
-                await cloudinary.uploader.rename(
-                    srcFilePath + '/' + filename,
-                    destFilePath + '/' + filename,
-                {})
-                .then(result => cl_result = result)
-                .catch(error => cl_error = error);
-                if (cl_error) {
-                    var error = handle_cloudinary_error(cl_error);
-                    render_move_page(req, res, next, [error]);
-                    return;
-                }
-                // Save url for canvas drawing so the new note can use the correct url
-                if (filename == 'drawing') {
-                    image_url = cl_result.secure_url;
-                    dbgNoteMovePost('cloudinary returned url', image_url);
-                    // update note with image url
-                    destNote.image = image_url;
-                }
-            }
-            // delete source folder which will now be empty
-            dbgNoteMovePost('delete folder from cloudinary', srcFilePath);
-            await cloudinary.api.delete_folder(srcFilePath, {})
-            .then(result => cl_result = result)
-            .catch(error => cl_error = error);
-            // update note with image url
-            if (cl_error) {
-                var error = handle_cloudinary_error(cl_error);
-                render_move_page(req, res, next, [error]);
+            var result = await cloudinary_action('rename', srcFilePath, destFilePath);
+            if (result.errors.length > 0) {
+                render_move_page(req, res, next, [result.errors]);
                 return;
             }
-            dbgNoteMovePost('cloudinary response', cl_result);
+            // update note with image url
+            destNote.image = result.image_url;
             // save note
             await destNote.save(function (err) {
                 if (err) {
@@ -752,57 +784,27 @@ var dbgNoteDeletePost = require('debug')('noteDeletePost');
 // handle note delete on POST.
 exports.note_delete_post = function(req, res, next) {
     // Delete object and redirect to the list of notes.
-    dbgNoteDeletePost('delete note', req.body.noteid);
-    Note.findByIdAndRemove(req.body.noteid, function deleteNote(err) {
-        if (err) { return next(err); }
-        (async () => {
-            require('dotenv').config();
-            const cloudinary = require('cloudinary').v2;
-            var cl_error;
-            var cl_result;
-            var folder = req.body.subjectid + '/' + req.body.topicid + '/' + req.body.subtopicid + '/' + req.body.noteid;
-
-            dbgNoteDeletePost('delete contents of cloudinary folder', folder);
-            // First, search source location for images. This is required as Cloudinary does not currently
-            // provide a mechanism for bulk removal of folder contents. Therefore, we get a list of
-            // existing image resources and remove each one. Limit to 30 resources.
-            await cloudinary.search
-            .expression('resource_type:image AND folder:' + folder)
-            .max_results(30)
-            .execute().then(result=>cl_result = result)
-            .catch(error => cl_error = error);
-
-            var r =  cl_result.resources;
-            // remove each resource (usually image)
-            for (let i = 0; i < r.length; i++) {
-                let filename = r[i]['filename'];
-                dbgNoteDeletePost('delete', filename);
-                await cloudinary.uploader.destroy(folder + '/' + filename, {})
-                .then(result => cl_result = result)
-                .catch(error => cl_error = error);
-                if (cl_error) {
-                    var error = handle_cloudinary_error(cl_error);
-                    render_delete_page(req, res, next, [error]);
-                    return;
-                }
-            }
-            // delete folder which will now be empty
-            dbgNoteDeletePost('delete folder from cloudinary', folder);
-            await cloudinary.api.delete_folder(folder, {})
-            .then(result => cl_result = result)
-            .catch(error => cl_error = error);
-            if (cl_error) {
-                var error = handle_cloudinary_error(cl_error);
-                render_delete_page(req, res, next, [error]);
+    async.series({
+        srcNote: async function(callback) {
+            dbgNoteDeletePost('delete note', req.body.noteid);
+            var baseFolder = req.body.subjectid + '/' + req.body.topicid + '/' + req.body.subtopicid;
+            Note.findByIdAndRemove(req.body.noteid, function deleteNote(err) {
+                if (err) { return next(err); }
+            });
+            var noteFolder = baseFolder + '/' + req.body.noteid;
+            // delete image files and folder from cloudinary
+            dbgNoteDeletePost('delete image files and folder from cloudinary', noteFolder);          
+            var result = await cloudinary_action('delete', noteFolder);
+            if (result.errors.length > 0) {
+                render_delete_page(req, res, next, [result.errors]);
                 return;
             }
-            dbgNoteDeletePost('cloudinary response', cl_result);
-        })();
-        var redirect = '/' + req.body.subjectid + '/' + req.body.topicid + '/' + req.body.subtopicid + '/notes';
-        dbgNoteDeletePost('redirect to', redirect);
-        res.redirect(redirect);
+            var redirect = '/' + baseFolder + '/notes';
+            dbgNoteDeletePost('redirect to', redirect);
+            res.redirect(redirect);
+        }
     });
-}
+};
 
 var dbgNoteDrawGet = require('debug')('noteDrawGet');
 
@@ -864,11 +866,11 @@ exports.note_draw_post = function(req, res, next) {
     dbgNoteDrawPost('redirect to', redirect);
     res.redirect(redirect);
 };
-var dbgError = require('debug')('error');
+var dbgCloudinary = require('debug')('cloudinary');
 
 function handle_cloudinary_error(cl_error) {
     if (cl_error.error) {
-        dbgError('error message: ' + cl_error.error.message);
+        dbgCloudinary('error message: ' + cl_error.error.message);
         var error = '';
         if (cl_error.error.code == 'SELF_SIGNED_CERT_IN_CHAIN') {
             // Unable to contact cloudinary, possibly due to network error.
@@ -880,4 +882,88 @@ function handle_cloudinary_error(cl_error) {
         error = cl_error.message;
     }
     return(error);
+}
+async function cloudinary_action(action, srcFolder, destFolder) {
+    require('dotenv').config();
+    const cloudinary = require('cloudinary').v2;
+
+    // result to be returned
+    var result_val = {};
+    result_val.filenames = [];
+    result_val.errors = [];
+    var cl_error;
+    var cl_result;
+    if (action == 'delete_file') {
+        var filename = destFolder;  // naughty
+        await cloudinary.uploader.destroy(
+            srcFolder + '/' + filename,
+        {})
+        .then(result => cl_result = result)
+        .catch(error => cl_error = error);
+    }
+    if (cl_error) {
+        var error = handle_cloudinary_error(cl_error);
+        result_val.errors = error;
+        return result_val;
+    }
+    if ((action == 'delete') || (action == 'search') || (action == 'rename')) {
+        // Search source location for images. This is required as Cloudinary does not
+        // currently provide a mechanism for bulk rename of a folder and all contents.
+        // Therefore, we get a list of existing image resources and rename each one.
+        // Limit to 30 resources.
+        await cloudinary.search
+        .expression('resource_type:image AND folder:' + srcFolder)
+        .max_results(30)
+        .execute().then(result=>cl_result = result)
+        .catch(error => cl_error = error);
+        if (cl_error) {
+            handle_cloudinary_error(cl_error);
+            result_val.errors = error;
+            return result_val;
+        }
+        var r =  cl_result.resources;
+        var filenames = [];
+        for (let i = 0; i < r.length; i++) {
+            let filename = r[i]['filename'];
+            if (action == 'rename') {
+                await cloudinary.uploader.rename(
+                    srcFolder + '/' + filename,
+                    destFolder + '/' + filename,
+                {})
+                .then(result => cl_result = result)
+                .catch(error => cl_error = error);
+                if (filename == 'drawing') {
+                    result_val.image_url = cl_result.secure_url;
+                }
+            }
+            if (action == 'delete') {
+                await cloudinary.uploader.destroy(
+                    srcFolder + '/' + filename,
+                {})
+                .then(result => cl_result = result)
+                .catch(error => cl_error = error);
+            }
+            if (cl_error) {
+                var error = handle_cloudinary_error(cl_error);
+                result_val.errors = error;
+                return result_val;
+            } else {
+                filenames.push(filename);
+            }
+        }
+        if (action == 'search')
+            result_val.filenames = filenames;
+    }
+    if ((action == 'delete') || (action == 'rename')) {
+        await cloudinary.api.delete_folder(srcFolder, {})
+        .then(result => cl_result = result)
+        .catch(error => cl_error = error);
+        if (cl_error) {
+            var error = handle_cloudinary_error(cl_error);
+            result_val.errors = error;
+            return result_val;
+        }
+        dbgCloudinary('cloudinary response', cl_result);
+    }
+    return result_val;
 }

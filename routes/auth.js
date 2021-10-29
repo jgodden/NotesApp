@@ -8,10 +8,13 @@ var querystring = require('querystring');
 
 dotenv.config();
 
+var dbgAuth = require('debug')('auth');
+
 // Perform the login, after login Auth0 will redirect to callback
 router.get('/login', passport.authenticate('auth0', {
   scope: 'openid email profile'
 }), function (req, res) {
+  dbgAuth("login");
   res.redirect('/');
 });
 
@@ -27,7 +30,7 @@ router.get('/callback', function (req, res, next) {
   var found = false;
   passport.authenticate('auth0', function (err, user, info) {
     if (err) {
-      console.log('Check you are not connected to a VPN and therefore behind a corporate proxy');
+      dbgAuth('Check you are not connected to a VPN and therefore behind a corporate proxy');
       return next(err);
     }
     if (!user) {
@@ -65,6 +68,7 @@ router.get('/callback', function (req, res, next) {
             return next(err);
         }
         req.logIn(user, function (err) {
+          dbgAuth("callback-login");
           if (err) { return next(err); }
           if (!found) {
             // user not found in internal user table - logout
@@ -74,7 +78,8 @@ router.get('/callback', function (req, res, next) {
             delete req.session.returnTo;
             req.session.internalUser = internalUser;
             internalUser._imageUrl = req.user.picture;
-            res.redirect(returnTo || '/1/1/1');
+            //console.log("auth redirect to", returnTo || '/');
+            res.redirect(returnTo || '/');
           }
         });
       });
@@ -83,24 +88,26 @@ router.get('/callback', function (req, res, next) {
 });
 // Perform session logout and redirect to homepage
 router.get('/logout', (req, res) => {
-    req.logout();
-  
-    var returnTo = req.protocol + '://' + req.hostname;
-    var port = req.connection.localPort;
-    // Only add port in dev
-    if (process.env.NODE_ENV === 'development' && (port !== undefined && port !== 80 && port !== 443)) {
-      returnTo += ':' + port;
-    }
-    var logoutURL = new url.URL(
-      util.format('http://%s/v2/logout', process.env.AUTH0_DOMAIN)
-    );
-    var searchString = querystring.stringify({
-      client_id: process.env.AUTH0_CLIENT_ID,
-      returnTo: returnTo
-    });
-    logoutURL.search = searchString;
-  
-    res.redirect(logoutURL);
+  dbgAuth("logout");
+  req.logout();
+
+  var returnTo = req.protocol + '://' + req.hostname;
+  var port = req.connection.localPort;
+  // Only add port in dev
+  if (process.env.NODE_ENV === 'development' && (port !== undefined && port !== 80 && port !== 443)) {
+    returnTo += ':' + port;
+  }
+  var logoutURL = new url.URL(
+    util.format('http://%s/v2/logout', process.env.AUTH0_DOMAIN)
+  );
+  var searchString = querystring.stringify({
+    client_id: process.env.AUTH0_CLIENT_ID,
+    returnTo: returnTo
   });
-  
-  module.exports = router;
+  logoutURL.search = searchString;
+  delete req.session.internalUser;
+
+  res.redirect(logoutURL);
+});
+
+module.exports = router;

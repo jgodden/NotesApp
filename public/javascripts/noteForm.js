@@ -31,13 +31,16 @@ window.addEventListener("DOMContentLoaded", function () {
 	var topicid = document.getElementById('topicid').value;
 	var subtopicid = document.getElementById('subtopicid').value;
 	var noteid = document.getElementById('noteid').value;
-
 	// base folder with leading / for urls
 	var baseFolder = '/' + subjectid + '/' + topicid + '/' + subtopicid;
 	// image folder without leading / for cloudinary media library
 	var imageFolder = subjectid + '/' + topicid + '/' + subtopicid + '/' + noteid;
 	var actionFolder = baseFolder + '/note/' + noteid;
-
+	var tinyImagesElement = document.getElementById('tinyImages');
+	// collect array of image filenames to return to server for comparison with cloudinary files
+	document.getElementById('save_button').onclick = function() {
+		tinyImagesElement.value = collectTinyMCEImages();
+	};
 	const cancelButton = document.getElementById('cancel_button');
 	if (cancelButton) cancelButton.onclick = function() { confirmCancel(baseFolder) };
 	const moveButton = document.getElementById('move_button');
@@ -50,6 +53,21 @@ window.addEventListener("DOMContentLoaded", function () {
 	if (imageButton) imageButton.onclick = function() { mediaLibraryWidget.show({folder: {path: imageFolder}}) };
 	document.getElementById('note_form').addEventListener('keypress', formKeyPressed);
 });
+function collectTinyMCEImages() {
+	var tinyImages = [];
+	var domUtils = tinymce.dom.DOMUtils.DOM;
+	var node = tinymce.activeEditor.dom.select('img');
+	for (var i=0;i<node.length;i++) {
+		// get url of image file
+		var url = domUtils.getAttrib(node[i], "src")
+		// get filename from url
+		var filename = url.substring(url.lastIndexOf('/') + 1);
+		// remove extension
+		filename = filename.replace(/\.[^/.]+$/, "");
+		tinyImages.push(filename);
+	}
+	return tinyImages;
+}
 function relocate(url) {
 	window.location.href = url;
 }
@@ -63,7 +81,6 @@ confirmCancel = function confirmCancel(folder) {
 	}
 	relocate(folder + '/notes');
 }
-
 function insertThisInThere(HTMLSelectElement) {
     let collection = HTMLSelectElement.selectedOptions;
     let theChar = "";
@@ -140,7 +157,9 @@ function insertThisInThere(HTMLSelectElement) {
 	htmlElement.setSelectionRange(pos.start + 1, pos.start + 1)
 	htmlElement.focus();
 }
-function image_upload_handler (blobInfo, success, failure, progress) {
+// to store cloudinary image url for img src attribute update after upload
+var cloudinary_url;
+function _imageUploadHandler (resource, success, failure, progress) {
 	var subjectid = document.getElementById('subjectid').value;
 	var topicid = document.getElementById('topicid').value;
 	var subtopicid = document.getElementById('subtopicid').value;
@@ -148,95 +167,133 @@ function image_upload_handler (blobInfo, success, failure, progress) {
 	// image folder without leading / for cloudinary folder
 	var imageFolder = subjectid + '/' + topicid + '/' + subtopicid + '/' + noteid;
 
-	var xhr, formData;
-	xhr = new XMLHttpRequest();
+	var xhr = new XMLHttpRequest();
 	xhr.withCredentials = false;
 	//restricted it to image only using resource_type = image in url,
 	// you can set it to auto for all types 
-	xhr.open('POST', 'https://api.cloudinary.com/v1_1/ddpa7qntq/image/upload');
-	xhr.onload = function () {
+	xhr.open('POST', 'https://api.cloudinary.com/v1_1/ddpa7qntq/image/upload', false);
+	xhr.onreadystatechange = function() {
 		if (xhr.readyState == 4 && xhr.status == 200) {
 			var response = JSON.parse(xhr.responseText);
 			var url = response.secure_url; //get the url 
 			var json = {location: url}; //set it in the format tinyMCE wants it
-			success(json.location);
+			cloudinary_url = json.location;
+			if (success)
+				success(cloudinary_url);
 		}
 	};
-	formData = new FormData();
-	formData.append('file', blobInfo.blob(), blobInfo.filename());
+	var formData = new FormData();
+	if (resource.blob) {
+		formData.append('file', resource.blob(), resource.filename());
+	} else {
+		formData.append('file', resource);
+	}
 	formData.append('folder', imageFolder);
 	formData.append('upload_preset', 'ik272aj0');
 	xhr.send(formData);
 };
-
+// paste_preprocess is called when dragging and dropping or copying and pasting
+// an image from a browser. Because the image_upload_handler is not triggered
+// in ths instance, it is called directly here. However, this does not handle
+// updating the src attribute with the cloudinary url, since the success function
+// is not passed in and cannot therefore be called at the end.
+// Instead, the paste_postprocess finds the image element just pasted and updates
+// the src attribute with the cloudinary url stored during the image upload.
+function _pastePreProcess(plugin, args) {
+	var content = args.content;
+	var src;
+	try {
+		src = content.match(/src=\"(.*?)\"/i)[1];
+	} catch (e) {
+	}
+	if (src.substring(0, 4) == "blob")
+		return;
+	_imageUploadHandler(src);
+}
+function _pastePostProcess(plugin, args) {
+	var thisNode = args.node;
+    if (thisNode.childNodes)
+    {
+        var nodes = thisNode.childNodes;
+		for (var i=0;i<nodes.length;i++)
+		{
+			var node = nodes[i];
+			if (node) {
+				if (cloudinary_url) {
+					tinymce.activeEditor.dom.setAttrib(node,
+					'src', cloudinary_url);
+					cloudinary_url = null;
+				}
+			}
+		}
+	}
+}
 tinymce.init(
-	{
-		selector: '#lectureNote',
-		images_upload_handler: image_upload_handler,
-		width  : '100%',
-		height : '100%',
-		plugins: [
-			'advlist autolink link image lists charmap print preview hr anchor pagebreak',
-			'searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking',
-			'table emoticons template paste help'
-		  ],
-		toolbar: 'undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | ' +
-		'bullist numlist outdent indent | link image | code | print preview media fullscreen | ' +
-		'forecolor backcolor emoticons | help',
-		menu: {
-		  favs: {title: 'My Favorites', items: 'code visualaid | searchreplace | emoticons'}
-		},
-		menubar: 'favs file edit view insert format tools table help',
-		content_css: '/stylesheets/style.css',
-		
-		/* enable title field in the Image dialog*/
-		image_title: true,
-		/* enable automatic uploads of images represented by blob or data URIs*/
-		automatic_uploads: true,
-		/*
-		URL of our upload handler (for more details check: https://www.tiny.cloud/docs/configure/file-image-upload/#images_upload_url)
-		images_upload_url: 'postAcceptor.php',
-		here we add custom filepicker only to Image dialog
-		*/
-		file_picker_types: 'image',
-		/* and here's our custom image picker*/
-		file_picker_callback: function (cb, value, meta) {
-		var input = document.createElement('input');
-		input.setAttribute('type', 'file');
-		input.setAttribute('accept', 'image/*');
+{
+	selector: '#lectureNote',
+	paste_preprocess: _pastePreProcess,
+	paste_postprocess: _pastePostProcess,
+	images_upload_handler: _imageUploadHandler,
+	//images_upload_url: 'https://api.cloudinary.com/v1_1/ddpa7qntq/image/upload',
+	width  : '100%',
+	height : '100%',
+	plugins: [
+		'advlist autolink link image lists charmap print hr anchor',
+		'searchreplace insertdatetime',
+		'table paste'
+		],
+	toolbar: 'undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | ' +
+	'bullist numlist outdent indent | link image | print | ' +
+	'forecolor backcolor | paste',
+	menubar: '',
+	content_css: '/stylesheets/style.css',
 	
-		/*
-			Note: In modern browsers input[type="file"] is functional without
-			even adding it to the DOM, but that might not be the case in some older
-			or quirky browsers like IE, so you might want to add it to the DOM
-			just in case, and visually hide it. And do not forget do remove it
-			once you do not need it anymore.
-		*/
-	
-		input.onchange = function () {
-			var file = this.files[0];
-	
-			var reader = new FileReader();
-			reader.onload = function () {
-				/*
-					Note: Now we need to register the blob in TinyMCEs image blob
-					registry. In the next release this part hopefully won't be
-					necessary, as we are looking to handle it internally.
-				*/
-				var id = 'blobid' + (new Date()).getTime();
-				var blobCache =  tinymce.activeEditor.editorUpload.blobCache;
-				var base64 = reader.result.split(',')[1];
-				var blobInfo = blobCache.create(id, file, base64);
-				blobCache.add(blobInfo);
-		
-				/* call the callback and populate the Title field with the file name */
-				cb(blobInfo.blobUri(), { title: file.name });	
-			};
-			reader.readAsDataURL(file);
-		};
-	
-		input.click();
-		},
-		content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
-	});
+	// enable title field in the Image dialog
+	image_title: true,
+	// Do not remove in-line images from the pasted content
+	paste_data_images: true,
+	// enable automatic uploads of images represented by blob or data URIs
+	automatic_uploads: true,
+	// here we add custom filepicker only to Image dialog
+	file_picker_types: 'image',
+	/* and here's our custom image picker*/
+	file_picker_callback: function (cb, value, meta) {
+	var input = document.createElement('input');
+	input.setAttribute('type', 'file');
+	input.setAttribute('accept', 'image/*');
 
+	/*
+		Note: In modern browsers input[type="file"] is functional without
+		even adding it to the DOM, but that might not be the case in some older
+		or quirky browsers like IE, so you might want to add it to the DOM
+		just in case, and visually hide it. And do not forget do remove it
+		once you do not need it anymore.
+	*/
+
+	input.onchange = function () {
+		var file = this.files[0];
+
+		var reader = new FileReader();
+		reader.onload = function () {
+			/*
+				Note: Now we need to register the blob in TinyMCEs image blob
+				registry. In the next release this part hopefully won't be
+				necessary, as we are looking to handle it internally.
+			*/
+			var id = 'blobid' + (new Date()).getTime();
+			var blobCache =  tinymce.activeEditor.editorUpload.blobCache;
+			var base64 = reader.result.split(',')[1];
+			var blobInfo = blobCache.create(id, file, base64);
+			blobCache.add(blobInfo);
+	
+			/* call the callback and populate the Title field with the file name */
+			cb(blobInfo.blobUri(), { title: file.name });	
+		};
+		reader.readAsDataURL(file);
+	};
+		
+	input.click();
+	},
+
+	content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+});

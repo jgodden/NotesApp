@@ -4,6 +4,8 @@ body {
   scroll chaining occurs to neighboring scrolling areas, e.g. underlying
   elements will not scroll. */
   overscroll-behavior: contain;
+  /*background-image: url("/public/images/spider.jpg");
+  background-color: #cccccc;*/
 }
 input, textarea {
   width: 100%;

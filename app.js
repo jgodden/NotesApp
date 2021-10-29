@@ -22,7 +22,8 @@ app.use(
                 "'self'",
                 "https://res.cloudinary.com/",
                 "https://lh3.googleusercontent.com",
-                "https://sp.tinymce.com",
+                "https://sp.tinymce.com",,
+                "https:",
                 "blob:",
                 "data:"],
               scriptSrc:[
@@ -76,7 +77,7 @@ app.set('view engine', 'pug');
 
 // favicon setup
 var favicon = require('serve-favicon');
-app.use(favicon(path.join(__dirname,'public','images','favicon.ico')));
+app.use(favicon('favicon.ico'));
 
 app.use(logger('dev'));
 app.use(express.json());

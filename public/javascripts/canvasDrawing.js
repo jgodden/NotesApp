@@ -99,6 +99,7 @@ window.addEventListener("DOMContentLoaded", function () {
     fs.borderStyle = "dashed solid";
     fs.position = "absolute";
     fs.zIndex = "1";
+    fs.height = "32px";
     var boldElement = document.getElementById('bold_button');
     var italicElement = document.getElementById('italic_button');
     function hideFloatingText() {
