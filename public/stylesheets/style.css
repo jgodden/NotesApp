@@ -32,15 +32,7 @@ body, div {
 p.indent {
   padding: 0px 5px;
 }
-.selcls {
-  font-size: 0.8em;
-  text-indent: 3px;
-  width: 100%;
-  padding: 0px; 
-  border: solid 1px #517B97;
-  outline: none; 
-  background: -webkit-gradient(linear, left top, left 25, from(#FFFFFF), color-stop(4%, #d2dce2), to(#FFFFFF));  
-}
+
 .rounded-circle {
   opacity: 1.0;
   transition: .5s ease;
