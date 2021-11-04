@@ -371,6 +371,10 @@ exports.note_create_post = [
                 enc_sig: req.body.enc_sig,
                 _id: req.body.noteid
             });
+            // Compare list of tiny images returned from client against cloudinary
+            // images and delete any that are not in the list
+            var tinyImages = [req.body.tinyImages];
+            var folder = note.subject._id + '/' + note.topic._id + '/' + note.subtopic._id + '/' + note._id;
             dbgNoteCreatePost('clean contents of cloudinary folder', folder);
             var result = await cloudinary_action('search', folder);
             if (result.errors.length > 0) {
