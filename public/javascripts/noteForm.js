@@ -206,7 +206,7 @@ function _pastePreProcess(plugin, args) {
 		src = content.match(/src=\"(.*?)\"/i)[1];
 	} catch (e) {
 	}
-	if (src.substring(0, 4) == "blob")
+	if (!src || src.substring(0, 4) == "blob")
 		return;
 	_imageUploadHandler(src);
 }

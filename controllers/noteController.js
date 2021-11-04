@@ -371,6 +371,36 @@ exports.note_create_post = [
                 enc_sig: req.body.enc_sig,
                 _id: req.body.noteid
             });
+            dbgNoteCreatePost('clean contents of cloudinary folder', folder);
+            var result = await cloudinary_action('search', folder);
+            if (result.errors.length > 0) {
+                render_create_page(req, res, next, [result.errors]);
+                return;
+            }
+            var cloudinaryImages = result.filenames;
+            for (let i = 0; i < cloudinaryImages.length; i++) {
+                let found = false;
+                for (let j = 0; j < tinyImages.length; j++) {
+                    if (tinyImages[j] == cloudinaryImages[i]) {
+                        // found tiny image in cloudinary - leave it there
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    // don't delete the 'drawing' file
+                    if (cloudinaryImages[i] == 'drawing') {
+                        continue;
+                    }
+                    // this cloudinary image is not mentioned in tiny list, so
+                    // delete it
+                    var result = await cloudinary_action('delete_file', folder, cloudinaryImages[i]);
+                    if (result.errors.length > 0) {
+                        render_create_page(req, res, next, [result.errors]);
+                        return;
+                    }
+                }
+            }
             note.save(function (err) {
                 if (err) {
                     return next(err);
