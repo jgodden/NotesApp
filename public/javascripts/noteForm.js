@@ -172,7 +172,7 @@ function _imageUploadHandler (resource, success, failure, progress) {
 	//restricted it to image only using resource_type = image in url,
 	// you can set it to auto for all types 
 	xhr.open('POST', 'https://api.cloudinary.com/v1_1/ddpa7qntq/image/upload', false);
-	xhr.onreadystatechange = function() {
+	xhr.onload = function(e) {
 		if (xhr.readyState == 4 && xhr.status == 200) {
 			var response = JSON.parse(xhr.responseText);
 			var url = response.secure_url; //get the url 
@@ -182,6 +182,9 @@ function _imageUploadHandler (resource, success, failure, progress) {
 				success(cloudinary_url);
 		}
 	};
+	xhr.onerror = function(e) {
+		alert(xhr.statusText);
+	}
 	var formData = new FormData();
 	if (resource.blob) {
 		formData.append('file', resource.blob(), resource.filename());
@@ -218,14 +221,19 @@ function _pastePostProcess(plugin, args) {
 		for (var i=0;i<nodes.length;i++)
 		{
 			var node = nodes[i];
-			if (node) {
-				if (cloudinary_url) {
-					tinymce.activeEditor.dom.setAttrib(node,
-					'src', cloudinary_url);
-					cloudinary_url = null;
-				}
+			if (node.src) {
+				setUrl(node);
+				return;
 			}
 		}
+	}
+}
+function setUrl(node) {
+	if (!cloudinary_url) {
+		setTimeout(setUrl,1000,node);
+	} else {
+		tinymce.activeEditor.dom.setAttrib(node, 'src', cloudinary_url);
+		cloudinary_url = null;
 	}
 }
 tinymce.init(
@@ -244,7 +252,10 @@ tinymce.init(
 		],
 	toolbar: 'undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | ' +
 	'bullist numlist outdent indent | link image | print | ' +
-	'forecolor backcolor | paste',
+	'forecolor backcolor | paste | charmap | ' +
+	'table tabledelete | tableprops tablerowprops tablecellprops | ' +
+	'tableinsertrowbefore tableinsertrowafter tabledeleterow | ' +
+	'tableinsertcolbefore tableinsertcolafter tabledeletecol',
 	menubar: '',
 	content_css: '/stylesheets/style.css',
 	
