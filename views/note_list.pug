@@ -70,13 +70,14 @@ block content
           updated = nl_row.updateDate_formatted;
           rows.push({'subject':subject,'topic':topic,'subtopic':subtopic,'url':url,'title':title,'creationDate':created,'updateDate':updated});
         }
-        var sort_order = 'asc';
+        var sort_order = 'desc';
         sort_page();
         function sort_page(url) {
           while (border.lastChild.id !== 'title_row')
               border.removeChild(border.lastChild);
-          // sort note list based on column title
-          let hash = 'title';
+          // default to sort note list on creation date in descending order
+          let hash = 'creationDate';
+          // url.hash e.g. #s_topic
           if (url)
             hash = url.hash.substr(3);
           rows.sort(compareValues(hash, sort_order));
