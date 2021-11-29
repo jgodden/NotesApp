@@ -325,6 +325,20 @@ function render_create_page(req, res, next, errors) {
         // Add user to note
         note.user = req.session.internalUser;
         var enc_sig = getSHA256Hash();
+        if (req) {
+            if (req.session) {
+                if (req.session.internalUser) {
+                    console.log('GET create note ' + note._id + ' user ' + req.session.internalUser._username);
+                } else {
+                    console.log('GET create note ' + note._id + ' req.session.internalUser is null');
+                }
+            } else {
+                console.log('GET create note ' + note._id + ' req.session is null');
+            }
+        } else {
+            console.log('GET create note ' + note._id + ' req is null');
+        }
+        
         res.render('note_form', {
             formType: 'create',
             creationDate: note.creationDate_formatted,
@@ -371,6 +385,7 @@ exports.note_create_post = [
                 enc_sig: req.body.enc_sig,
                 _id: req.body.noteid
             });
+            console.log('POST create note ' + note._id + ' user ' + req.session.internalUser);
             // Compare list of tiny images returned from client against cloudinary
             // images and delete any that are not in the list
             var tinyImages = [req.body.tinyImages];
