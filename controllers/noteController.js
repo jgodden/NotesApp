@@ -45,6 +45,19 @@ function getSHA256Hash() {
 
 var dbgNoteAuth = require('debug')('noteAuth');
 
+// Get user from session if still active, or null if expired
+function get_user(req) {
+    var user = null;
+    if (req) {
+        if (req.session) {
+            if (req.session.internalUser) {
+                user = req.session.internalUser;
+            }
+        }
+    }
+    return user;
+}
+
 // display logout page on GET /.
 exports.index_page = function(req, res, next) {
     var subjectId = '1';
@@ -79,6 +92,12 @@ exports.note_list = function(req, res, next) {
 };
 
 function render_list_page(req, res, next, errors) {
+    // get user, or redirect to login page if session has timed out
+    var user = get_user(req);
+    if (user == null) {
+        res.redirect('/logout');
+        return;
+    }
     var subjectId = req.params.subject;
     var topicId = req.params.topic;
     var subtopicId = req.params.subtopic;
@@ -272,6 +291,12 @@ exports.note_create_get = function(req, res, next) {
 };
 
 function render_create_page(req, res, next, errors) {
+    // get user, or redirect to login page if session has timed out
+    var user = get_user(req);
+    if (user == null) {
+        res.redirect('/logout');
+        return;
+    }
     var subjectId = req.params.subject;
     var topicId = req.params.topic;
     var subtopicId = req.params.subtopic;
@@ -325,20 +350,6 @@ function render_create_page(req, res, next, errors) {
         // Add user to note
         note.user = req.session.internalUser;
         var enc_sig = getSHA256Hash();
-        if (req) {
-            if (req.session) {
-                if (req.session.internalUser) {
-                    console.log('GET create note ' + note._id + ' user ' + req.session.internalUser._username);
-                } else {
-                    console.log('GET create note ' + note._id + ' req.session.internalUser is null');
-                }
-            } else {
-                console.log('GET create note ' + note._id + ' req.session is null');
-            }
-        } else {
-            console.log('GET create note ' + note._id + ' req is null');
-        }
-        
         res.render('note_form', {
             formType: 'create',
             creationDate: note.creationDate_formatted,
@@ -354,7 +365,7 @@ function render_create_page(req, res, next, errors) {
             imageUrl: note.image,
             enc_sig: enc_sig,
             errors: errors,
-            user: req.session.internalUser
+            user: user
         });
     })();
 }
@@ -368,6 +379,12 @@ exports.note_create_post = [
     // Process request after validation and sanitization.
     (req, res, next) => {
         (async () => {
+            // get user, or redirect to login page if session has timed out
+            var user = get_user(req);
+            if (user == null) {
+                res.redirect('/logout');
+                return;
+            }
             var note = await new Note({
                 creationDate: req.body.creationDate,
                 updateDate: req.body.updateDate,
@@ -381,7 +398,7 @@ exports.note_create_post = [
                 topic: ObjectId(req.body.topicid),
                 subtopic: ObjectId(req.body.subtopicid),
                 image: req.body.imageUrl,
-                user: req.session.internalUser,
+                user: user,
                 enc_sig: req.body.enc_sig,
                 _id: req.body.noteid
             });
@@ -439,6 +456,11 @@ exports.note_update_get = function(req, res, next) {
 };
 
 function render_update_page(req, res, next, errors) {
+    var user = get_user(req);
+    if (user == null) {
+        res.redirect('/logout');
+        return;
+    }
     var subjectId = req.params.subject;
     req.session.subjectId = subjectId;
     var topicId = req.params.topic;
@@ -496,6 +518,7 @@ function render_update_page(req, res, next, errors) {
         note_object.comments = decodeEntities(note_object.comments);
         note_object.summary = decodeEntities(note_object.summary);
         var enc_sig = getSHA256Hash();
+
         res.render('note_form', {
             formType: 'update',
             title: note_object.title,
@@ -516,7 +539,7 @@ function render_update_page(req, res, next, errors) {
             summary: note_object.summary,
             enc_sig: enc_sig,
             errors: errors,
-            user: req.session.internalUser
+            user: user
         });
     });
 }
@@ -530,6 +553,11 @@ exports.note_update_post = [
     // Process request after validation and sanitization.
     (req, res, next) => {
         (async () => {
+            var user = get_user(req);
+            if (user == null) {
+                res.redirect('/logout');
+                return;
+            }
             // Extract the validation errors from a request.
             const errors = validationResult(req);
             var now = Date.now();
@@ -547,7 +575,7 @@ exports.note_update_post = [
                 topic: ObjectId(req.body.topicid),
                 subtopic: ObjectId(req.body.subtopicid),
                 image: req.body.image,   // use the cloud url instead of the image data
-                user: req.session.internalUser,
+                user: user,
                 _id:req.params.note // This is required, or a new ID will be assigned!
             });
 
@@ -613,6 +641,11 @@ exports.note_move_get = function(req, res, next) {
 };
 
 function render_move_page(req, res, next, errors) {
+    var user = get_user(req);
+    if (user == null) {
+        res.redirect('/logout');
+        return;
+    }
     // get new location subject, topic and subtopic from url
     var newSubjectId = req.params.subject;
     var newTopicId = req.params.topic;
@@ -715,7 +748,7 @@ function render_move_page(req, res, next, errors) {
             new_subtopicid: newSubtopicId,
             new_subtopic_list: newSubtopicList,
             errors: errors,
-            user: req.session.internalUser
+            user: user
         } );
     });
 }
@@ -728,6 +761,11 @@ exports.note_move_post = function(req, res, next) {
     async.series({
         // Get note
         srcNote: async function(callback) {
+            var user = get_user(req);
+            if (user == null) {
+                res.redirect('/logout');
+                return;
+            }
             let srcId = req.body.noteid;
             srcNote = await Note.findById(srcId, callback);
             dbgNoteMovePost('note to move', srcNote);
@@ -746,7 +784,7 @@ exports.note_move_post = function(req, res, next) {
                 subject: ObjectId(req.body.newsubjectid),
                 topic: ObjectId(req.body.newtopicid),
                 subtopic: ObjectId(req.body.newsubtopicid),
-                user: req.session.internalUser
+                user: user
             });
 
             var srcFilePath = srcNote.subject._id + '/' + srcNote.topic._id + '/' + srcNote.subtopic._id + '/' + srcNote._id;
@@ -792,6 +830,11 @@ exports.note_delete_get = function(req, res, next) {
 };
 
 function render_delete_page(req, res, next, errors) {
+    var user = get_user(req);
+    if (user == null) {
+        res.redirect('/logout');
+        return;
+    }
     var subjectId = req.params.subject;
     var topicId = req.params.topic;
     var subtopicId = req.params.subtopic;
@@ -824,7 +867,7 @@ function render_delete_page(req, res, next, errors) {
             subtopic_list: subtopicList,
             link_list: linkList,
             errors: errors,
-            user: req.session.internalUser
+            user: user
         } );
     });
 }
@@ -835,6 +878,11 @@ exports.note_delete_post = function(req, res, next) {
     // Delete object and redirect to the list of notes.
     async.series({
         srcNote: async function(callback) {
+            var user = get_user(req);
+            if (user == null) {
+                res.redirect('/logout');
+                return;
+            }
             dbgNoteDeletePost('delete note', req.body.noteid);
             var baseFolder = req.body.subjectid + '/' + req.body.topicid + '/' + req.body.subtopicid;
             Note.findByIdAndRemove(req.body.noteid, function deleteNote(err) {
@@ -863,6 +911,11 @@ exports.note_draw_get = function(req, res, next) {
 };
 
 function render_draw_page(req, res, next, errors) {
+    var user = get_user(req);
+    if (user == null) {
+        res.redirect('/logout');
+        return;
+    }
     var noteid = req.params.note;
     dbgNoteDrawGet('draw noteid', noteid);
     async.series({
@@ -888,6 +941,11 @@ var dbgNoteDrawPost = require('debug')('noteDrawPost');
 // handle note drawing on POST.
 exports.note_draw_post = function(req, res, next) {
     (async () => {
+        var user = get_user(req);
+        if (user == null) {
+            res.redirect('/logout');
+            return;
+        }
         var folder = subjectId + '/' + topicId + '/' + subtopicId + '/' + req.params.note;
         require('dotenv').config();
         const cloudinary = require('cloudinary').v2;
