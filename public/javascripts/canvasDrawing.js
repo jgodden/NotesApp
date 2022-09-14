@@ -47,15 +47,18 @@ window.addEventListener("DOMContentLoaded", function () {
 
     // Render bitmap data in hidden image element to canvas
     var img = new Image;
-    img.src = image_url_element.value;
+
     // Set cross origin otherwise the retrieved png image from cloudinary will be
     // tainted, and the canvas.toDataUrl will fail with security error
     img.setAttribute('crossOrigin', 'anonymous');
     img.onload = function () {
         ctx.drawImage(img, 0, 0); // Draw image at top right
     };
-
+    // Add cachebreaker which will force hard refresh to ensure we get the latest version of
+    // the drawing from cloudinary
+    img.src = image_url_element.value + "?" + new Date().getTime();
     resize();
+    
     window.addEventListener('resize', resize);
     function resize() {
         canvas.width = window.innerWidth;

@@ -89,25 +89,26 @@ router.get('/callback', function (req, res, next) {
 // Perform session logout and redirect to homepage
 router.get('/logout', (req, res) => {
   dbgAuth("logout");
-  req.logout();
-
-  var returnTo = req.protocol + '://' + req.hostname;
-  var port = req.connection.localPort;
-  // Only add port in dev
-  if (process.env.NODE_ENV === 'development' && (port !== undefined && port !== 80 && port !== 443)) {
-    returnTo += ':' + port;
-  }
-  var logoutURL = new url.URL(
-    util.format('http://%s/v2/logout', process.env.AUTH0_DOMAIN)
-  );
-  var searchString = querystring.stringify({
-    client_id: process.env.AUTH0_CLIENT_ID,
-    returnTo: returnTo
+  req.logout(function(err) {
+    if (err) { return next(err); }
+    var returnTo = req.protocol + '://' + req.hostname;
+    var port = req.connection.localPort;
+    // Only add port in dev
+    if (process.env.NODE_ENV === 'development' && (port !== undefined && port !== 80 && port !== 443)) {
+      returnTo += ':' + port;
+    }
+    var logoutURL = new url.URL(
+      util.format('https://%s/v2/logout', process.env.AUTH0_DOMAIN)
+    );
+    var searchString = querystring.stringify({
+      client_id: process.env.AUTH0_CLIENT_ID,
+      returnTo: returnTo
+    });
+    logoutURL.search = searchString;
+    delete req.session.internalUser;
+    dbgAuth("redirect to logoutURL", logoutURL);
+    res.redirect(logoutURL);
   });
-  logoutURL.search = searchString;
-  delete req.session.internalUser;
-
-  res.redirect(logoutURL);
 });
 
 module.exports = router;

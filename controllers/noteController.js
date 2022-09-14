@@ -938,7 +938,8 @@ exports.note_draw_post = function(req, res, next) {
             res.redirect('/logout');
             return;
         }
-        var folder = subjectId + '/' + topicId + '/' + subtopicId + '/' + req.params.note;
+        var folder = req.body.subjectid + '/' + req.body.topicid + '/' + req.body.subtopicid + '/' + req.params.note;
+        dbgNoteDrawPost('save drawing to cloudinary folder', folder);
         require('dotenv').config();
         const cloudinary = require('cloudinary').v2;
         var image_url;
