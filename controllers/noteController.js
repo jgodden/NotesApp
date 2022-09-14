@@ -58,30 +58,22 @@ function get_user(req) {
     return user;
 }
 
-// display logout page on GET /.
-exports.index_page = function(req, res, next) {
-    var subjectId = '1';
-    var topicId = '1';
-    var subtopicId = '1';
-    if (req.session.internalUser) {
-        dbgNoteAuth("logged in");
-        if (req.session.subject)
-            subjectId = req.session.subjectId;
-        if (req.session.topic)
-            topicId = req.session.topicId;
-        if (req.session.subtopic)
-            subtopicId = req.session.subtopicId;
-        res.redirect(subjectId + '/' + topicId + '/' + subtopicId);
-    } else {
-        dbgNoteAuth("not logged in - render index");
-        res.render('index', { title: 'notes' });
-    }
-};
+var dbgUser = require('debug')('user');
 
-// display logout page on GET /.
-exports.logout_page = function(req, res, next) {
-    dbgNoteAuth("logout");
-    res.render('index', { title: 'notes' });
+exports.login_page = function login_page(req, res, next) {
+    var user = get_user(req);
+    dbgUser('user in index', user);
+    if (user) {
+        if (user.provider == 'auth0') {
+            dbgUser("logged in to auth0 but not app yet - let auth0 redirect to firsttime");
+        } else {
+            dbgUser("logged in to auth0 and app");
+            res.redirect('/1/1/1');
+        }
+    } else {
+        dbgUser("not logged in to auth0 nor app - render index");
+        res.redirect('login');
+    }
 };
 
 var dbgNoteList = require('debug')('noteList');
